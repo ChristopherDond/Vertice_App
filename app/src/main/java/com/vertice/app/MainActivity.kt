@@ -17,7 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.vertice.app.nav.BottomNav
 import com.vertice.app.nav.Screen
+import com.vertice.app.screens.ContactModal
 import com.vertice.app.screens.HomeScreen
+import com.vertice.app.screens.MatchScreen
+import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.ui.theme.VerticeThemeProvider
 
@@ -38,6 +41,7 @@ fun VerticeApp() {
     var dark by remember { mutableStateOf(true) }
     var screen by remember { mutableStateOf(Screen.Home) }
     var violetaOn by remember { mutableStateOf(false) }
+    var contactTarget by remember { mutableStateOf<Freelancer?>(null) }
 
     VerticeThemeProvider(dark = dark, onToggle = { dark = !dark }) {
         val C = LocalColors
@@ -49,7 +53,11 @@ fun VerticeApp() {
                         openPro = { /* TODO: modal Pro — próxima entrega */ },
                         openOffer = { /* TODO: modal Oferecer Serviço — próxima entrega */ },
                     )
-                    Screen.Match -> PlaceholderScreen("Match")
+                    Screen.Match -> MatchScreen(
+                        violetaOn = violetaOn,
+                        onContact = { contactTarget = it },
+                        onProfile = { /* TODO: modal Perfil do prestador — próxima entrega */ },
+                    )
                     Screen.Violeta -> PlaceholderScreen("Protocolo Violeta")
                     Screen.Perfil -> PlaceholderScreen("Perfil")
                     Screen.Confirmacao -> PlaceholderScreen("Confirmação")
@@ -59,6 +67,10 @@ fun VerticeApp() {
                     Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                         BottomNav(active = screen, onNav = { screen = it })
                     }
+                }
+
+                contactTarget?.let { f ->
+                    ContactModal(f = f, onClose = { contactTarget = null })
                 }
             }
         }

@@ -105,7 +105,7 @@ fun ProgressRing(pct: Float, size: Int = 60, strokeWidth: Int = 5, color: Color 
     }
 }
 
-/** Barra de status fake do protótipo (relógio + toggle de tema + ícones decorativos). */
+/** Barra de topo do protótipo — mantém só o toggle de tema (o celular já mostra hora real). */
 @Composable
 fun StatusBar() {
     val C = LocalColors
@@ -116,24 +116,21 @@ fun StatusBar() {
             .height(48.dp)
             .padding(horizontal = 22.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.End,
     ) {
-        Text("9:41", color = C.white, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = theme.toggle,
-                modifier = Modifier
-                    .size(30.dp)
-                    .background(C.card2, RoundedCornerShape(9.dp))
-                    .border(1.dp, C.border, RoundedCornerShape(9.dp)),
-            ) {
-                Icon(
-                    imageVector = if (theme.dark) Icons.Filled.LightMode else Icons.Filled.DarkMode,
-                    contentDescription = "Alternar tema",
-                    tint = if (theme.dark) C.amber else C.purple,
-                    modifier = Modifier.size(14.dp),
-                )
-            }
+        IconButton(
+            onClick = theme.toggle,
+            modifier = Modifier
+                .size(30.dp)
+                .background(C.card2, RoundedCornerShape(9.dp))
+                .border(1.dp, C.border, RoundedCornerShape(9.dp)),
+        ) {
+            Icon(
+                imageVector = if (theme.dark) Icons.Filled.LightMode else Icons.Filled.DarkMode,
+                contentDescription = "Alternar tema",
+                tint = if (theme.dark) C.amber else C.purple,
+                modifier = Modifier.size(14.dp),
+            )
         }
     }
 }

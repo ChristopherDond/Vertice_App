@@ -25,10 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.ActivityRow
@@ -38,6 +35,9 @@ import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 /**
  * SCREEN 1 · Início — replica o HomeScreen do protótipo Figma Make:

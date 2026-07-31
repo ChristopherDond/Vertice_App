@@ -20,6 +20,8 @@ import com.vertice.app.nav.Screen
 import com.vertice.app.screens.ContactModal
 import com.vertice.app.screens.HomeScreen
 import com.vertice.app.screens.MatchScreen
+import com.vertice.app.screens.ProfileModal
+import com.vertice.app.screens.VioletaScreen
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.ui.theme.VerticeThemeProvider
@@ -42,6 +44,7 @@ fun VerticeApp() {
     var screen by remember { mutableStateOf(Screen.Home) }
     var violetaOn by remember { mutableStateOf(false) }
     var contactTarget by remember { mutableStateOf<Freelancer?>(null) }
+    var profileTarget by remember { mutableStateOf<Freelancer?>(null) }
 
     VerticeThemeProvider(dark = dark, onToggle = { dark = !dark }) {
         val C = LocalColors
@@ -56,9 +59,9 @@ fun VerticeApp() {
                     Screen.Match -> MatchScreen(
                         violetaOn = violetaOn,
                         onContact = { contactTarget = it },
-                        onProfile = { /* TODO: modal Perfil do prestador — próxima entrega */ },
+                        onProfile = { profileTarget = it },
                     )
-                    Screen.Violeta -> PlaceholderScreen("Protocolo Violeta")
+                    Screen.Violeta -> VioletaScreen(on = violetaOn, setOn = { violetaOn = it })
                     Screen.Perfil -> PlaceholderScreen("Perfil")
                     Screen.Confirmacao -> PlaceholderScreen("Confirmação")
                 }
@@ -67,6 +70,14 @@ fun VerticeApp() {
                     Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                         BottomNav(active = screen, onNav = { screen = it })
                     }
+                }
+
+                profileTarget?.let { f ->
+                    ProfileModal(
+                        f = f,
+                        onClose = { profileTarget = null },
+                        onContact = { profileTarget = null; contactTarget = f },
+                    )
                 }
 
                 contactTarget?.let { f ->

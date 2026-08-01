@@ -41,10 +41,6 @@ import com.vertice.app.ui.theme.LocalColors
 
 private val CHIPS = listOf("Todos", "Construção", "Comércio", "Serviços", "Beleza", "Alimentação")
 
-/**
- * SCREEN 2 · Match — busca, chips de filtro, lista de cards (FCard).
- * `violetaOn` replica o filtro do Protocolo Violeta (só mostra prestadoras).
- */
 @Composable
 fun MatchScreen(
     violetaOn: Boolean,
@@ -63,13 +59,15 @@ fun MatchScreen(
         }
     }
 
-    val filtered = FREELANCERS.filter { f ->
-        if (violetaOn && f.gender == "m") return@filter false
-        if (search.isNotEmpty() &&
-            !f.name.lowercase().contains(search.lowercase()) &&
-            !f.area.lowercase().contains(search.lowercase())
-        ) return@filter false
-        true
+    val filtered = remember(violetaOn, search, activeChips) {
+        FREELANCERS.filter { f ->
+            if (violetaOn && f.gender == "m") return@filter false
+            if (search.isNotEmpty() &&
+                !f.name.lowercase().contains(search.lowercase()) &&
+                !f.area.lowercase().contains(search.lowercase())
+            ) return@filter false
+            true
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
@@ -133,7 +131,6 @@ fun MatchScreen(
                 }
             }
 
-            // Busca
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -159,7 +156,6 @@ fun MatchScreen(
                 }
             }
 
-            // Chips
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -207,7 +203,6 @@ fun MatchScreen(
                 }
             }
 
-            // Lista de cards
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
@@ -242,7 +237,6 @@ fun MatchScreen(
     }
 }
 
-/** Equivalente ao FCard do React (card de freelancer/prestador na lista de Match). */
 @Composable
 private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
     val C = LocalColors
@@ -333,3 +327,4 @@ private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
         }
     }
 }
+

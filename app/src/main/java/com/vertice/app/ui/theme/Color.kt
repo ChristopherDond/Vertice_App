@@ -2,10 +2,6 @@ package com.vertice.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Paleta 1:1 com o protótipo Figma Make (objetos DARK/LIGHT em App.tsx).
- * Alphas hex de 2 dígitos do React (ex: C.purple+"12") viram Color.copy(alpha=...) no uso.
- */
 data class VerticeColors(
     val navy: Color,
     val card: Color,
@@ -35,8 +31,8 @@ val DarkColors = VerticeColors(
     mutedL = Color(0xFFA0A8CC),
     green = Color(0xFF10B981),
     amber = Color(0xFFF59E0B),
-    border = Color(0x12FFFFFF),   // rgba(255,255,255,0.07)
-    glass = Color(0x0AFFFFFF),    // rgba(255,255,255,0.04)
+    border = Color(0x12FFFFFF),
+    glass = Color(0x0AFFFFFF),
     inputBg = Color(0xFF222540),
 )
 
@@ -52,10 +48,10 @@ val LightColors = VerticeColors(
     mutedL = Color(0xFF4E4A75),
     green = Color(0xFF059669),
     amber = Color(0xFFD97706),
-    border = Color(0x14000000),   // rgba(0,0,0,0.08)
-    glass = Color(0x08000000),    // rgba(0,0,0,0.03)
+    border = Color(0x14000000),
+    glass = Color(0x08000000),
     inputBg = Color(0xFFEDE9FF),
 )
 
-/** Equivalente a `color+"XX"` do React: aplica alpha 0-255 mantendo RGB. */
 fun Color.withAlpha(alpha: Int): Color = this.copy(alpha = alpha / 255f)
+

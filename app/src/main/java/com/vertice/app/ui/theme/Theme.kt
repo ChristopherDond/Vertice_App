@@ -7,7 +7,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 
-/** Equivalente ao ThemeCtx (createContext) do React: expõe cores + toggle dark/light. */
 data class VerticeTheme(
     val colors: VerticeColors,
     val dark: Boolean,
@@ -18,7 +17,6 @@ val LocalVerticeTheme = staticCompositionLocalOf {
     VerticeTheme(colors = DarkColors, dark = true, toggle = {})
 }
 
-/** Atalho equivalente ao `useC()` do React. */
 val LocalColors
     @Composable get() = LocalVerticeTheme.current.colors
 
@@ -46,3 +44,4 @@ fun VerticeThemeProvider(
         MaterialTheme(typography = AppTypography, content = content)
     }
 }
+

@@ -30,18 +30,13 @@ private val NAV_ITEMS = listOf(
     NavItem(Screen.Perfil, "Perfil", Icons.Filled.Person),
 )
 
-/**
- * Footer / bottom navigation fixo. Equivale 1:1 ao BottomNav do protótipo:
- * altura 76dp, 4 itens, ponto indicador embaixo do item ativo.
- * "confirmacao" mapeia visualmente para "match" ativo (mesmo comportamento do `eff` no React).
- */
 @Composable
-fun BottomNav(active: Screen, onNav: (Screen) -> Unit) {
+fun BottomNav(active: Screen, onNav: (Screen) -> Unit, modifier: Modifier = Modifier) {
     val C = LocalColors
     val effective = if (active == Screen.Confirmacao) Screen.Match else active
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(76.dp)
             .background(C.card)
@@ -79,3 +74,4 @@ fun BottomNav(active: Screen, onNav: (Screen) -> Unit) {
         }
     }
 }
+

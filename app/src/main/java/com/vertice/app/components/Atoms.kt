@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.ui.theme.LocalVerticeTheme
 
-/** Equivalente ao componente Avatar (círculo com iniciais). */
 @Composable
 fun Avatar(initials: String, size: Int = 46, bg: Color = LocalColors.purple, fontSize: Int = 15) {
     Box(
@@ -37,7 +36,6 @@ fun Avatar(initials: String, size: Int = 46, bg: Color = LocalColors.purple, fon
     }
 }
 
-/** Equivalente ao componente Pill (badge arredondado). */
 @Composable
 fun Pill(label: String, color: Color = LocalColors.purple, small: Boolean = false) {
     Box(
@@ -50,7 +48,6 @@ fun Pill(label: String, color: Color = LocalColors.purple, small: Boolean = fals
     }
 }
 
-/** Equivalente ao SLabel (rótulo de seção em maiúsculas). */
 @Composable
 fun SLabel(text: String) {
     val C = LocalColors
@@ -64,7 +61,6 @@ fun SLabel(text: String) {
     )
 }
 
-/** Equivalente ao Divider (linha horizontal fina). */
 @Composable
 fun HDivider(verticalPadding: Int = 20) {
     val C = LocalColors
@@ -77,7 +73,6 @@ fun HDivider(verticalPadding: Int = 20) {
     )
 }
 
-/** Equivalente ao ProgressRing (anel de progresso em SVG). */
 @Composable
 fun ProgressRing(pct: Float, size: Int = 60, strokeWidth: Int = 5, color: Color = Color.White) {
     androidx.compose.foundation.Canvas(modifier = Modifier.size(size.dp)) {
@@ -105,7 +100,6 @@ fun ProgressRing(pct: Float, size: Int = 60, strokeWidth: Int = 5, color: Color 
     }
 }
 
-/** Barra de topo do protótipo — mantém só o toggle de tema (o celular já mostra hora real). */
 @Composable
 fun StatusBar() {
     val C = LocalColors
@@ -135,7 +129,6 @@ fun StatusBar() {
     }
 }
 
-/** Equivalente ao ARow (linha de item na "Atividade Recente"). */
 @Composable
 fun ActivityRow(icon: @Composable () -> Unit, iconBg: Color, title: String, sub: String, time: String) {
     val C = LocalColors
@@ -161,3 +154,4 @@ fun ActivityRow(icon: @Composable () -> Unit, iconBg: Color, title: String, sub:
         Text(time, color = C.muted, fontSize = 11.sp)
     }
 }
+

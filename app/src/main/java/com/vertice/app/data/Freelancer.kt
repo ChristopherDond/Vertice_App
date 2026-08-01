@@ -13,7 +13,7 @@ data class Freelancer(
     val rating: Double,
     val jobs: Int,
     val bio: String,
-    val gender: String, // "m" | "f" — usado pelo filtro do Protocolo Violeta
+    val gender: String,
 )
 
 val FREELANCERS = listOf(
@@ -24,3 +24,4 @@ val FREELANCERS = listOf(
     Freelancer("JP", "João Pereira", "Encanador", "Serviços Hidráulicos", 79, Color(0xFF065F46), "Disponível amanhã", 4.5, 39, "Reparos e instalações hidráulicas, desentupimentos e manutenção preventiva.", "m"),
     Freelancer("MS", "Marina Souza", "Limpeza", "Serviços Domésticos", 88, Color(0xFF9D174D), "Disponível agora", 4.9, 84, "Limpeza residencial e comercial, organização de ambientes e pós-obra.", "f"),
 )
+

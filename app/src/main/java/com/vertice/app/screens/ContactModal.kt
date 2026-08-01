@@ -45,10 +45,6 @@ private val SVC_OPTS = listOf(
     "Instalação Hidráulica", "Pintura", "Limpeza", "Consultoria", "Outro",
 )
 
-/**
- * MODAL · Contato — equivalente ao ContactModal do React.
- * Ocupa a tela cheia (equivalente a `position:absolute; inset:0` no protótipo).
- */
 @Composable
 fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     val C = LocalColors
@@ -117,7 +113,7 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     }
 
     Column(modifier = Modifier.fillMaxSize().background(C.navy)) {
-        // Header
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,7 +136,6 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             }
         }
 
-        // Card do prestador
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -163,7 +158,6 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             }
         }
 
-        // Formulário
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -208,8 +202,8 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(C.inputBg, RoundedCornerShape(13.dp))
-                    .border(1.5.dp, C.border, RoundedCornerShape(13.dp)) // dash não suportado nativamente; borda sólida discreta
-                    .clickableNoRipple { /* TODO: seletor de fotos — fora do escopo do protótipo */ }
+                    .border(1.5.dp, C.border, RoundedCornerShape(13.dp))
+                    .clickableNoRipple {  }
                     .padding(14.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -252,7 +246,6 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             Spacer(Modifier.height(24.dp))
         }
 
-        // Rodapé fixo
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -285,3 +278,4 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
         }
     }
 }
+

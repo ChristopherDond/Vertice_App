@@ -11,13 +11,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Botões "background:none, border:none, cursor:pointer" do React viram isto. */
 fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = composed {
     val interaction = remember { MutableInteractionSource() }
     this.clickable(indication = null, interactionSource = interaction, onClick = onClick)
 }
 
-/** Equivalente a `border-top: 1px solid C.border` (usado no BottomNav e rodapés fixos). */
 fun Modifier.drawTopBorder(color: Color, strokeWidth: Dp = 1.dp): Modifier = drawBehind {
     drawLine(
         color = color,
@@ -35,3 +33,4 @@ fun Modifier.drawBottomBorder(color: Color, strokeWidth: Dp = 1.dp): Modifier = 
         strokeWidth = strokeWidth.toPx(),
     )
 }
+

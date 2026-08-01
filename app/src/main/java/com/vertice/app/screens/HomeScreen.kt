@@ -39,11 +39,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 
-/**
- * SCREEN 1 · Início — replica o HomeScreen do protótipo Figma Make:
- * banner Pro dispensável, saudação, card de progresso do perfil (70%),
- * botões "Encontrar Parceiro" / "Oferecer Serviço", atividade recente.
- */
 @Composable
 fun HomeScreen(
     onNav: (Screen) -> Unit,
@@ -136,7 +131,6 @@ fun HomeScreen(
                 }
             }
 
-            // Card "Complete seu perfil" — navega pra tela de Perfil
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,7 +157,6 @@ fun HomeScreen(
                 }
             }
 
-            // Botões de ação
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -192,7 +185,6 @@ fun HomeScreen(
                 ) { Text("Oferecer Serviço", color = C.white, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
             }
 
-            // Atividade recente
             Column(modifier = Modifier.padding(horizontal = 22.dp).padding(top = 26.dp)) {
                 SLabel("Atividade Recente")
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -226,3 +218,4 @@ private fun buildAnnotatedStringPro(purpleL: Color, mutedL: Color) =
             append(" — mais alcance, prioridade nos resultados e acesso antecipado a novos parceiros")
         }
     }
+

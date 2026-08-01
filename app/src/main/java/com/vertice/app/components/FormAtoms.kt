@@ -25,14 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.ui.theme.LocalColors
 
-/** Equivalente ao FLabel do React (rótulo de campo). */
 @Composable
 fun FLabel(text: String) {
     val C = LocalColors
     Text(text, color = C.mutedL, fontWeight = FontWeight.Bold, fontSize = 12.sp, modifier = Modifier.padding(bottom = 7.dp))
 }
 
-/** Equivalente ao TInput do React (campo de texto de linha única, com ícone opcional). */
 @Composable
 fun TInput(
     value: String,
@@ -67,7 +65,6 @@ fun TInput(
     }
 }
 
-/** Equivalente ao TArea do React (textarea multi-linha). */
 @Composable
 fun TArea(
     value: String,
@@ -97,7 +94,6 @@ fun TArea(
     }
 }
 
-/** Equivalente ao SInput do React (select ⇒ dropdown de opções). */
 @Composable
 fun SInput(
     value: String,
@@ -131,3 +127,4 @@ fun SInput(
         }
     }
 }
+

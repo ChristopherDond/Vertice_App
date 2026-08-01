@@ -52,17 +52,13 @@ private val OVERLAY_ITEMS = listOf(
     OverlayItem(Icons.Filled.Call, "Suporte 24h habilitado"),
 )
 
-/**
- * SCREEN 3 · Protocolo Violeta — equivalente ao VioletaScreen do React.
- * `on`/`setOn` vêm do estado raiz (mesmo state que filtra o Match para só mulheres).
- */
 @Composable
 fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
     val C = LocalColors
 
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header com gradiente
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -285,3 +281,4 @@ private fun VFCard(item: VFItem, on: Boolean, modifier: Modifier = Modifier) {
         if (on) Icon(Icons.Filled.CheckCircle, null, tint = item.color, modifier = Modifier.size(14.dp))
     }
 }
+

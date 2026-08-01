@@ -22,20 +22,36 @@ Port 1:1 do protótipo Figma Make (`App.tsx`) pra Kotlin + Jetpack Compose.
 ## Passo 3 — Fonte "Plus Jakarta Sans" (pendente)
 O protótipo usa `Plus Jakarta Sans` (pesos 400/500/600/700/800). Pra ativar:
 1. Baixe em https://fonts.google.com/specimen/Plus+Jakarta+Sans (botão "Download family").
-2. Do zip baixado, pegue os arquivos estáticos e renomeie/coloque em `app/src/main/res/font/` (criar a pasta) como:
+2. Do zip baixado, pegue os arquivos estáticos e coloque em `app/src/main/res/font/` (criar a pasta) como:
    - `plus_jakarta_sans_regular.ttf`
    - `plus_jakarta_sans_medium.ttf`
    - `plus_jakarta_sans_semibold.ttf`
    - `plus_jakarta_sans_bold.ttf`
    - `plus_jakarta_sans_extrabold.ttf`
-3. `ui/theme/Type.kt` já referencia esses nomes via `R.font.*` — assim que os arquivos existirem, o build resolve sozinho.
-4. Sem os arquivos, o build **quebra** (R.font.* não existe). Se quiser rodar antes de baixar a fonte, me avisa que eu troco temporariamente pra `FontFamily.Default`.
+3. Abra `ui/theme/Type.kt` e substitua o conteúdo por:
+```kotlin
+package com.vertice.app.ui.theme
 
-## Próximas entregas (tela por tela)
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import com.vertice.app.R
+
+val PlusJakartaSans = FontFamily(
+    Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
+    Font(R.font.plus_jakarta_sans_medium, FontWeight.Medium),
+    Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold),
+    Font(R.font.plus_jakarta_sans_extrabold, FontWeight.ExtraBold),
+)
+```
+4. Sync novamente.
+
+## Próximas entregas
 1. ~~Setup + Home~~ ✅
-2. Match (busca, filtros por chip, cards de freelancer, modal Contatar)
-3. Protocolo Violeta (toggle + overlay "Você está protegida")
-4. Perfil (habilidades, Trilha de Blindagem com lições, editar perfil)
-5. Modais restantes: Oferecer Serviço, Vértice Pro, confirmação de envio
+2. ~~Match + modal Contatar~~ ✅
+3. ~~Protocolo Violeta + Ver Perfil~~ ✅
+4. ~~Perfil + Trilha de Blindagem + Editar Perfil~~ ✅
+5. Modal Oferecer Serviço + Modal Vértice Pro
 
-Manda "continuar" que sigo pro Match.
+Manda "continuar" que eu sigo pros modais finais (Oferecer Serviço e Vértice Pro).

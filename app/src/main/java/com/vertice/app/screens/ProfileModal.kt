@@ -35,7 +35,6 @@ private val REVIEWS = listOf(
     Review("Cláudia R.", "Trabalho bem feito e preço justo.", 4),
 )
 
-/** MODAL · Perfil do prestador — equivalente ao ProfileModal do React ("Ver perfil"). */
 @Composable
 fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
     val C = LocalColors
@@ -47,7 +46,7 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 100.dp),
         ) {
-            // Header com gradiente na cor do avatar
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -153,7 +152,6 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
             }
         }
 
-        // Rodapé fixo
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -189,3 +187,4 @@ private fun StatBlock(value: String, label: String, accent: Boolean = false) {
         Text(label, color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
     }
 }
+

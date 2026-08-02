@@ -1,3 +1,5 @@
+[Read in English](README-english.md)
+
 # Vértice — App Android (Compose)
 
 Port 1:1 do protótipo Figma Make (`App.tsx`) pra Kotlin + Jetpack Compose.

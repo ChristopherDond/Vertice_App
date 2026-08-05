@@ -1,59 +1,96 @@
-[Versão em Português](README.md)
+[Read in Portuguese](README.md)
 
 # Vértice — Android App (Compose)
 
-1:1 port of the Figma Make prototype (`App.tsx`) to Kotlin + Jetpack Compose.
+**Android app (Kotlin + Jetpack Compose)** for **Vértice** — a platform that connects informal Brazilian entrepreneurs with strategic management partners. 1:1 port of the Figma Make prototype (`App.tsx`).
 
-## Delivered in this stage
-- Complete Gradle project (build.gradle.kts, AndroidManifest, theme).
-- DARK/LIGHT color palette identical to the prototype (`ui/theme/Color.kt`), with dark/light toggle.
-- `BottomNav` (footer) with the 4 items: Home, Match, Violeta, Profile.
-- **Complete HomeScreen**: skippable Pro banner, greeting, profile progress card (70% ring), "Find Partner" / "Offer Service" buttons, recent activity.
-- Match, Violeta, Profile: placeholders (coming in the next deliveries).
+> **Empreenda Senac 2026 · 19th Edition** — functional MVP of the concept presented at Brazil's largest entrepreneurship and innovation competition.
+
+---
+
+## ✨ What the app does
+
+Vértice tackles three real barriers of informal entrepreneurship:
+
+1. **Offer & Request service** — the provider lists what they can do; the client searches and requests. Mutual reviews build verifiable reputation (the digital replacement for word-of-mouth).
+2. **Protocolo Violeta** — an exclusive space for women entrepreneurs to connect with verified women only: verified identity, safe routes and 24h support. Safety as an economic lever, not a cost.
+3. **Management partner matching** — the executor states the gap; the strategist states the skill; the platform proposes the match and formalizes the partnership (shared interest, not a loan).
+
+The model charges **3–5%** only when the deal happens, with **escrow** releasing payment after the service is delivered.
+
+---
+
+## Screen-flows implemented (current stage)
+
+- **Setup + Home** — greeting, profile progress card (70% ring), "Find Partner" / "Offer Service" buttons, recent activity, dismissable **Vértice Pro** banner.
+- **Match** — search, area filters (Construction, Commerce, Services, Beauty, Food), professional cards with match %, rating (⭐/5), job count and availability. **Protocolo Violeta integration**: when active, shows only women providers.
+- **Protocolo Violeta** — protection toggle with a "You are protected" overlay: 100% women-only network, verified identity, safe route, 24h support.
+- **Profile + Shield Track** — "Ana Silva" profile (MIE), Protocolo Violeta badge, management/safety modules with persistent progress, Vértice Pro upgrade.
+- **Modals**: Contact / Request Service (full form with type, date, budget, location, urgency), View Profile (recent reviews), Edit Profile, Offer Service and Vértice Pro (monthly plan R$ 19.99).
+
+## Stack
+
+- **Kotlin** + **Jetpack Compose** (Material 3, Compose BOM 2024.06)
+- **Navigation Compose** (state-driven tabs with `rememberSaveable`, rotation-safe)
+- **Dark/Light** theme with the brand's purple/pink palette, top-right toggle
+- Material extended icons
+
+---
+
+## Project Score
+
+```
+app/src/main/java/com/vertice/app/
+├── components/     # reusable atoms (StatusBar, ProgressRing, Avatar, Pills...)
+├── data/           # Freelancer + TrilhaData (seed)
+├── nav/            # BottomNav + Screen enum
+├── screens/        # Home, Match, Violeta, Perfil + 6 modals
+└── ui/theme/       # Color, Theme (dark/light), Type
+```
+**~2,750 lines of Kotlin** · `minSdk 26` · `targetSdk 34` · `applicationId com.vertice.app`
+
+---
 
 ## Step 1 — Open in Android Studio
-1. Extract the zip.
-2. Android Studio → **Open** → select the `VerticeApp` folder.
-3. If asked to add the Gradle Wrapper (`gradlew`), accept — Android Studio downloads and sets it up on its own.
-4. Wait for the **Gradle Sync** (bottom bar). If it asks for SDK 34, install it via SDK Manager.
+
+1. Android Studio → **Open** → select the `VerticeApp` folder.
+2. If asked to add the Gradle Wrapper (`gradlew`), accept — Android Studio downloads and configures it on its own.
+3. Wait for the **Gradle Sync**. If it asks for SDK 34, install via SDK Manager.
 
 ## Step 2 — Run
-- Create an emulator (Pixel 8, API 34) or connect a phone with USB debugging enabled.
-- Run ▶ (Shift+F10).
+
+- Create an emulator (Pixel 6/8, API 34) or connect a phone with USB debugging.
+- `Run` (Shift+F10).
+
+> Build (Windows): `gradle assembleDebug -Dorg.gradle.java.home="<Android Studio>\\jbr"` — host uses Java 21 (JBR), not the Java 25 default. APK at `app/build/outputs/apk/debug/app-debug.apk`.
+
+---
 
 ## Step 3 — "Plus Jakarta Sans" font (pending)
-The prototype uses `Plus Jakarta Sans` (weights 400/500/600/700/800). To enable it:
-1. Download it from https://fonts.google.com/specimen/Plus+Jakarta+Sans ("Download family" button).
-2. From the downloaded zip, take the static files and place them in `app/src/main/res/font/` (create the folder) as:
-   - `plus_jakarta_sans_regular.ttf`
-   - `plus_jakarta_sans_medium.ttf`
-   - `plus_jakarta_sans_semibold.ttf`
-   - `plus_jakarta_sans_bold.ttf`
-   - `plus_jakarta_sans_extrabold.ttf`
-3. Open `ui/theme/Type.kt` and replace its contents with:
-```kotlin
-package com.vertice.app.ui.theme
 
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import com.vertice.app.R
+The prototype uses `Plus Jakarta Sans` (weights 400–800). Steps:
+1. Download from https://fonts.google.com/specimen/Plus+Jakarta+Sans ("Download family").
+2. Add the static files to `app/src/main/res/font/` as `plus_jakarta_sans_regular.ttf`, `_medium.ttf`, `_semibold.ttf`, `_bold.ttf`, `_extrabold.ttf`.
+3. Replace the contents of `ui/theme/Type.kt` with the corresponding `FontFamily`.
+4. **Sync** again.
 
-val PlusJakartaSans = FontFamily(
-    Font(R.font.plus_jakarta_sans_regular, FontWeight.Normal),
-    Font(R.font.plus_jakarta_sans_medium, FontWeight.Medium),
-    Font(R.font.plus_jakarta_sans_semibold, FontWeight.SemiBold),
-    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold),
-    Font(R.font.plus_jakarta_sans_extrabold, FontWeight.ExtraBold),
-)
-```
-4. Sync again.
+---
 
-## Next deliveries
-1. ~~Setup + Home~~ ✅
-2. ~~Match + Contact modal~~ ✅
-3. ~~Violet Protocol + View Profile~~ ✅
-4. ~~Profile + Shield Track + Edit Profile~~ ✅
-5. Offer Service modal + Vértice Pro modal
+## Roadmap / Next steps
 
-Say "continue" and I'll move on to the final modals (Offer Service and Vértice Pro).
+- [x] Setup + Home
+- [x] Match + Contact modal
+- [x] Protocolo Violeta + View Profile
+- [x] Profile + Shield Track + Edit Profile
+- [x] Offer Service modal + Vértice Pro modal
+- [ ] Real backend (persistence + escrow) — currently a local `rememberSaveable` prototype
+- [ ] Auth + identity verification (Protocolo Violeta)
+- [ ] Store release (Play Console)
+
+---
+
+## Contribute / Test
+
+Suggest, open an issue, or send a PR. The app is an MVP prototype — UX and Compose architecture feedback is very welcome.
+
+**Vértice — Empreenda Senac 2026 · 19th Edition**

@@ -1,10 +1,10 @@
 package com.vertice.app.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -31,7 +31,7 @@ val TRILHA = listOf(
         ),
     ),
     TModule(
-        "m2", "Direitos da MEI", Icons.Filled.MenuBook, Color(0xFF9B5FF7),
+        "m2", "Direitos da MEI", Icons.AutoMirrored.Filled.MenuBook, Color(0xFF9B5FF7),
         listOf(
             Lesson("d1", "O que é MEI", "\uD83C\uDFDB\uFE0F", listOf(
                 LCard("Microempreendedor Individual", "MEI é um registro que formaliza seu negócio com CNPJ próprio. Faturamento de até R$81.000/ano com direitos de trabalhadora.", "Com CNPJ você acessa crédito mais fácil e pode emitir nota fiscal."),
@@ -65,7 +65,7 @@ val TRILHA = listOf(
         ),
     ),
     TModule(
-        "m4", "Finanças para Negócios", Icons.Filled.TrendingUp, Color(0xFFF59E0B),
+        "m4", "Finanças para Negócios", Icons.AutoMirrored.Filled.TrendingUp, Color(0xFFF59E0B),
         listOf(
             Lesson("f1", "Controle de gastos", "\uD83D\uDCF1", listOf(
                 LCard("Separe pessoal do profissional", "Tenha uma conta bancária separada para o negócio, mesmo que gratuita (Nubank, Inter, C6 Bank).", "Misturar dinheiro pessoal e do negócio é a principal causa de dívidas entre MEIs."),
@@ -83,10 +83,3 @@ val TRILHA = listOf(
     ),
 )
 
-data class ModDisplay(val icon: ImageVector, val label: String, val done: Boolean)
-val MOD_DISPLAY = listOf(
-    ModDisplay(Icons.Filled.Shield, "Segurança Pessoal", true),
-    ModDisplay(Icons.Filled.MenuBook, "Direitos da MEI", true),
-    ModDisplay(Icons.Filled.TrackChanges, "Gestão de Clientes", false),
-    ModDisplay(Icons.Filled.TrendingUp, "Finanças para Negócios", false),
-)

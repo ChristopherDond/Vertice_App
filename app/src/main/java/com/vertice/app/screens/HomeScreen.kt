@@ -8,21 +8,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +35,7 @@ import com.vertice.app.components.ProgressRing
 import com.vertice.app.components.StatusBar
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
 import androidx.compose.ui.text.SpanStyle
@@ -46,7 +49,7 @@ fun HomeScreen(
     openOffer: () -> Unit,
 ) {
     val C = LocalColors
-    var proDismissed by remember { mutableStateOf(false) }
+    var proDismissed by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(
@@ -136,9 +139,10 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp)
                     .padding(top = 18.dp)
+                    .shadow(10.dp, RoundedCornerShape(20.dp), ambientColor = C.purple.copy(alpha = 0.4f), spotColor = C.purple.copy(alpha = 0.4f))
                     .clip(RoundedCornerShape(20.dp))
                     .background(Brush.linearGradient(listOf(C.purple, Color(0xFF8B46F0), C.purpleL)))
-                    .clickableNoRipple { onNav(Screen.Perfil) }
+                    .clickableRipple { onNav(Screen.Perfil) }
                     .padding(20.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -153,7 +157,7 @@ fun HomeScreen(
                         Spacer(Modifier.height(3.dp))
                         Text("para mais matches", color = Color.White.copy(alpha = 0.65f), fontSize = 12.sp)
                     }
-                    Icon(Icons.Filled.KeyboardArrowRight, null, tint = Color.White.copy(alpha = 0.5f))
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.White.copy(alpha = 0.5f))
                 }
             }
 
@@ -169,7 +173,7 @@ fun HomeScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .background(C.purple)
-                        .clickableNoRipple { onNav(Screen.Match) }
+                        .clickableRipple { onNav(Screen.Match) }
                         .padding(vertical = 15.dp),
                     contentAlignment = Alignment.Center,
                 ) { Text("Encontrar Parceiro", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
@@ -179,7 +183,7 @@ fun HomeScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .border(1.5.dp, C.border, RoundedCornerShape(14.dp))
-                        .clickableNoRipple(openOffer)
+                        .clickableRipple(openOffer)
                         .padding(vertical = 15.dp),
                     contentAlignment = Alignment.Center,
                 ) { Text("Oferecer Serviço", color = C.white, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }

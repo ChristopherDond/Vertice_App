@@ -10,8 +10,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
@@ -21,10 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -34,12 +36,23 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.components.Avatar
 import com.vertice.app.components.Pill
 import com.vertice.app.components.StatusBar
-import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.FREELANCERS
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 
 private val CHIPS = listOf("Todos", "Construção", "Comércio", "Serviços", "Beleza", "Alimentação")
+
+// Cada chip filtra por uma ou mais áreas reais cadastradas no Freelancer.
+// "Construção" casa com "Construção Civil", "Serviços" casa com
+// "Instalações Elétr." e "Serviços Hidráulicos", etc.
+private val CHIP_AREAS = mapOf(
+    "Construção" to listOf("Construção Civil"),
+    "Comércio" to listOf("Comércio & Varejo"),
+    "Serviços" to listOf("Instalações Elétr.", "Serviços Hidráulicos", "Pintura Residencial"),
+    "Beleza" to listOf("Beleza & Estética"),
+    "Alimentação" to listOf("Alimentação"),
+)
 
 @Composable
 fun MatchScreen(
@@ -48,8 +61,8 @@ fun MatchScreen(
     onProfile: (Freelancer) -> Unit,
 ) {
     val C = LocalColors
-    var activeChips by remember { mutableStateOf(listOf("Construção", "Comércio")) }
-    var search by remember { mutableStateOf("") }
+    var activeChips by rememberSaveable { mutableStateOf(listOf("Construção", "Comércio")) }
+    var search by rememberSaveable { mutableStateOf("") }
 
     fun toggleChip(c: String) {
         activeChips = when {
@@ -62,6 +75,10 @@ fun MatchScreen(
     val filtered = remember(violetaOn, search, activeChips) {
         FREELANCERS.filter { f ->
             if (violetaOn && f.gender == "m") return@filter false
+            if (activeChips.isNotEmpty()) {
+                val areas = activeChips.flatMap { CHIP_AREAS[it] ?: emptyList() }
+                if (areas.isNotEmpty() && f.area !in areas) return@filter false
+            }
             if (search.isNotEmpty() &&
                 !f.name.lowercase().contains(search.lowercase()) &&
                 !f.area.lowercase().contains(search.lowercase())
@@ -170,7 +187,7 @@ fun MatchScreen(
                             .clip(RoundedCornerShape(50))
                             .background(if (on) C.purple else C.card)
                             .let { if (!on) it.border(1.dp, C.border, RoundedCornerShape(50)) else it }
-                            .clickableNoRipple { toggleChip(c) }
+                            .clickableRipple { toggleChip(c) }
                             .padding(horizontal = 17.dp, vertical = 8.dp),
                     ) {
                         Text(
@@ -211,25 +228,48 @@ fun MatchScreen(
                     FCard(f = f, onContact = { onContact(f) }, onProfile = { onProfile(f) })
                 }
                 if (filtered.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(C.card, RoundedCornerShape(20.dp))
-                            .border(1.dp, C.border, RoundedCornerShape(20.dp))
-                            .padding(horizontal = 20.dp, vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(32.dp))
-                        Spacer(Modifier.height(12.dp))
-                        Text("Protocolo Violeta ativo", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            "Nenhuma prestadora encontrada nesta área. Tente outro filtro.",
-                            color = C.muted,
-                            fontSize = 13.sp,
-                            lineHeight = 19.sp,
-                            modifier = Modifier.widthIn(max = 260.dp),
-                        )
+                    if (violetaOn) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(C.card, RoundedCornerShape(20.dp))
+                                .border(1.dp, C.border, RoundedCornerShape(20.dp))
+                                .padding(horizontal = 20.dp, vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(32.dp))
+                            Spacer(Modifier.height(12.dp))
+                            Text("Protocolo Violeta ativo", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                "Nenhuma prestadora encontrada nesta área. Tente outro filtro.",
+                                color = C.muted,
+                                fontSize = 13.sp,
+                                lineHeight = 19.sp,
+                                modifier = Modifier.widthIn(max = 260.dp),
+                            )
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(C.card, RoundedCornerShape(20.dp))
+                                .border(1.dp, C.border, RoundedCornerShape(20.dp))
+                                .padding(horizontal = 20.dp, vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(32.dp))
+                            Spacer(Modifier.height(12.dp))
+                            Text("Nenhum resultado encontrado", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                "Tente ajustar a busca ou os filtros selecionados.",
+                                color = C.muted,
+                                fontSize = 13.sp,
+                                lineHeight = 19.sp,
+                                modifier = Modifier.widthIn(max = 260.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -243,6 +283,7 @@ private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .shadow(6.dp, RoundedCornerShape(20.dp), ambientColor = Color.Black.copy(alpha = 0.3f), spotColor = Color.Black.copy(alpha = 0.3f))
             .background(C.card, RoundedCornerShape(20.dp))
             .border(1.dp, C.border, RoundedCornerShape(20.dp))
             .padding(18.dp),
@@ -305,7 +346,7 @@ private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
                     .border(1.5.dp, C.border, RoundedCornerShape(12.dp))
-                    .clickableNoRipple(onProfile)
+                    .clickableRipple(onProfile)
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center,
             ) { Text("Ver perfil", color = C.white, fontWeight = FontWeight.SemiBold, fontSize = 13.sp) }
@@ -315,12 +356,12 @@ private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
                     .weight(1f)
                     .clip(RoundedCornerShape(12.dp))
                     .background(C.pink)
-                    .clickableNoRipple(onContact)
+                    .clickableRipple(onContact)
                     .padding(vertical = 12.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Filled.Chat, null, tint = Color.White, modifier = Modifier.size(15.dp))
+                Icon(Icons.AutoMirrored.Filled.Chat, null, tint = Color.White, modifier = Modifier.size(15.dp))
                 Spacer(Modifier.width(6.dp))
                 Text("Contatar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }

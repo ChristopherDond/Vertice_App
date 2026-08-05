@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -22,38 +22,51 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Lesson
 import com.vertice.app.data.TModule
 import com.vertice.app.data.TRILHA
 import com.vertice.app.ui.theme.LocalColors
 
 @Composable
-fun TrilhaModal(onClose: () -> Unit) {
+fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Set<String>) -> Unit) {
     val C = LocalColors
-    var done by remember { mutableStateOf(setOf("s1", "s2", "s3", "d1", "d2", "d3")) }
-    var activeLesson by remember { mutableStateOf<Pair<Lesson, Color>?>(null) }
-    var cardIdx by remember { mutableIntStateOf(0) }
+    var done by rememberSaveable(initialDone) { mutableStateOf(initialDone) }
+    // Salvamos só o id da lição ativa (serializável); resolvemos o objeto abaixo.
+    var activeLessonId by rememberSaveable { mutableStateOf<String?>(null) }
+    var cardIdx by rememberSaveable { mutableIntStateOf(0) }
     val total = TRILHA.sumOf { it.lessons.size }
+    val activeLesson = activeLessonId?.let { id ->
+        TRILHA.asSequence().map { it.lessons }.flatten().find { it.id == id }
+    }
 
-    activeLesson?.let { (lesson, color) ->
+    fun markDone(id: String) {
+        done = done + id
+        onDoneChange(done)
+    }
+
+    activeLesson?.let { lesson ->
+        val mod = TRILHA.first { m -> m.lessons.any { it.id == lesson.id } }
         LessonView(
             lesson = lesson,
-            moduleColor = color,
+            moduleColor = mod.color,
             cardIdx = cardIdx,
             isDone = done.contains(lesson.id),
-            onBack = { activeLesson = null },
+            onBack = { activeLessonId = null },
             onPrev = { cardIdx-- },
             onNext = { cardIdx++ },
-            onComplete = { done = done + lesson.id; activeLesson = null },
+            onComplete = { markDone(lesson.id); activeLessonId = null },
         )
         return
     }
@@ -74,7 +87,7 @@ fun TrilhaModal(onClose: () -> Unit) {
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
                     .clickableNoRipple(onClose),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text("Trilha de Blindagem", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
@@ -104,6 +117,31 @@ fun TrilhaModal(onClose: () -> Unit) {
             Text("Sequência de 3 dias estudando", color = C.white, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
 
+        // Barra de progresso estilo Duolingo
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 22.dp)
+                .padding(top = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(10.dp)
+                    .background(C.card2, RoundedCornerShape(50)),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(if (total == 0) 0f else done.size.toFloat() / total)
+                        .fillMaxHeight()
+                        .background(Brush.horizontalGradient(listOf(C.purple, C.pink)), RoundedCornerShape(50)),
+                )
+            }
+            Text("${done.size * 100 / total}%", color = C.purpleL, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+        }
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -118,7 +156,7 @@ fun TrilhaModal(onClose: () -> Unit) {
                     done = done,
                     onOpenLesson = { l ->
                         if (!(l.locked && !done.contains(l.id))) {
-                            activeLesson = l to mod.color
+                            activeLessonId = l.id
                             cardIdx = 0
                         }
                     },
@@ -191,7 +229,7 @@ private fun ModuleBlock(mod: TModule, done: Set<String>, onOpenLesson: (Lesson) 
                     .clip(RoundedCornerShape(16.dp))
                     .background(if (clickable) nodeColor.copy(alpha = 0.13f) else C.card)
                     .border(2.dp, if (isDone) C.green else if (isCurrent) mod.color else C.border, RoundedCornerShape(16.dp))
-                    .clickableNoRipple { if (!isLocked) onOpenLesson(l) }
+                    .clickableRipple { if (!isLocked) onOpenLesson(l) }
                     .padding(horizontal = 16.dp, vertical = 13.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -255,7 +293,7 @@ private fun LessonView(
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
                     .clickableNoRipple(onBack),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
 
             Text(lesson.title, color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, modifier = Modifier.weight(1f))
 
@@ -342,7 +380,7 @@ private fun LessonView(
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(if (isLast) (if (isDone) C.green else moduleColor) else C.purple)
-                    .clickableNoRipple { if (isLast) onComplete() else onNext() }
+                    .clickableRipple { if (isLast) onComplete() else onNext() }
                     .padding(vertical = 15.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -360,3 +398,4 @@ private fun LessonView(
         }
     }
 }
+

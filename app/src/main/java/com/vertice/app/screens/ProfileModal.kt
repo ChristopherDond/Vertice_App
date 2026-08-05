@@ -8,8 +8,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.components.Avatar
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 
@@ -61,7 +62,7 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
                         .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(13.dp))
                         .clickableNoRipple(onClose),
                     contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Filled.ArrowBack, null, tint = Color.White, modifier = Modifier.size(18.dp)) }
+                ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White, modifier = Modifier.size(18.dp)) }
 
                 Column(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -166,12 +167,12 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(C.pink)
-                    .clickableNoRipple(onContact)
+                    .clickableRipple(onContact)
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Filled.Chat, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.Chat, null, tint = Color.White, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Contatar ${f.name.substringBefore(" ")}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }

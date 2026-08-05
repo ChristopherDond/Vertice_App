@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.ui.theme.LocalColors
 
 private data class VFItem(val icon: ImageVector, val label: String, val color: Color)
@@ -153,7 +153,7 @@ fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
                             if (on) Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF10B981)))
                             else Brush.linearGradient(listOf(C.pink, Color(0xFFF472B6))),
                         )
-                        .clickableNoRipple { setOn(!on) }
+                        .clickableRipple { setOn(!on) }
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -252,7 +252,7 @@ fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-                        .clickableNoRipple { setOn(false) }
+                        .clickableRipple { setOn(false) }
                         .padding(horizontal = 32.dp, vertical = 12.dp),
                 ) { Text("Desativar proteção", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
             }

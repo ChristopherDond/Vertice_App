@@ -10,8 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,7 @@ import com.vertice.app.components.FLabel
 import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.ui.theme.LocalColors
 import kotlinx.coroutines.delay
 
@@ -45,11 +47,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun EditProfileModal(onClose: () -> Unit) {
     val C = LocalColors
-    var name by remember { mutableStateOf("Ana Silva") }
-    var bio by remember { mutableStateOf("Costureira especializada em moda sob medida e confecção feminina.") }
-    var city by remember { mutableStateOf("São Paulo, SP") }
-    var skills by remember { mutableStateOf(listOf("Costura", "Confecção", "Moda Sob Medida")) }
-    var saved by remember { mutableStateOf(false) }
+    var name by rememberSaveable { mutableStateOf("Ana Silva") }
+    var bio by rememberSaveable { mutableStateOf("Costureira especializada em moda sob medida e confecção feminina.") }
+    var city by rememberSaveable { mutableStateOf("São Paulo, SP") }
+    var skills by rememberSaveable { mutableStateOf(listOf("Costura", "Confecção", "Moda Sob Medida")) }
+    var saved by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(saved) {
         if (saved) {
@@ -74,7 +76,7 @@ fun EditProfileModal(onClose: () -> Unit) {
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
                     .clickableNoRipple(onClose),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
             Text("Editar Perfil", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
         }
 
@@ -163,7 +165,7 @@ fun EditProfileModal(onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(if (saved) C.green else C.purple)
-                    .clickableNoRipple { saved = true }
+                    .clickableRipple { saved = true }
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -175,3 +177,4 @@ fun EditProfileModal(onClose: () -> Unit) {
         }
     }
 }
+

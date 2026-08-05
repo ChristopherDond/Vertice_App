@@ -16,6 +16,10 @@ fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier = composed {
     this.clickable(indication = null, interactionSource = interaction, onClick = onClick)
 }
 
+fun Modifier.clickableRipple(onClick: () -> Unit): Modifier = composed {
+    this.clickable(onClick = onClick)
+}
+
 fun Modifier.drawTopBorder(color: Color, strokeWidth: Dp = 1.dp): Modifier = drawBehind {
     drawLine(
         color = color,

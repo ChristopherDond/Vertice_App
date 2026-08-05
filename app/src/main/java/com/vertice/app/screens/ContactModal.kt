@@ -8,14 +8,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import com.vertice.app.components.SInput
 import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
+import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 
@@ -48,14 +50,14 @@ private val SVC_OPTS = listOf(
 @Composable
 fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     val C = LocalColors
-    var service by remember { mutableStateOf(SVC_OPTS[0]) }
-    var date by remember { mutableStateOf("") }
-    var hour by remember { mutableStateOf("") }
-    var price by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
-    var desc by remember { mutableStateOf("") }
-    var urgent by remember { mutableStateOf(false) }
-    var sent by remember { mutableStateOf(false) }
+    var service by rememberSaveable { mutableStateOf(SVC_OPTS[0]) }
+    var date by rememberSaveable { mutableStateOf("") }
+    var hour by rememberSaveable { mutableStateOf("") }
+    var price by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
+    var desc by rememberSaveable { mutableStateOf("") }
+    var urgent by rememberSaveable { mutableStateOf(false) }
+    var sent by rememberSaveable { mutableStateOf(false) }
     val valid = service != SVC_OPTS[0] && date.isNotEmpty() && desc.length > 5
 
     if (sent) {
@@ -104,7 +106,7 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(C.purple)
-                    .clickableNoRipple(onClose)
+                    .clickableRipple(onClose)
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center,
             ) { Text("Voltar ao Match", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
@@ -129,7 +131,7 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
                     .clickableNoRipple(onClose),
                 contentAlignment = Alignment.Center,
-            ) { Icon(Icons.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
+            ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
             Column {
                 Text("Solicitar Serviço", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                 Text("Preencha e envie para ${f.name}", color = C.muted, fontSize = 12.sp)
@@ -258,12 +260,12 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(if (valid) C.pink else C.card2)
-                    .clickableNoRipple { if (valid) sent = true }
+                    .clickableRipple { if (valid) sent = true }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                    Icon(Icons.Filled.Send, null, tint = if (valid) Color.White else C.muted, modifier = Modifier.size(18.dp))
+                    Icon(Icons.AutoMirrored.Filled.Send, null, tint = if (valid) Color.White else C.muted, modifier = Modifier.size(18.dp))
                     Text("Enviar solicitação", color = if (valid) Color.White else C.muted, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }

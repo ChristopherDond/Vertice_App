@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Circle
@@ -29,13 +30,21 @@ import com.vertice.app.components.HDivider
 import com.vertice.app.components.Pill
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.StatusBar
-import com.vertice.app.components.clickableNoRipple
-import com.vertice.app.data.MOD_DISPLAY
+import com.vertice.app.components.clickableRipple
+import com.vertice.app.data.TRILHA
 import com.vertice.app.ui.theme.LocalColors
 
 @Composable
-fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Unit) {
+fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Unit) {
     val C = LocalColors
+
+    // Progresso real da Trilha: módulos concluídos = todos os seus ids em "done".
+    val modMapped = TRILHA.map { m ->
+        Triple(m, m.title, m.lessons.all { it.id in done })
+    }
+    val doneCount = modMapped.count { it.third }
+    val totalLessons = TRILHA.sumOf { it.lessons.size }
+    val pct = if (totalLessons == 0) 0 else done.size * 100 / totalLessons
 
     Column(
         modifier = Modifier
@@ -74,18 +83,45 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                     Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(11.dp))
                     Text("Protocolo Violeta", color = C.pink, fontWeight = FontWeight.Bold, fontSize = 11.sp)
                 }
-                Row(
+            }
+        }
+
+        // Botão Vértice Pro em destaque (cartão quadrado/arredondado, clicável)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 22.dp)
+                .padding(top = 16.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(Brush.linearGradient(listOf(C.purple, Color(0xFF9333EA), C.pink)), RoundedCornerShape(18.dp))
+                .clickableRipple(openPro)
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Box(
                     modifier = Modifier
-                        .background(Brush.horizontalGradient(listOf(C.purple.copy(alpha = 0.19f), C.pink.copy(alpha = 0.13f))), RoundedCornerShape(50))
-                        .border(1.dp, C.purple.copy(alpha = 0.21f), RoundedCornerShape(50))
-                        .clickableNoRipple(openPro)
-                        .padding(horizontal = 11.dp, vertical = 3.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                ) {
-                    Icon(Icons.Filled.WorkspacePremium, null, tint = C.purpleL, modifier = Modifier.size(11.dp))
-                    Text("Vértice Pro", color = C.purpleL, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                        .size(46.dp)
+                        .background(Color.White.copy(alpha = 0.18f), RoundedCornerShape(13.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(13.dp)),
+                    contentAlignment = Alignment.Center,
+                ) { Icon(Icons.Filled.WorkspacePremium, null, tint = Color.White, modifier = Modifier.size(22.dp)) }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Vértice Pro", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                        Box(
+                            modifier = Modifier
+                                .background(Color.White.copy(alpha = 0.22f), RoundedCornerShape(50))
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                        ) { Text("PRO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 10.sp) }
+                    }
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "Desbloqueie matches ilimitados, prioridade e acesso antecipado",
+                        color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp, lineHeight = 17.sp,
+                    )
                 }
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.White.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
             }
         }
 
@@ -103,7 +139,7 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                     .clip(RoundedCornerShape(20.dp))
                     .background(C.card)
                     .border(1.dp, C.border, RoundedCornerShape(20.dp))
-                    .clickableNoRipple(openTrilha)
+                    .clickableRipple(openTrilha)
                     .padding(18.dp),
             ) {
                 Row(
@@ -113,7 +149,7 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                 ) {
                     Column {
                         Text("Trilha de Blindagem", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Text("2 de 4 módulos concluídos", color = C.muted, fontSize = 12.sp)
+                        Text("$doneCount de ${modMapped.size} módulos concluídos · $done.size de $totalLessons lições", color = C.muted, fontSize = 12.sp)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Box(
@@ -121,7 +157,7 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                                 .background(Brush.linearGradient(listOf(C.purple.copy(alpha = 0.19f), C.pink.copy(alpha = 0.13f))), RoundedCornerShape(12.dp))
                                 .border(1.dp, C.purple.copy(alpha = 0.19f), RoundedCornerShape(12.dp))
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
-                        ) { Text("50%", color = C.purpleL, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) }
+                        ) { Text("$pct%", color = C.purpleL, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) }
                         Icon(Icons.Filled.ChevronRight, null, tint = C.muted, modifier = Modifier.size(16.dp))
                     }
                 }
@@ -135,19 +171,19 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(pct / 100f)
                             .fillMaxHeight()
                             .background(Brush.horizontalGradient(listOf(C.purple, C.purpleL)), RoundedCornerShape(50)),
                     )
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    MOD_DISPLAY.forEach { m ->
+                    modMapped.forEach { (mod, label, isModDone) ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(if (m.done) C.purple.copy(alpha = 0.07f) else C.glass, RoundedCornerShape(13.dp))
-                                .border(1.dp, if (m.done) C.purple.copy(alpha = 0.19f) else C.border, RoundedCornerShape(13.dp))
+                                .background(if (isModDone) C.purple.copy(alpha = 0.07f) else C.glass, RoundedCornerShape(13.dp))
+                                .border(1.dp, if (isModDone) C.purple.copy(alpha = 0.19f) else C.border, RoundedCornerShape(13.dp))
                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(11.dp),
@@ -155,17 +191,17 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                             Box(
                                 modifier = Modifier
                                     .size(32.dp)
-                                    .background(if (m.done) C.purple.copy(alpha = 0.15f) else Color(0x1A808080), RoundedCornerShape(10.dp)),
+                                    .background(if (isModDone) C.purple.copy(alpha = 0.15f) else Color(0x1A808080), RoundedCornerShape(10.dp)),
                                 contentAlignment = Alignment.Center,
-                            ) { Icon(m.icon, null, tint = if (m.done) C.purpleL else C.muted, modifier = Modifier.size(15.dp)) }
+                            ) { Icon(mod.icon, null, tint = if (isModDone) C.purpleL else C.muted, modifier = Modifier.size(15.dp)) }
                             Text(
-                                m.label,
-                                color = if (m.done) C.white else C.muted,
-                                fontWeight = if (m.done) FontWeight.SemiBold else FontWeight.Normal,
+                                label,
+                                color = if (isModDone) C.white else C.muted,
+                                fontWeight = if (isModDone) FontWeight.SemiBold else FontWeight.Normal,
                                 fontSize = 13.sp,
                                 modifier = Modifier.weight(1f),
                             )
-                            if (m.done) Icon(Icons.Filled.CheckCircle, null, tint = C.green, modifier = Modifier.size(16.dp))
+                            if (isModDone) Icon(Icons.Filled.CheckCircle, null, tint = C.green, modifier = Modifier.size(16.dp))
                             else Icon(Icons.Filled.Circle, null, tint = C.border, modifier = Modifier.size(16.dp))
                         }
                     }
@@ -186,7 +222,7 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
                     .padding(top = 14.dp)
                     .clip(RoundedCornerShape(15.dp))
                     .border(1.5.dp, C.border, RoundedCornerShape(15.dp))
-                    .clickableNoRipple(openEdit)
+                    .clickableRipple(openEdit)
                     .padding(vertical = 15.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -198,3 +234,4 @@ fun PerfilScreen(openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Un
         }
     }
 }
+

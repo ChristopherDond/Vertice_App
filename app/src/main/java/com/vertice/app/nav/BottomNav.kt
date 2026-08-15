@@ -48,7 +48,12 @@ fun BottomNav(active: Screen, onNav: (Screen) -> Unit, modifier: Modifier = Modi
             Column(
                 modifier = Modifier
                     .padding(top = 10.dp)
-                    .clickableNoRipple { onNav(item.screen) }
+                    .clickableNoRipple { 
+                        if (!isOn) {
+                            onNav(item.screen)
+                            HapticFeedback.lightClick()
+                        }
+                    }
                     .padding(horizontal = 18.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -74,4 +79,3 @@ fun BottomNav(active: Screen, onNav: (Screen) -> Unit, modifier: Modifier = Modi
         }
     }
 }
-

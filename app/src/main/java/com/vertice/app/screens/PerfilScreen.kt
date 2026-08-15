@@ -1,5 +1,6 @@
 package com.vertice.app.screens
 
+import androidx.compose.animation.sharedelement.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,10 +34,16 @@ import com.vertice.app.components.SLabel
 import com.vertice.app.components.StatusBar
 import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.TRILHA
+import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
 
 @Composable
-fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Unit) {
+fun PerfilScreen(
+    done: Set<String>,
+    openEdit: () -> Unit,
+    openPro: () -> Unit,
+    openTrilha: () -> Unit,
+) {
     val C = LocalColors
 
     val modMapped = TRILHA.map { m ->
@@ -55,15 +63,16 @@ fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, o
         StatusBar()
 
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp).padding(top = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(84.dp)
-                    .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) { Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp) }
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp).padding(top = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    // Profile avatar
+                    Box(
+                        modifier = Modifier
+                            .size(84.dp)
+                            .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) { Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp) }
 
             Spacer(Modifier.height(12.dp))
             Text("Ana Silva", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)
@@ -232,4 +241,3 @@ fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, o
         }
     }
 }
-

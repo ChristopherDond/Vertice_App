@@ -52,6 +52,11 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    // Coil for image loading
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Unit test dependencies
+    testImplementation("junit:junit:4.13.2")
 }

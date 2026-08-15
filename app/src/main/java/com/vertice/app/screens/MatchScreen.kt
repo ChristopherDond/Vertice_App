@@ -2,6 +2,7 @@ package com.vertice.app.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -37,20 +38,26 @@ import com.vertice.app.components.Avatar
 import com.vertice.app.components.Pill
 import com.vertice.app.components.StatusBar
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.FilterBottomSheet
 import com.vertice.app.data.FREELANCERS
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
+import androidx.compose.material3.ModalBottomSheetLayout
+import androidx.compose.material3.ModalBottomSheetValue
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 private val CHIPS = listOf("Todos", "Construção", "Comércio", "Serviços", "Beleza", "Alimentação")
 
 private val CHIP_AREAS = mapOf(
-    "Construção" to listOf("Construção Civil"),
-    "Comércio" to listOf("Comércio & Varejo"),
-    "Serviços" to listOf("Instalações Elétr.", "Serviços Hidráulicos", "Pintura Residencial"),
-    "Beleza" to listOf("Beleza & Estética"),
+    "Construção" to listOf("Construção Civil", "Construção"),
+    "Comércio" to listOf("Comércio & Varejo", "Consultoria"),
+    "Serviços" to listOf("Instalações Elétr.", "Serviços Hidráulicos", "Pintura Residencial", "Serviços"),
+    "Beleza" to listOf("Beleza & Estética", "Beleza"),
     "Alimentação" to listOf("Alimentação"),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MatchScreen(
     violetaOn: Boolean,
@@ -60,6 +67,7 @@ fun MatchScreen(
     val C = LocalColors
     var activeChips by rememberSaveable { mutableStateOf(listOf("Construção", "Comércio")) }
     var search by rememberSaveable { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     fun toggleChip(c: String) {
         activeChips = when {
@@ -78,194 +86,216 @@ fun MatchScreen(
             }
             if (search.isNotEmpty() &&
                 !f.name.lowercase().contains(search.lowercase()) &&
-                !f.area.lowercase().contains(search.lowercase())
+                !f.area.lowercase().contains(search.lowercase()) &&
+                !f.role.lowercase().contains(search.lowercase())
             ) return@filter false
             true
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 90.dp),
-        ) {
-            StatusBar()
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            FilterBottomSheet(
+                activeChips = activeChips,
+                onChipsChange = { activeChips = it },
+                violetaOn = violetaOn,
+                onVioletaChange = { },
+                searchText = search,
+                onSearchChange = { search = it },
+                onClose = { },
+                onApply = { },
+            )
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 90.dp),
+            ) {
+                StatusBar()
 
-            if (violetaOn) {
+                if (violetaOn) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 22.dp)
+                            .padding(bottom = 4.dp)
+                            .background(C.pink.copy(alpha = 0.10f), RoundedCornerShape(13.dp))
+                            .border(1.dp, C.purple.copy(alpha = 0.20f), RoundedCornerShape(13.dp))
+                            .padding(horizontal = 14.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    ) {
+                        Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(14.dp))
+                        Text("Protocolo Violeta ativo — exibindo apenas prestadoras", color = C.pink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    }
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 22.dp)
-                        .padding(bottom = 4.dp)
-                        .background(C.pink.copy(alpha = 0.10f), RoundedCornerShape(13.dp))
-                        .border(1.dp, C.purple.copy(alpha = 0.20f), RoundedCornerShape(13.dp))
-                        .padding(horizontal = 14.dp, vertical = 9.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top,
                 ) {
-                    Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(14.dp))
-                    Text("Protocolo Violeta ativo — exibindo apenas prestadoras", color = C.pink, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp)
-                    .padding(top = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column {
-                    Text("Match", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
-                    Spacer(Modifier.height(3.dp))
-                    Text(
-                        "Encontre parceiros de negócio, prestadores ou apoio para sua gestão",
-                        color = C.muted,
-                        fontSize = 13.sp,
-                        lineHeight = 19.sp,
-                        modifier = Modifier.widthIn(max = 230.dp),
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (activeChips.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier.background(C.purple, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 3.dp),
-                        ) { Text("${activeChips.size}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(C.card, RoundedCornerShape(13.dp))
-                            .border(1.dp, C.border, RoundedCornerShape(13.dp)),
-                        contentAlignment = Alignment.Center,
-                    ) { Icon(Icons.Filled.FilterList, null, tint = if (activeChips.isNotEmpty()) C.purple else C.mutedL, modifier = Modifier.size(17.dp)) }
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 22.dp)
-                    .padding(top = 14.dp)
-                    .background(C.card, RoundedCornerShape(14.dp))
-                    .border(1.dp, C.border, RoundedCornerShape(14.dp))
-                    .padding(horizontal = 16.dp, vertical = 13.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(16.dp))
-                Box(modifier = Modifier.weight(1f)) {
-                    if (search.isEmpty()) Text("Buscar habilidade ou área...", color = C.muted, fontSize = 14.sp)
-                    BasicTextField(
-                        value = search,
-                        onValueChange = { search = it },
-                        textStyle = TextStyle(color = C.white, fontSize = 14.sp),
-                        cursorBrush = SolidColor(C.purple),
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 22.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                CHIPS.forEach { c ->
-                    val on = if (c == "Todos") activeChips.isEmpty() else activeChips.contains(c)
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(if (on) C.purple else C.card)
-                            .let { if (!on) it.border(1.dp, C.border, RoundedCornerShape(50)) else it }
-                            .clickableRipple { toggleChip(c) }
-                            .padding(horizontal = 17.dp, vertical = 8.dp),
-                    ) {
+                    Column {
+                        Text("Match", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp)
+                        Spacer(Modifier.height(3.dp))
                         Text(
-                            c,
-                            color = if (on) Color.White else C.muted,
+                            "Encontre parceiros de negócio, prestadores ou apoio para sua gestão",
+                            color = C.muted,
                             fontSize = 13.sp,
-                            fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
+                            lineHeight = 19.sp,
+                            modifier = Modifier.widthIn(max = 230.dp),
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (activeChips.isNotEmpty()) {
+                            Box(
+                                modifier = Modifier.background(C.purple, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 3.dp),
+                            ) { Text("${activeChips.size}", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(C.card, RoundedCornerShape(13.dp))
+                                .border(1.dp, C.border, RoundedCornerShape(13.dp))
+                                .clickable { sheetState.show() },
+                            contentAlignment = Alignment.Center,
+                        ) { Icon(Icons.Filled.FilterList, null, tint = if (activeChips.isNotEmpty()) C.purple else C.mutedL, modifier = Modifier.size(17.dp)) }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 14.dp)
+                        .background(C.card, RoundedCornerShape(14.dp))
+                        .border(1.dp, C.border, RoundedCornerShape(14.dp))
+                        .padding(horizontal = 16.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(16.dp))
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (search.isEmpty()) Text("Buscar habilidade ou área...", color = C.muted, fontSize = 14.sp)
+                        BasicTextField(
+                            value = search,
+                            onValueChange = { search = it },
+                            textStyle = TextStyle(color = C.white, fontSize = 14.sp),
+                            cursorBrush = SolidColor(C.purple),
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
-            }
 
-            if (activeChips.isNotEmpty()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 22.dp)
-                        .padding(bottom = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("Filtrando por:", color = C.muted, fontSize = 12.sp, modifier = Modifier.padding(top = 3.dp))
-                    activeChips.forEach { ch ->
+                    CHIPS.forEach { c ->
+                        val on = if (c == "Todos") activeChips.isEmpty() else activeChips.contains(c)
                         Box(
                             modifier = Modifier
-                                .background(C.purple.copy(alpha = 0.10f), RoundedCornerShape(50))
-                                .border(1.dp, C.purple.copy(alpha = 0.16f), RoundedCornerShape(50))
-                                .padding(horizontal = 10.dp, vertical = 2.dp),
-                        ) { Text(ch, color = C.purpleL, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                filtered.forEach { f ->
-                    FCard(f = f, onContact = { onContact(f) }, onProfile = { onProfile(f) })
-                }
-                if (filtered.isEmpty()) {
-                    if (violetaOn) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(C.card, RoundedCornerShape(20.dp))
-                                .border(1.dp, C.border, RoundedCornerShape(20.dp))
-                                .padding(horizontal = 20.dp, vertical = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                                .clip(RoundedCornerShape(50))
+                                .background(if (on) C.purple else C.card)
+                                .let { if (!on) it.border(1.dp, C.border, RoundedCornerShape(50)) else it }
+                                .clickableRipple { toggleChip(c) }
+                                .padding(horizontal = 17.dp, vertical = 8.dp),
                         ) {
-                            Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(32.dp))
-                            Spacer(Modifier.height(12.dp))
-                            Text("Protocolo Violeta ativo", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                            Spacer(Modifier.height(6.dp))
                             Text(
-                                "Nenhuma prestadora encontrada nesta área. Tente outro filtro.",
-                                color = C.muted,
+                                c,
+                                color = if (on) Color.White else C.muted,
                                 fontSize = 13.sp,
-                                lineHeight = 19.sp,
-                                modifier = Modifier.widthIn(max = 260.dp),
+                                fontWeight = if (on) FontWeight.Bold else FontWeight.Medium,
                             )
                         }
-                    } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(C.card, RoundedCornerShape(20.dp))
-                                .border(1.dp, C.border, RoundedCornerShape(20.dp))
-                                .padding(horizontal = 20.dp, vertical = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(32.dp))
-                            Spacer(Modifier.height(12.dp))
-                            Text("Nenhum resultado encontrado", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                "Tente ajustar a busca ou os filtros selecionados.",
-                                color = C.muted,
-                                fontSize = 13.sp,
-                                lineHeight = 19.sp,
-                                modifier = Modifier.widthIn(max = 260.dp),
-                            )
+                    }
+                }
+
+                if (activeChips.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 22.dp)
+                            .padding(bottom = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(7.dp),
+                    ) {
+                        Text("Filtrando por:", color = C.muted, fontSize = 12.sp, modifier = Modifier.padding(top = 3.dp))
+                        activeChips.forEach { ch ->
+                            Box(
+                                modifier = Modifier
+                                    .background(C.purple.copy(alpha = 0.10f), RoundedCornerShape(50))
+                                    .border(1.dp, C.purple.copy(alpha = 0.16f), RoundedCornerShape(50))
+                                    .padding(horizontal = 10.dp, vertical = 2.dp),
+                            ) { Text(ch, color = C.purpleL, fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                        }
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    filtered.forEach { f ->
+                        FCard(
+                            f = f,
+                            onContact = { onContact(f) },
+                            onProfile = { onProfile(f) },
+                        )
+                    }
+                    if (filtered.isEmpty()) {
+                        if (violetaOn) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(C.card, RoundedCornerShape(20.dp))
+                                    .border(1.dp, C.border, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 20.dp, vertical = 32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Icon(Icons.Filled.Shield, null, tint = C.pink, modifier = Modifier.size(32.dp))
+                                Spacer(Modifier.height(12.dp))
+                                Text("Protocolo Violeta ativo", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    "Nenhuma prestadora encontrada nesta área. Tente outro filtro.",
+                                    color = C.muted,
+                                    fontSize = 13.sp,
+                                    lineHeight = 19.sp,
+                                    modifier = Modifier.widthIn(max = 260.dp),
+                                )
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(C.card, RoundedCornerShape(20.dp))
+                                    .border(1.dp, C.border, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 20.dp, vertical = 32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(32.dp))
+                                Spacer(Modifier.height(12.dp))
+                                Text("Nenhum resultado encontrado", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    "Tente ajustar a busca ou os filtros selecionados.",
+                                    color = C.muted,
+                                    fontSize = 13.sp,
+                                    lineHeight = 19.sp,
+                                    modifier = Modifier.widthIn(max = 260.dp),
+                                )
+                            }
                         }
                     }
                 }
@@ -275,8 +305,13 @@ fun MatchScreen(
 }
 
 @Composable
-private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
+private fun FCard(
+    f: Freelancer,
+    onContact: () -> Unit,
+    onProfile: () -> Unit,
+) {
     val C = LocalColors
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -365,4 +400,3 @@ private fun FCard(f: Freelancer, onContact: () -> Unit, onProfile: () -> Unit) {
         }
     }
 }
-

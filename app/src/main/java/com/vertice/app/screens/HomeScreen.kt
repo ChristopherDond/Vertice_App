@@ -44,7 +44,7 @@ import androidx.compose.ui.text.withStyle
 
 @Composable
 fun HomeScreen(
-    onNav: (Screen) -> Unit,
+    onNavigate: (Screen) -> Unit,
     openPro: () -> Unit,
     openOffer: () -> Unit,
 ) {
@@ -117,10 +117,12 @@ fun HomeScreen(
                         modifier = Modifier.widthIn(max = 220.dp),
                     )
                 }
+                // Profile avatar - navigate to Perfil on click
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
+                        .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape)
+                        .clickableRipple { onNavigate(Screen.Perfil) },
                     contentAlignment = Alignment.Center,
                 ) {
                     Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
@@ -142,7 +144,7 @@ fun HomeScreen(
                     .shadow(10.dp, RoundedCornerShape(20.dp), ambientColor = C.purple.copy(alpha = 0.4f), spotColor = C.purple.copy(alpha = 0.4f))
                     .clip(RoundedCornerShape(20.dp))
                     .background(Brush.linearGradient(listOf(C.purple, Color(0xFF8B46F0), C.purpleL)))
-                    .clickableRipple { onNav(Screen.Perfil) }
+                    .clickableRipple { onNavigate(Screen.Perfil) }
                     .padding(20.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -173,7 +175,7 @@ fun HomeScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
                         .background(C.purple)
-                        .clickableRipple { onNav(Screen.Match) }
+                        .clickableRipple { onNavigate(Screen.Match) }
                         .padding(vertical = 15.dp),
                     contentAlignment = Alignment.Center,
                 ) { Text("Encontrar Parceiro", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
@@ -222,4 +224,3 @@ private fun buildAnnotatedStringPro(purpleL: Color, mutedL: Color) =
             append(" — mais alcance, prioridade nos resultados e acesso antecipado a novos parceiros")
         }
     }
-

@@ -36,7 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.nav.SharedElementManager
+import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
+import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 private data class ProBenefit(val icon: ImageVector, val label: String, val desc: String)
 private val PRO_BENEFITS = listOf(
@@ -49,7 +52,11 @@ private val PRO_BENEFITS = listOf(
 )
 
 @Composable
-fun ProModal(onClose: () -> Unit) {
+fun ProModal(
+    onClose: () -> Unit,
+    sharedTransition: SharedTransitionApi,
+    sharedElementManager: SharedElementManager,
+) {
     val C = LocalColors
     var subscribed by rememberSaveable { mutableStateOf(false) }
 
@@ -96,7 +103,10 @@ fun ProModal(onClose: () -> Unit) {
                     .padding(top = 32.dp)
                     .clip(RoundedCornerShape(15.dp))
                     .background(C.purple)
-                    .clickableRipple(onClose)
+                    .clickableRipple {
+                        onClose()
+                        HapticFeedback.success()
+                    }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center,
             ) { Text("Começar a usar", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
@@ -123,7 +133,10 @@ fun ProModal(onClose: () -> Unit) {
                         .background(Color.Black.copy(alpha = 0.3f), RoundedCornerShape(13.dp))
                         .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(13.dp))
                         .clip(RoundedCornerShape(13.dp))
-                        .clickableRipple(onClose),
+                        .clickableRipple {
+                            onClose()
+                            HapticFeedback.lightClick()
+                        },
                     contentAlignment = Alignment.Center,
                 ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.White, modifier = Modifier.size(18.dp)) }
 
@@ -248,7 +261,10 @@ fun ProModal(onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(Brush.linearGradient(listOf(C.purple, C.pink)))
-                    .clickableRipple { subscribed = true }
+                    .clickableRipple {
+                        subscribed = true
+                        HapticFeedback.heavyClick()
+                    }
                     .padding(vertical = 17.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -260,4 +276,3 @@ fun ProModal(onClose: () -> Unit) {
         }
     }
 }
-

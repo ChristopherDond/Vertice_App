@@ -37,10 +37,19 @@ import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Lesson
 import com.vertice.app.data.TModule
 import com.vertice.app.data.TRILHA
+import com.vertice.app.nav.SharedElementManager
+import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
+import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 @Composable
-fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Set<String>) -> Unit) {
+fun TrilhaModal(
+    onClose: () -> Unit,
+    initialDone: Set<String>,
+    onDoneChange: (Set<String>) -> Unit,
+    sharedTransition: SharedTransitionApi,
+    sharedElementManager: SharedElementManager,
+) {
     val C = LocalColors
     var done by rememberSaveable(initialDone) { mutableStateOf(initialDone) }
     var activeLessonId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -53,6 +62,7 @@ fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Se
     fun markDone(id: String) {
         done = done + id
         onDoneChange(done)
+        HapticFeedback.success()
     }
 
     activeLesson?.let { lesson ->
@@ -62,9 +72,9 @@ fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Se
             moduleColor = mod.color,
             cardIdx = cardIdx,
             isDone = done.contains(lesson.id),
-            onBack = { activeLessonId = null },
-            onPrev = { cardIdx-- },
-            onNext = { cardIdx++ },
+            onBack = { activeLessonId = null; HapticFeedback.lightClick() },
+            onPrev = { cardIdx--; HapticFeedback.lightClick() },
+            onNext = { cardIdx++; HapticFeedback.lightClick() },
             onComplete = { markDone(lesson.id); activeLessonId = null },
         )
         return
@@ -84,7 +94,10 @@ fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Se
                     .size(40.dp)
                     .background(C.card, RoundedCornerShape(13.dp))
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
-                    .clickableNoRipple(onClose),
+                    .clickableNoRipple {
+                        onClose()
+                        HapticFeedback.lightClick()
+                    },
                 contentAlignment = Alignment.Center,
             ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
 
@@ -156,6 +169,7 @@ fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Se
                         if (!(l.locked && !done.contains(l.id))) {
                             activeLessonId = l.id
                             cardIdx = 0
+                            HapticFeedback.mediumClick()
                         }
                     },
                 )
@@ -396,4 +410,3 @@ private fun LessonView(
         }
     }
 }
-

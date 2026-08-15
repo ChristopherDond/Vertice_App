@@ -3,6 +3,8 @@ package com.vertice.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,25 +58,27 @@ fun VerticeApp() {
     VerticeThemeProvider(dark = dark, onToggle = { dark = !dark }) {
         val C = LocalColors
         Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
-            when (screen) {
-                Screen.Home -> HomeScreen(
-                    onNav = { screen = it },
-                    openPro = { proOpen = true },
-                    openOffer = { offerOpen = true },
-                )
-                Screen.Match -> MatchScreen(
-                    violetaOn = violetaOn,
-                    onContact = { contactName = it.name },
-                    onProfile = { profileName = it.name },
-                )
-                Screen.Violeta -> VioletaScreen(on = violetaOn, setOn = { violetaOn = it })
-                Screen.Perfil -> PerfilScreen(
-                    done = trilhaDone.toSet(),
-                    openEdit = { editOpen = true },
-                    openPro = { proOpen = true },
-                    openTrilha = { trilhaOpen = true },
-                )
-                Screen.Confirmacao -> PlaceholderScreen("Confirmação")
+            Crossfade(targetState = screen, animationSpec = tween(300)) { currentScreen ->
+                when (currentScreen) {
+                    Screen.Home -> HomeScreen(
+                        onNavigate = { screen = it },
+                        openPro = { proOpen = true },
+                        openOffer = { offerOpen = true },
+                    )
+                    Screen.Match -> MatchScreen(
+                        violetaOn = violetaOn,
+                        onContact = { contactName = it.name },
+                        onProfile = { profileName = it.name },
+                    )
+                    Screen.Violeta -> VioletaScreen(on = violetaOn, setOn = { violetaOn = it })
+                    Screen.Perfil -> PerfilScreen(
+                        done = trilhaDone.toSet(),
+                        openEdit = { editOpen = true },
+                        openPro = { proOpen = true },
+                        openTrilha = { trilhaOpen = true },
+                    )
+                    Screen.Confirmacao -> PlaceholderScreen("Confirmação")
+                }
             }
 
             BottomNav(active = screen, onNav = { screen = it }, modifier = Modifier.align(Alignment.BottomCenter))
@@ -115,4 +119,3 @@ private fun PlaceholderScreen(name: String) {
         Text("$name — próxima entrega", color = C.muted)
     }
 }
-

@@ -9,20 +9,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,11 +32,18 @@ import com.vertice.app.components.Avatar
 import com.vertice.app.components.FLabel
 import com.vertice.app.components.SInput
 import com.vertice.app.components.TArea
-import com.vertice.app.components.TInput
+import com.vertice.app.components.DateInput
+import com.vertice.app.components.TimeInput
+import com.vertice.app.components.CurrencyInput
+import com.vertice.app.components.CurrencyMaskTransformation
+import com.vertice.app.components.ValidatedTextField
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 private val SVC_OPTS = listOf(
     "Selecionar serviço...", "Reforma / Construção", "Instalação Elétrica",
@@ -58,7 +61,11 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     var desc by rememberSaveable { mutableStateOf("") }
     var urgent by rememberSaveable { mutableStateOf(false) }
     var sent by rememberSaveable { mutableStateOf(false) }
-    val valid = service != SVC_OPTS[0] && date.isNotEmpty() && desc.length > 5
+
+    val dateValid = date.length == 10 && isValidDate(date)
+    val timeValid = hour.isBlank() || (hour.length == 5 && isValidTime(hour))
+    val priceValid = price.isBlank() || CurrencyMaskTransformation.parseToCents(price) > 0
+    val valid = service != SVC_OPTS[0] && dateValid && timeValid && priceValid && desc.length > 5
 
     if (sent) {
         Column(
@@ -174,11 +181,24 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
                     FLabel("Data *")
-                    TInput(value = date, onChange = { date = it }, placeholder = "DD/MM/AAAA", icon = { Icon(Icons.Filled.CalendarToday, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
+                    DateInput(
+                        value = date,
+                        onValueChange = { date = it },
+                        label = "Data *",
+                        placeholder = "DD/MM/AAAA",
+                        modifier = Modifier.fillMaxWidth(),
+                        minDate = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+                    )
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     FLabel("Horário")
-                    TInput(value = hour, onChange = { hour = it }, placeholder = "Ex: 14h", icon = { Icon(Icons.Filled.AccessTime, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
+                    TimeInput(
+                        value = hour,
+                        onValueChange = { hour = it },
+                        label = "Horário",
+                        placeholder = "HH:mm",
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             }
             Spacer(Modifier.height(14.dp))
@@ -186,11 +206,24 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
                     FLabel("Orçamento (R$)")
-                    TInput(value = price, onChange = { price = it }, placeholder = "Ex: 300", icon = { Icon(Icons.Filled.AttachMoney, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
+                    CurrencyInput(
+                        value = price,
+                        onValueChange = { price = it },
+                        label = "Orçamento (R$)",
+                        placeholder = "Ex: 300",
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     FLabel("Local")
-                    TInput(value = address, onChange = { address = it }, placeholder = "Bairro", icon = { Icon(Icons.Filled.LocationOn, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
+                    ValidatedTextField(
+                        value = address,
+                        onValueChange = { address = it },
+                        label = "Local",
+                        placeholder = "Bairro",
+                        icon = { Icon(Icons.Filled.LocationOn, null, tint = C.muted, modifier = Modifier.size(16.dp)) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
             }
             Spacer(Modifier.height(14.dp))
@@ -205,7 +238,7 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                     .fillMaxWidth()
                     .background(C.inputBg, RoundedCornerShape(13.dp))
                     .border(1.5.dp, C.border, RoundedCornerShape(13.dp))
-                    .clickableNoRipple {  }
+                    .clickableNoRipple { }
                     .padding(14.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -281,3 +314,33 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     }
 }
 
+private fun isValidDate(dateStr: String): Boolean {
+    if (dateStr.length != 10) return false
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    sdf.isLenient = false
+    return try {
+        val date = sdf.parse(dateStr)
+        val cal = Calendar.getInstance()
+        cal.time = date!!
+        val today = Calendar.getInstance()
+        today.set(Calendar.HOUR_OF_DAY, 0)
+        today.set(Calendar.MINUTE, 0)
+        today.set(Calendar.SECOND, 0)
+        today.set(Calendar.MILLISECOND, 0)
+        cal.timeInMillis >= today.timeInMillis
+    } catch (e: Exception) {
+        false
+    }
+}
+
+private fun isValidTime(timeStr: String): Boolean {
+    if (timeStr.length != 5) return false
+    return try {
+        val parts = timeStr.split(":")
+        val h = parts[0].toInt()
+        val m = parts[1].toInt()
+        h in 0..23 && m in 0..59
+    } catch (e: Exception) {
+        false
+    }
+}

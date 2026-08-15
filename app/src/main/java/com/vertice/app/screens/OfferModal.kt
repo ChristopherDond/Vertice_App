@@ -33,7 +33,10 @@ import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.nav.SharedElementManager
+import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
+import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 private val CATEGORY_OPTS = listOf(
     "Selecionar categoria...",
@@ -46,7 +49,11 @@ private val AVAIL_OPTS = listOf(
 )
 
 @Composable
-fun OfferModal(onClose: () -> Unit) {
+fun OfferModal(
+    onClose: () -> Unit,
+    sharedTransition: SharedTransitionApi,
+    sharedElementManager: SharedElementManager,
+) {
     val C = LocalColors
     var category by rememberSaveable { mutableStateOf(CATEGORY_OPTS[0]) }
     var title by rememberSaveable { mutableStateOf("") }
@@ -97,7 +104,10 @@ fun OfferModal(onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(C.purple)
-                    .clickableRipple(onClose)
+                    .clickableRipple {
+                        onClose()
+                        HapticFeedback.success()
+                    }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center,
             ) { Text("Voltar ao início", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp) }
@@ -119,7 +129,10 @@ fun OfferModal(onClose: () -> Unit) {
                     .size(40.dp)
                     .background(C.card, RoundedCornerShape(13.dp))
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
-                    .clickableNoRipple(onClose),
+                    .clickableNoRipple {
+                        onClose()
+                        HapticFeedback.lightClick()
+                    },
                 contentAlignment = Alignment.Center,
             ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
             Column {
@@ -176,7 +189,12 @@ fun OfferModal(onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(if (valid) C.purple else C.card2)
-                    .clickableRipple { if (valid) published = true }
+                    .clickableRipple {
+                        if (valid) {
+                            published = true
+                            HapticFeedback.success()
+                        }
+                    }
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center,
             ) {

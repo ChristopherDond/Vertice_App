@@ -1,5 +1,6 @@
 package com.vertice.app.screens
 
+import androidx.compose.animation.sharedelement.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -30,7 +31,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
+import com.vertice.app.nav.HapticFeedback
 
 private data class VFItem(val icon: ImageVector, val label: String, val color: Color)
 private val VF = listOf(
@@ -53,7 +56,10 @@ private val OVERLAY_ITEMS = listOf(
 )
 
 @Composable
-fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
+fun VioletaScreen(
+    on: Boolean,
+    setOn: (Boolean) -> Unit,
+) {
     val C = LocalColors
 
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
@@ -153,7 +159,10 @@ fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
                             if (on) Brush.linearGradient(listOf(Color(0xFF059669), Color(0xFF10B981)))
                             else Brush.linearGradient(listOf(C.pink, Color(0xFFF472B6))),
                         )
-                        .clickableRipple { setOn(!on) }
+                        .clickableRipple { 
+                            setOn(!on)
+                            HapticFeedback.mediumClick()
+                        }
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -252,7 +261,10 @@ fun VioletaScreen(on: Boolean, setOn: (Boolean) -> Unit) {
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color.White.copy(alpha = 0.1f))
                         .border(1.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-                        .clickableRipple { setOn(false) }
+                        .clickableRipple { 
+                            setOn(false)
+                            HapticFeedback.lightClick()
+                        }
                         .padding(horizontal = 32.dp, vertical = 12.dp),
                 ) { Text("Desativar proteção", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp) }
             }
@@ -281,4 +293,3 @@ private fun VFCard(item: VFItem, on: Boolean, modifier: Modifier = Modifier) {
         if (on) Icon(Icons.Filled.CheckCircle, null, tint = item.color, modifier = Modifier.size(14.dp))
     }
 }
-

@@ -1,5 +1,6 @@
 package com.vertice.app.screens
 
+import androidx.compose.animation.sharedelement.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -41,11 +42,14 @@ import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
 import com.vertice.app.ui.theme.LocalColors
+import com.vertice.app.nav.HapticFeedback
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun EditProfileModal(onClose: () -> Unit) {
+fun EditProfileModal(
+    onClose: () -> Unit,
+) {
     val C = LocalColors
     var name by rememberSaveable { mutableStateOf("Ana Silva") }
     var bio by rememberSaveable { mutableStateOf("Costureira especializada em moda sob medida e confecção feminina.") }
@@ -74,7 +78,10 @@ fun EditProfileModal(onClose: () -> Unit) {
                     .size(40.dp)
                     .background(C.card, RoundedCornerShape(13.dp))
                     .border(1.dp, C.border, RoundedCornerShape(13.dp))
-                    .clickableNoRipple(onClose),
+                    .clickableNoRipple {
+                        onClose()
+                        HapticFeedback.lightClick()
+                    },
                 contentAlignment = Alignment.Center,
             ) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = C.white, modifier = Modifier.size(18.dp)) }
             Text("Editar Perfil", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
@@ -101,7 +108,7 @@ fun EditProfileModal(onClose: () -> Unit) {
                             .size(28.dp)
                             .background(C.purple, CircleShape)
                             .border(2.dp, C.navy, CircleShape)
-                            .clickableNoRipple { },
+                            .clickableNoRipple { HapticFeedback.lightClick() },
                         contentAlignment = Alignment.Center,
                     ) { Icon(Icons.Filled.CameraAlt, null, tint = Color.White, modifier = Modifier.size(13.dp)) }
                 }
@@ -133,7 +140,10 @@ fun EditProfileModal(onClose: () -> Unit) {
                         Text(s, color = C.purple, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         Icon(
                             Icons.Filled.Close, null, tint = C.purple,
-                            modifier = Modifier.size(11.dp).clickableNoRipple { skills = skills - s },
+                            modifier = Modifier.size(11.dp).clickableNoRipple { 
+                                skills = skills - s
+                                HapticFeedback.lightClick()
+                            },
                         )
                     }
                 }
@@ -141,7 +151,7 @@ fun EditProfileModal(onClose: () -> Unit) {
                     modifier = Modifier
                         .background(C.card, RoundedCornerShape(50))
                         .border(1.dp, C.border, RoundedCornerShape(50))
-                        .clickableNoRipple { }
+                        .clickableNoRipple { HapticFeedback.lightClick() }
                         .padding(horizontal = 12.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -165,7 +175,10 @@ fun EditProfileModal(onClose: () -> Unit) {
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15.dp))
                     .background(if (saved) C.green else C.purple)
-                    .clickableRipple { saved = true }
+                    .clickableRipple { 
+                        saved = true
+                        HapticFeedback.success()
+                    }
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -177,4 +190,3 @@ fun EditProfileModal(onClose: () -> Unit) {
         }
     }
 }
-

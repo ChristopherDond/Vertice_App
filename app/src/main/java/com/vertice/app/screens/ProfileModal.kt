@@ -188,4 +188,3 @@ private fun StatBlock(value: String, label: String, accent: Boolean = false) {
         Text(label, color = Color.White.copy(alpha = 0.5f), fontSize = 11.sp)
     }
 }
-

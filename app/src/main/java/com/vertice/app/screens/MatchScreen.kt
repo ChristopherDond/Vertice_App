@@ -43,9 +43,6 @@ import com.vertice.app.ui.theme.LocalColors
 
 private val CHIPS = listOf("Todos", "Construção", "Comércio", "Serviços", "Beleza", "Alimentação")
 
-// Cada chip filtra por uma ou mais áreas reais cadastradas no Freelancer.
-// "Construção" casa com "Construção Civil", "Serviços" casa com
-// "Instalações Elétr." e "Serviços Hidráulicos", etc.
 private val CHIP_AREAS = mapOf(
     "Construção" to listOf("Construção Civil"),
     "Comércio" to listOf("Comércio & Varejo"),

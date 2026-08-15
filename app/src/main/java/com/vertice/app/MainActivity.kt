@@ -42,13 +42,9 @@ fun VerticeApp() {
     var dark by rememberSaveable { mutableStateOf(true) }
     var screen by rememberSaveable { mutableStateOf(Screen.Home) }
     var violetaOn by rememberSaveable { mutableStateOf(false) }
-    // Salvamos só o nome dos freelancers (serializável); resolvemos o objeto
-    // na hora de renderizar, assim o estado sobrevive à rotação sem crash.
     var contactName by rememberSaveable { mutableStateOf<String?>(null) }
     var profileName by rememberSaveable { mutableStateOf<String?>(null) }
     var trilhaOpen by rememberSaveable { mutableStateOf(false) }
-    // Progresso da Trilha de Blindagem (ids das lições concluídas), compartilhado
-    // entre a TrilhaModal e a PerfilScreen. List<String> é serializável p/ rotação.
     var trilhaDone by rememberSaveable { mutableStateOf(listOf("s1", "s2", "s3", "d1", "d2", "d3")) }
     var editOpen by rememberSaveable { mutableStateOf(false) }
     var offerOpen by rememberSaveable { mutableStateOf(false) }

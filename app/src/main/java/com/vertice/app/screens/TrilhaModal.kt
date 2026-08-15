@@ -43,7 +43,6 @@ import com.vertice.app.ui.theme.LocalColors
 fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Set<String>) -> Unit) {
     val C = LocalColors
     var done by rememberSaveable(initialDone) { mutableStateOf(initialDone) }
-    // Salvamos só o id da lição ativa (serializável); resolvemos o objeto abaixo.
     var activeLessonId by rememberSaveable { mutableStateOf<String?>(null) }
     var cardIdx by rememberSaveable { mutableIntStateOf(0) }
     val total = TRILHA.sumOf { it.lessons.size }
@@ -117,7 +116,6 @@ fun TrilhaModal(onClose: () -> Unit, initialDone: Set<String>, onDoneChange: (Se
             Text("Sequência de 3 dias estudando", color = C.white, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
 
-        // Barra de progresso estilo Duolingo
         Row(
             modifier = Modifier
                 .fillMaxWidth()

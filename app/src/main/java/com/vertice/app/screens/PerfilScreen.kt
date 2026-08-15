@@ -38,7 +38,6 @@ import com.vertice.app.ui.theme.LocalColors
 fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, openTrilha: () -> Unit) {
     val C = LocalColors
 
-    // Progresso real da Trilha: módulos concluídos = todos os seus ids em "done".
     val modMapped = TRILHA.map { m ->
         Triple(m, m.title, m.lessons.all { it.id in done })
     }
@@ -86,7 +85,6 @@ fun PerfilScreen(done: Set<String>, openEdit: () -> Unit, openPro: () -> Unit, o
             }
         }
 
-        // Botão Vértice Pro em destaque (cartão quadrado/arredondado, clicável)
         Box(
             modifier = Modifier
                 .fillMaxWidth()

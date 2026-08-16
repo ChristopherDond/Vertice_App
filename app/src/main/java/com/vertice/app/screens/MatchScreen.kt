@@ -42,7 +42,7 @@ import com.vertice.app.components.FilterBottomSheet
 import com.vertice.app.components.Pill
 import com.vertice.app.components.StatusBar
 import com.vertice.app.components.clickableRipple
-import com.vertice.app.data.FREELANCERS
+import com.vertice.app.data.FREELANCERS_SORTED
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 
@@ -78,7 +78,7 @@ fun MatchScreen(
     }
 
     val filtered = remember(violetaOn, search, activeChips) {
-        FREELANCERS.filter { f ->
+        FREELANCERS_SORTED.filter { f ->
             if (violetaOn && f.gender == "m") return@filter false
             if (activeChips.isNotEmpty()) {
                 val areas = activeChips.flatMap { CHIP_AREAS[it] ?: emptyList() }

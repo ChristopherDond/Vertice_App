@@ -25,10 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.ui.theme.LocalVerticeTheme
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun Avatar(initials: String, size: Int = 46, bg: Color = LocalColors.purple, fontSize: Int = 15) {
@@ -56,24 +53,14 @@ fun Avatar(
             .background(bg, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        // Try to load photo from URL, then drawable resource, fallback to initials
-                val painter = when {
-                    freelancer.photoUrl != null -> rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(freelancer.photoUrl)
-                            .build()
-                    )
-                    freelancer.photoRes != null -> painterResource(freelancer.photoRes!!)
-                    else -> null
-                }
-        
-        if (painter != null) {
+        val drawableRes = freelancer.photoRes
+        if (drawableRes != null) {
             androidx.compose.foundation.Image(
-                            painter = painter,
-                            contentDescription = freelancer.name,
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                            modifier = Modifier.size(size.dp).clip(CircleShape),
-                        )
+                painter = painterResource(drawableRes),
+                contentDescription = freelancer.name,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.size(size.dp).clip(CircleShape),
+            )
         } else {
             Text(text = freelancer.initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontSize.sp)
         }

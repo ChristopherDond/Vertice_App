@@ -18,14 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.ui.theme.LocalVerticeTheme
-import coil3.compose.rememberImagePainter
-import coil3.request.ImageRequest
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 
@@ -56,23 +57,23 @@ fun Avatar(
         contentAlignment = Alignment.Center,
     ) {
         // Try to load photo from URL, then drawable resource, fallback to initials
-        val painter = when {
-            freelancer.photoUrl != null -> rememberImagePainter(
-                ImageRequest.Builder(LocalContext.current)
-                    .data(freelancer.photoUrl)
-                    .build()
-            )
-            freelancer.photoRes != null -> painterResource(freelancer.photoRes!!)
-            else -> null
-        }
+                val painter = when {
+                    freelancer.photoUrl != null -> rememberAsyncImagePainter(
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(freelancer.photoUrl)
+                            .build()
+                    )
+                    freelancer.photoRes != null -> painterResource(freelancer.photoRes!!)
+                    else -> null
+                }
         
         if (painter != null) {
             androidx.compose.foundation.Image(
-                painter = painter,
-                contentDescription = freelancer.name,
-                contentScale = androidx.compose.foundation.layout.ContentScale.Crop,
-                modifier = Modifier.size(size.dp).clip(CircleShape),
-            )
+                            painter = painter,
+                            contentDescription = freelancer.name,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.size(size.dp).clip(CircleShape),
+                        )
         } else {
             Text(text = freelancer.initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontSize.sp)
         }

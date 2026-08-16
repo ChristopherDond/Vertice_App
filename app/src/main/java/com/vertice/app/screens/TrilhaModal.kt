@@ -37,18 +37,14 @@ import com.vertice.app.components.clickableRipple
 import com.vertice.app.data.Lesson
 import com.vertice.app.data.TModule
 import com.vertice.app.data.TRILHA
-import com.vertice.app.nav.SharedElementManager
 import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
-import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 @Composable
 fun TrilhaModal(
     onClose: () -> Unit,
     initialDone: Set<String>,
     onDoneChange: (Set<String>) -> Unit,
-    sharedTransition: SharedTransitionApi,
-    sharedElementManager: SharedElementManager,
 ) {
     val C = LocalColors
     var done by rememberSaveable(initialDone) { mutableStateOf(initialDone) }

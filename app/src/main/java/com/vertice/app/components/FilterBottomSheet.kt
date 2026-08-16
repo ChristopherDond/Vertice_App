@@ -2,12 +2,15 @@ package com.vertice.app.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.components.clickableRipple
 import com.vertice.app.ui.theme.LocalColors
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilledButton
 import androidx.compose.material3.ButtonDefaults
 
 private val CHIPS = listOf("Todos", "Construção", "Comércio", "Serviços", "Beleza", "Alimentação")
@@ -84,23 +86,27 @@ fun FilterBottomSheet(
             
             // Search
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(C.inputBg, RoundedCornerShape(13.dp))
-                    .border(1.dp, C.border, RoundedCornerShape(13.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-            ) {
-                androidx.compose.material.icons.filled.Search
-                if (searchText.isEmpty()) Text("Buscar habilidade ou área...", color = C.muted, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                androidx.compose.foundation.text.BasicTextField(
-                    value = searchText,
-                    onValueChange = onSearchChange,
-                    textStyle = androidx.compose.ui.text.TextStyle(color = C.white, fontSize = 14.sp),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(C.purple),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                )
-            }
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(C.inputBg, RoundedCornerShape(13.dp))
+                                .border(1.dp, C.border, RoundedCornerShape(13.dp))
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Icon(Icons.Filled.Search, null, tint = C.muted, modifier = Modifier.size(16.dp))
+                                Box(modifier = Modifier.weight(1f)) {
+                                    if (searchText.isEmpty()) Text("Buscar habilidade ou área...", color = C.muted, fontSize = 14.sp)
+                                    androidx.compose.foundation.text.BasicTextField(
+                                        value = searchText,
+                                        onValueChange = onSearchChange,
+                                        textStyle = androidx.compose.ui.text.TextStyle(color = C.white, fontSize = 14.sp),
+                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(C.purple),
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                            }
+                        }
             
             // Violeta toggle
             Row(
@@ -183,38 +189,38 @@ fun FilterBottomSheet(
             }
             
             // Clear filters button
-            if (activeChips.isNotEmpty() || violetaOn || searchText.isNotEmpty()) {
-                FilledButton(
-                    onClick = {
-                        onChipsChange(emptyList())
-                        onVioletaChange(false)
-                        onSearchChange("")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.filledButtonColors(
-                        containerColor = C.card,
-                        contentColor = C.pink,
-                    ),
-                ) {
-                    Text("Limpar todos os filtros", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                }
-                Spacer(Modifier.height(8.dp))
-            }
+                        if (activeChips.isNotEmpty() || violetaOn || searchText.isNotEmpty()) {
+                            Button(
+                                onClick = {
+                                    onChipsChange(emptyList())
+                                    onVioletaChange(false)
+                                    onSearchChange("")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = C.card,
+                                    contentColor = C.pink,
+                                ),
+                            ) {
+                                Text("Limpar todos os filtros", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+                            Spacer(Modifier.height(8.dp))
+                        }
             
-            // Apply button
-            FilledButton(
-                onClick = {
-                    onApply()
-                    onClose()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.filledButtonColors(
-                    containerColor = C.purple,
-                    contentColor = Color.White,
-                ),
-            ) {
-                Text("Aplicar filtros", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
+                        // Apply button
+                        Button(
+                            onClick = {
+                                onApply()
+                                onClose()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = C.purple,
+                                contentColor = Color.White,
+                            ),
+                        ) {
+                            Text("Aplicar filtros", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
             
             Spacer(Modifier.height(24.dp))
         }

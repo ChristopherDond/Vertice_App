@@ -33,10 +33,8 @@ import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
-import com.vertice.app.nav.SharedElementManager
 import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
-import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 private val CATEGORY_OPTS = listOf(
     "Selecionar categoria...",
@@ -51,8 +49,6 @@ private val AVAIL_OPTS = listOf(
 @Composable
 fun OfferModal(
     onClose: () -> Unit,
-    sharedTransition: SharedTransitionApi,
-    sharedElementManager: SharedElementManager,
 ) {
     val C = LocalColors
     var category by rememberSaveable { mutableStateOf(CATEGORY_OPTS[0]) }

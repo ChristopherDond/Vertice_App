@@ -36,10 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableRipple
-import com.vertice.app.nav.SharedElementManager
 import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
-import androidx.compose.animation.sharedelement.SharedTransitionApi
 
 private data class ProBenefit(val icon: ImageVector, val label: String, val desc: String)
 private val PRO_BENEFITS = listOf(
@@ -54,8 +52,6 @@ private val PRO_BENEFITS = listOf(
 @Composable
 fun ProModal(
     onClose: () -> Unit,
-    sharedTransition: SharedTransitionApi,
-    sharedElementManager: SharedElementManager,
 ) {
     val C = LocalColors
     var subscribed by rememberSaveable { mutableStateOf(false) }

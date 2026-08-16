@@ -2,22 +2,17 @@ package com.vertice.app.components
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Context
-import android.view.View
-import android.widget.DatePicker
-import android.widget.TimePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.KeyboardType
-import androidx.compose.foundation.text.VisualTransformation
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Icon
@@ -35,11 +30,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,59 +43,69 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicReference
 
-// ============================================================================
-// VisualTransformations for masks
-// ============================================================================
+private fun separatorOffsetMapping(separatorPositions: List<Int>): OffsetMapping = object : OffsetMapping {
+    override fun originalToTransformed(offset: Int): Int {
+        var result = offset
+        separatorPositions.forEach { pos ->
+            if (offset > pos) result++
+        }
+        return result
+    }
+
+    override fun transformedToOriginal(offset: Int): Int {
+        var result = offset
+        separatorPositions.forEach { pos ->
+            if (offset > pos + 1) result--
+        }
+        return result
+    }
+}
 
 class DateMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TextFieldValue {
-        val digitsOnly = text.text.filter { it.isDigit() }
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digitsOnly = text.text.filter { it.isDigit() }.take(8)
         val formatted = StringBuilder()
         for (i in digitsOnly.indices) {
             if (i == 2 || i == 4) formatted.append('/')
             formatted.append(digitsOnly[i])
         }
-        return TextFieldValue(
-            text = AnnotatedString(formatted.toString()),
-            selection = androidx.compose.ui.text.TextRange(formatted.length),
-            composition = text.composition
+        return TransformedText(
+            AnnotatedString(formatted.toString()),
+            separatorOffsetMapping(listOf(2, 4)),
         )
     }
 }
 
 class TimeMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TextFieldValue {
-        val digitsOnly = text.text.filter { it.isDigit() }
+    override fun filter(text: AnnotatedString): TransformedText {
+        val digitsOnly = text.text.filter { it.isDigit() }.take(4)
         val formatted = StringBuilder()
         for (i in digitsOnly.indices) {
             if (i == 2) formatted.append(':')
             formatted.append(digitsOnly[i])
         }
-        return TextFieldValue(
-            text = AnnotatedString(formatted.toString()),
-            selection = androidx.compose.ui.text.TextRange(formatted.length),
-            composition = text.composition
+        return TransformedText(
+            AnnotatedString(formatted.toString()),
+            separatorOffsetMapping(listOf(2)),
         )
     }
 }
 
 class CurrencyMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TextFieldValue {
+    override fun filter(text: AnnotatedString): TransformedText {
         val digitsOnly = text.text.filter { it.isDigit() }
         if (digitsOnly.isEmpty()) {
-            return TextFieldValue(text = AnnotatedString(""))
+            return TransformedText(AnnotatedString(""), separatorOffsetMapping(emptyList()))
         }
         val cents = digitsOnly.toLong()
         val formatter = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 2
         val formatted = formatter.format(cents / 100.0)
-        return TextFieldValue(
-            text = AnnotatedString(formatted),
-            selection = androidx.compose.ui.text.TextRange(formatted.length),
-            composition = text.composition
+        return TransformedText(
+            AnnotatedString(formatted),
+            separatorOffsetMapping(emptyList()),
         )
     }
 
@@ -111,10 +116,6 @@ class CurrencyMaskTransformation : VisualTransformation {
         }
     }
 }
-
-// ============================================================================
-// ValidatedTextField - Base component with validation state
-// ============================================================================
 
 @Composable
 fun ValidatedTextField(
@@ -132,22 +133,15 @@ fun ValidatedTextField(
     onClick: (() -> Unit)? = null,
 ) {
     val C = LocalColors
-    val context = LocalContext.current
-    var showError by remember { mutableStateOf(isError && value.isNotBlank()) }
 
-    val fieldColors = if (isError) {
-        Pair(C.red.copy(alpha = 0.15f), C.red)
-    } else {
-        Pair(C.inputBg, C.border)
-    }
+    val colors = if (isError) Pair(C.pink.copy(alpha = 0.15f), C.pink) else Pair(C.inputBg, C.border)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(fieldColors.first, RoundedCornerShape(13.dp))
-            .border(1.dp, fieldColors.second, RoundedCornerShape(13.dp))
+            .background(colors.first, RoundedCornerShape(13.dp))
+            .border(1.dp, colors.second, RoundedCornerShape(13.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
-        contentAlignment = Alignment.CenterVertically,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -155,48 +149,43 @@ fun ValidatedTextField(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             icon?.invoke()
-            
-            Box(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
             ) {
                 if (value.isEmpty() && placeholder.isNotBlank()) {
                     Text(placeholder, color = C.muted, fontSize = 14.sp)
                 }
-                BasicTextField(
-                    value = value,
-                    onValueChange = { newValue ->
-                        onValueChange(newValue)
-                        showError = isError && newValue.isNotBlank()
-                    },
-                    textStyle = TextStyle(color = C.white, fontSize = 14.sp),
-                    cursorBrush = SolidColor(C.purple),
-                    singleLine = singleLine,
-                    keyboardOptions = keyboardOptions,
-                    visualTransformation = visualTransformation,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                val vTransformation = visualTransformation ?: VisualTransformation.None
+                                BasicTextField(
+                                    value = value,
+                                    onValueChange = onValueChange,
+                                    textStyle = TextStyle(color = C.white, fontSize = 14.sp),
+                                    cursorBrush = SolidColor(C.purple),
+                                    singleLine = singleLine,
+                                    keyboardOptions = keyboardOptions,
+                                    visualTransformation = vTransformation,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
             }
-            
+
             if (isError && value.isNotBlank()) {
-                Icon(Icons.Filled.Error, null, tint = C.red, modifier = Modifier.size(16.dp))
+                Icon(Icons.Filled.Error, null, tint = C.pink, modifier = Modifier.size(16.dp))
             } else if (!isError && value.isNotBlank()) {
                 Icon(Icons.Filled.CheckCircle, null, tint = C.green, modifier = Modifier.size(16.dp))
             }
         }
     }
-    
-    if (showError && errorMessage != null) {
-        Text(errorMessage, color = C.red, fontSize = 11.sp, modifier = Modifier
+
+    if (isError && errorMessage != null) {
+        Text(errorMessage, color = C.pink, fontSize = 11.sp, modifier = Modifier
             .fillMaxWidth()
             .padding(start = 14.dp, top = 4.dp))
     }
 }
-
-// ============================================================================
-// DateInput - DD/MM/YYYY mask with DatePickerDialog
-// ============================================================================
 
 @Composable
 fun DateInput(
@@ -204,48 +193,41 @@ fun DateInput(
     onValueChange: (String) -> Unit,
     label: String = "Data",
     placeholder: String = "DD/MM/AAAA",
-    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.CalendarToday, null, tint = LocalColors.current.muted, modifier = Modifier.size(16.dp)) },
+    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.CalendarToday, null, tint = Color.Gray, modifier = Modifier.size(16.dp)) },
     modifier: Modifier = Modifier,
     isRequired: Boolean = true,
     minDate: Calendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) },
     onDatePicked: ((Calendar) -> Unit)? = null,
 ) {
-    val C = LocalColors
     val context = LocalContext.current
-    var showPicker by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var internalValue by rememberSaveable { mutableStateOf(value) }
-    
-    // Sync with external value
+
     LaunchedEffect(value) {
         internalValue = value
     }
-    
+
     val isError = isRequired && internalValue.isNotBlank() && !isValidDate(internalValue)
-    if (isError) {
-        errorMessage = "Data inválida. Use DD/MM/AAAA e data futura"
-    } else if (internalValue.isBlank() && isRequired) {
-        errorMessage = "Data é obrigatória"
-    } else {
-        errorMessage = null
+    val errorMessage = when {
+        isError -> "Data inválida. Use DD/MM/AAAA e data futura"
+        internalValue.isBlank() && isRequired -> "Data é obrigatória"
+        else -> null
     }
-    
+
     val onClick = {
         val calendar = Calendar.getInstance()
         if (internalValue.isNotBlank()) {
             try {
                 val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 sdf.isLenient = false
-                val date = sdf.parse(internalValue)
-                calendar.time = date
+                calendar.time = sdf.parse(internalValue)!!
             } catch (e: Exception) {
                 calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
         } else {
             calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
-        
-        val dpd = DatePickerDialog(
+
+        DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 val picked = Calendar.getInstance().apply {
@@ -260,11 +242,11 @@ fun DateInput(
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        dpd.datePicker.minDate = minDate.timeInMillis
-        dpd.show()
+        ).apply {
+            datePicker.minDate = minDate.timeInMillis
+        }.show()
     }
-    
+
     ValidatedTextField(
         value = internalValue,
         onValueChange = { internalValue = it; onValueChange(it) },
@@ -299,30 +281,25 @@ internal fun isValidDate(dateStr: String): Boolean {
     }
 }
 
-// ============================================================================
-// TimeInput - HH:mm mask with TimePickerDialog
-// ============================================================================
-
 @Composable
 fun TimeInput(
     value: String,
     onValueChange: (String) -> Unit,
     label: String = "Horário",
     placeholder: String = "HH:mm",
-    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.AccessTime, null, tint = LocalColors.current.muted, modifier = Modifier.size(16.dp)) },
+    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.AccessTime, null, tint = Color.Gray, modifier = Modifier.size(16.dp)) },
     modifier: Modifier = Modifier,
 ) {
-    val C = LocalColors
     val context = LocalContext.current
     var internalValue by rememberSaveable { mutableStateOf(value) }
-    
+
     LaunchedEffect(value) {
         internalValue = value
     }
-    
+
     val isError = internalValue.isNotBlank() && !isValidTime(internalValue)
     val errorMessage = if (isError) "Horário inválido. Use HH:mm" else null
-    
+
     val onClick = {
         val calendar = Calendar.getInstance()
         if (internalValue.isNotBlank()) {
@@ -333,11 +310,10 @@ fun TimeInput(
                     calendar.set(Calendar.MINUTE, parts[1].toInt())
                 }
             } catch (e: Exception) {
-                // Use current time
             }
         }
-        
-        val tpd = TimePickerDialog(
+
+        TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
                 val formatted = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
@@ -346,11 +322,10 @@ fun TimeInput(
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
-            true // 24 hour format
-        )
-        tpd.show()
+            true
+        ).show()
     }
-    
+
     ValidatedTextField(
         value = internalValue,
         onValueChange = { internalValue = it; onValueChange(it) },
@@ -378,31 +353,26 @@ internal fun isValidTime(timeStr: String): Boolean {
     }
 }
 
-// ============================================================================
-// CurrencyInput - Brazilian R$ format, numeric only
-// ============================================================================
-
 @Composable
 fun CurrencyInput(
     value: String,
     onValueChange: (String) -> Unit,
     label: String = "Orçamento (R$)",
     placeholder: String = "Ex: 300",
-    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.AttachMoney, null, tint = LocalColors.current.muted, modifier = Modifier.size(16.dp)) },
+    icon: (@Composable () -> Unit)? = { Icon(Icons.Filled.AttachMoney, null, tint = Color.Gray, modifier = Modifier.size(16.dp)) },
     modifier: Modifier = Modifier,
     isRequired: Boolean = false,
 ) {
-    val C = LocalColors
     var internalValue by rememberSaveable { mutableStateOf(value) }
-    
+
     LaunchedEffect(value) {
         internalValue = value
     }
-    
+
     val cents = CurrencyMaskTransformation.parseToCents(internalValue)
     val isError = isRequired && cents == 0L && internalValue.isNotBlank()
     val errorMessage = if (isError) "Informe um valor maior que zero" else null
-    
+
     ValidatedTextField(
         value = internalValue,
         onValueChange = { internalValue = it; onValueChange(it) },

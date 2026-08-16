@@ -1,5 +1,7 @@
 package com.vertice.app.components
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,21 +14,18 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialDatePicker
-import androidx.compose.material3.MaterialTimePicker
-import androidx.compose.material3.TimePickerState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,9 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.ui.theme.LocalColors
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 @Composable
 fun FLabel(text: String) {
@@ -141,7 +138,6 @@ fun SInput(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DateInput(
     value: String,
@@ -151,16 +147,30 @@ fun DateInput(
     icon: (@Composable () -> Unit)? = null,
 ) {
     val C = LocalColors
-    var showPicker by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    val formattedValue = remember(value) { value }
-    
-    val handleDateSelected = { calendar: Calendar ->
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        val selectedDate = sdf.format(calendar.time)
-        onChange(selectedDate)
-        showPicker = false
+    val handleClick = {
+        val calendar = Calendar.getInstance()
+        if (value.isNotBlank()) {
+            try {
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                sdf.isLenient = false
+                calendar.time = sdf.parse(value)!!
+            } catch (e: Exception) {
+                // keep today
+            }
+        }
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val picked = Calendar.getInstance().apply { set(year, month, dayOfMonth) }
+                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                onChange(sdf.format(picked.time))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -174,36 +184,29 @@ fun DateInput(
                     shape = RoundedCornerShape(13.dp)
                 )
                 .padding(horizontal = 14.dp, vertical = 12.dp)
-                .clickableNoRipple { showPicker = true },
+                .clickableNoRipple { handleClick() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             icon?.invoke()
             Box(modifier = Modifier.weight(1f)) {
-                if (formattedValue.isEmpty()) {
+                if (value.isEmpty()) {
                     Text(placeholder, color = C.muted, fontSize = 14.sp)
                 }
-                Text(formattedValue, color = C.white, fontSize = 14.sp)
+                Text(value, color = C.white, fontSize = 14.sp)
             }
             Icon(Icons.Filled.CalendarToday, contentDescription = null, tint = C.muted, modifier = Modifier.size(16.dp))
         }
-        
+
         if (error != null) {
             Text(error, color = C.pink, fontSize = 11.sp, modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp, start = 14.dp)
             )
         }
-        
-        MaterialDatePicker(
-            onDateSelected = handleDateSelected,
-            onDismissRequest = { showPicker = false },
-            state = remember { androidx.compose.material3.MaterialDatePickerState() }
-        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimeInput(
     value: String,
@@ -213,15 +216,31 @@ fun TimeInput(
     icon: (@Composable () -> Unit)? = null,
 ) {
     val C = LocalColors
-    var showPicker by remember { mutableStateOf(false) }
-    val timePickerState = remember { TimePickerState() }
+    val context = LocalContext.current
 
-    val handleTimeSelected = { time: Long ->
-        val hours = TimeUnit.MILLISECONDS.toHours(time)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(time) % 60
-        val formatted = String.format(Locale.getDefault(), "%02dh%02d", hours, minutes)
-        onChange(formatted)
-        showPicker = false
+    val handleClick = {
+        val calendar = Calendar.getInstance()
+        if (value.isNotBlank()) {
+            try {
+                val clean = value.replace("h", ":")
+                val parts = clean.split(":")
+                if (parts.size == 2) {
+                    calendar.set(Calendar.HOUR_OF_DAY, parts[0].toInt())
+                    calendar.set(Calendar.MINUTE, parts[1].toInt())
+                }
+            } catch (e: Exception) {
+                // keep current time
+            }
+        }
+        TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                onChange(String.format(Locale.getDefault(), "%02dh%02d", hourOfDay, minute))
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -235,7 +254,7 @@ fun TimeInput(
                     shape = RoundedCornerShape(13.dp)
                 )
                 .padding(horizontal = 14.dp, vertical = 12.dp)
-                .clickableNoRipple { showPicker = true },
+                .clickableNoRipple { handleClick() },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -248,19 +267,13 @@ fun TimeInput(
             }
             Icon(Icons.Filled.AccessTime, contentDescription = null, tint = C.muted, modifier = Modifier.size(16.dp))
         }
-        
+
         if (error != null) {
             Text(error, color = C.pink, fontSize = 11.sp, modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp, start = 14.dp)
             )
         }
-        
-        MaterialTimePicker(
-            state = timePickerState,
-            onTimeSelected = handleTimeSelected,
-            onDismissRequest = { showPicker = false },
-        )
     }
 }
 
@@ -273,48 +286,50 @@ fun CurrencyInput(
     icon: (@Composable () -> Unit)? = null,
 ) {
     val C = LocalColors
-    
-    val formattedValue = remember(value) { value }
     val hasError = error != null
-    
+
     val handleValueChange = { newValue: String ->
         val digitsOnly = newValue.filter { it.isDigit() }
         onChange(digitsOnly)
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(C.inputBg, RoundedCornerShape(13.dp))
-            .border(
-                width = if (hasError) 1.5.dp else 1.dp,
-                color = if (hasError) C.pink else C.border,
-                shape = RoundedCornerShape(13.dp)
-            )
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        icon?.invoke()
-        Box(modifier = Modifier.weight(1f)) {
-            if (formattedValue.isEmpty()) {
-                Text(placeholder, color = C.muted, fontSize = 14.sp)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(C.inputBg, RoundedCornerShape(13.dp))
+                .border(
+                    width = if (hasError) 1.5.dp else 1.dp,
+                    color = if (hasError) C.pink else C.border,
+                    shape = RoundedCornerShape(13.dp)
+                )
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            icon?.invoke()
+            Box(modifier = Modifier.weight(1f)) {
+                if (value.isEmpty()) {
+                    Text(placeholder, color = C.muted, fontSize = 14.sp)
+                }
+                BasicTextField(
+                    value = value,
+                    onValueChange = handleValueChange,
+                    textStyle = TextStyle(color = C.white, fontSize = 14.sp),
+                    cursorBrush = SolidColor(C.purple),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                )
             }
-            BasicTextField(
-                value = formattedValue,
-                onValueChange = handleValueChange,
-                textStyle = TextStyle(color = C.white, fontSize = 14.sp),
-                cursorBrush = SolidColor(C.purple),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = androidx.compose.ui.text.input.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+            Icon(Icons.Filled.AttachMoney, contentDescription = null, tint = C.muted, modifier = Modifier.size(16.dp))
+        }
+
+        if (hasError) {
+            Text(error ?: "", color = C.pink, fontSize = 11.sp, modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 6.dp, start = 14.dp)
             )
         }
-        Icon(Icons.Filled.AttachMoney, contentDescription = null, tint = C.muted, modifier = Modifier.size(16.dp))
-    }
-    
-    if (hasError) {
-        // Error text would need to be rendered in a column wrapper
     }
 }
-

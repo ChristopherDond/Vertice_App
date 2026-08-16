@@ -62,8 +62,8 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
     var urgent by rememberSaveable { mutableStateOf(false) }
     var sent by rememberSaveable { mutableStateOf(false) }
 
-    val dateValid = date.length == 10 && isValidDate(date)
-    val timeValid = hour.isBlank() || (hour.length == 5 && isValidTime(hour))
+    val dateValid = date.length == 10 && com.vertice.app.components.isValidDate(date)
+        val timeValid = hour.isBlank() || (hour.length == 5 && com.vertice.app.components.isValidTime(hour))
     val priceValid = price.isBlank() || CurrencyMaskTransformation.parseToCents(price) > 0
     val valid = service != SVC_OPTS[0] && dateValid && timeValid && priceValid && desc.length > 5
 
@@ -303,44 +303,13 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text(
-                if (valid) "${f.name} receberá sua solicitação por notificação" else "Preencha os campos obrigatórios (*)",
-                color = C.muted,
-                fontSize = 11.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            )
-        }
-    }
-}
-
-private fun isValidDate(dateStr: String): Boolean {
-    if (dateStr.length != 10) return false
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    sdf.isLenient = false
-    return try {
-        val date = sdf.parse(dateStr)
-        val cal = Calendar.getInstance()
-        cal.time = date!!
-        val today = Calendar.getInstance()
-        today.set(Calendar.HOUR_OF_DAY, 0)
-        today.set(Calendar.MINUTE, 0)
-        today.set(Calendar.SECOND, 0)
-        today.set(Calendar.MILLISECOND, 0)
-        cal.timeInMillis >= today.timeInMillis
-    } catch (e: Exception) {
-        false
-    }
-}
-
-private fun isValidTime(timeStr: String): Boolean {
-    if (timeStr.length != 5) return false
-    return try {
-        val parts = timeStr.split(":")
-        val h = parts[0].toInt()
-        val m = parts[1].toInt()
-        h in 0..23 && m in 0..59
-    } catch (e: Exception) {
-        false
-    }
-}
+                        Text(
+                            if (valid) "${f.name} receberá sua solicitação por notificação" else "Preencha os campos obrigatórios (*)",
+                            color = C.muted,
+                            fontSize = 11.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        )
+                    }
+                }
+            }

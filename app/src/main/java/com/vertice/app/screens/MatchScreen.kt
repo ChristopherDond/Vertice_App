@@ -60,6 +60,7 @@ private val CHIP_AREAS = mapOf(
 @Composable
 fun MatchScreen(
     violetaOn: Boolean,
+    setVioletaOn: (Boolean) -> Unit,
     onContact: (Freelancer) -> Unit,
     onProfile: (Freelancer) -> Unit,
 ) {
@@ -103,7 +104,7 @@ fun MatchScreen(
                 activeChips = activeChips,
                 onChipsChange = { activeChips = it },
                 violetaOn = violetaOn,
-                onVioletaChange = { },
+                                onVioletaChange = setVioletaOn,
                 searchText = search,
                 onSearchChange = { search = it },
                 onClose = { showFilters = false },

@@ -66,10 +66,11 @@ fun VerticeApp() {
                         openOffer = { offerOpen = true },
                     )
                     Screen.Match -> MatchScreen(
-                        violetaOn = violetaOn,
-                        onContact = { contactName = it.name },
-                        onProfile = { profileName = it.name },
-                    )
+                                            violetaOn = violetaOn,
+                                            setVioletaOn = { violetaOn = it },
+                                            onContact = { contactName = it.name },
+                                            onProfile = { profileName = it.name },
+                                        )
                     Screen.Violeta -> VioletaScreen(on = violetaOn, setOn = { violetaOn = it })
                     Screen.Perfil -> PerfilScreen(
                         done = trilhaDone.toSet(),

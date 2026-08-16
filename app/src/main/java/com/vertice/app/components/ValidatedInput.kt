@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,68 +43,51 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-private fun separatorOffsetMapping(separatorPositions: List<Int>): OffsetMapping = object : OffsetMapping {
-    override fun originalToTransformed(offset: Int): Int {
-        var result = offset
-        separatorPositions.forEach { pos ->
-            if (offset > pos) result++
-        }
-        return result
-    }
+fun digitsOnly(s: String): String = s.filter { it.isDigit() }
 
-    override fun transformedToOriginal(offset: Int): Int {
-        var result = offset
-        separatorPositions.forEach { pos ->
-            if (offset > pos + 1) result--
-        }
-        return result
+fun formatDateMask(digits: String): String {
+    val d = digits.filter { it.isDigit() }.take(8)
+    val sb = StringBuilder()
+    for (i in d.indices) {
+        if (i == 2 || i == 4) sb.append('/')
+        sb.append(d[i])
     }
+    return sb.toString()
+}
+
+fun formatTimeMask(digits: String): String {
+    val d = digits.filter { it.isDigit() }.take(4)
+    val sb = StringBuilder()
+    for (i in d.indices) {
+        if (i == 2) sb.append(':')
+        sb.append(d[i])
+    }
+    return sb.toString()
 }
 
 class DateMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val digitsOnly = text.text.filter { it.isDigit() }.take(8)
-        val formatted = StringBuilder()
-        for (i in digitsOnly.indices) {
-            if (i == 2 || i == 4) formatted.append('/')
-            formatted.append(digitsOnly[i])
-        }
-        return TransformedText(
-            AnnotatedString(formatted.toString()),
-            separatorOffsetMapping(listOf(2, 4)),
-        )
-    }
+    override fun filter(text: AnnotatedString): TransformedText =
+        TransformedText(AnnotatedString(formatDateMask(text.text)), OffsetMapping.Identity)
 }
 
 class TimeMaskTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val digitsOnly = text.text.filter { it.isDigit() }.take(4)
-        val formatted = StringBuilder()
-        for (i in digitsOnly.indices) {
-            if (i == 2) formatted.append(':')
-            formatted.append(digitsOnly[i])
-        }
-        return TransformedText(
-            AnnotatedString(formatted.toString()),
-            separatorOffsetMapping(listOf(2)),
-        )
-    }
+    override fun filter(text: AnnotatedString): TransformedText =
+        TransformedText(AnnotatedString(formatTimeMask(text.text)), OffsetMapping.Identity)
 }
 
 class CurrencyMaskTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val digitsOnly = text.text.filter { it.isDigit() }
         if (digitsOnly.isEmpty()) {
-            return TransformedText(AnnotatedString(""), separatorOffsetMapping(emptyList()))
+            return TransformedText(AnnotatedString(""), OffsetMapping.Identity)
         }
         val cents = digitsOnly.toLong()
         val formatter = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
         formatter.minimumFractionDigits = 2
         formatter.maximumFractionDigits = 2
-        val formatted = formatter.format(cents / 100.0)
         return TransformedText(
-            AnnotatedString(formatted),
-            separatorOffsetMapping(emptyList()),
+            AnnotatedString(formatter.format(cents / 100.0)),
+            OffsetMapping.Identity,
         )
     }
 
@@ -131,6 +113,7 @@ fun ValidatedTextField(
     errorMessage: String? = null,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    readOnly: Boolean = false,
 ) {
     val C = LocalColors
 
@@ -141,7 +124,8 @@ fun ValidatedTextField(
             .fillMaxWidth()
             .background(colors.first, RoundedCornerShape(13.dp))
             .border(1.dp, colors.second, RoundedCornerShape(13.dp))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -153,23 +137,30 @@ fun ValidatedTextField(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+                    .fillMaxWidth(),
             ) {
-                if (value.isEmpty() && placeholder.isNotBlank()) {
-                    Text(placeholder, color = C.muted, fontSize = 14.sp)
+                if (readOnly) {
+                    if (value.isEmpty()) {
+                        Text(placeholder, color = C.muted, fontSize = 14.sp)
+                    } else {
+                        Text(value, color = C.white, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                } else {
+                    if (value.isEmpty() && placeholder.isNotBlank()) {
+                        Text(placeholder, color = C.muted, fontSize = 14.sp)
+                    }
+                    val vTransformation = visualTransformation ?: VisualTransformation.None
+                    BasicTextField(
+                        value = value,
+                        onValueChange = onValueChange,
+                        textStyle = TextStyle(color = C.white, fontSize = 14.sp),
+                        cursorBrush = SolidColor(C.purple),
+                        singleLine = singleLine,
+                        keyboardOptions = keyboardOptions,
+                        visualTransformation = vTransformation,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
-                val vTransformation = visualTransformation ?: VisualTransformation.None
-                                BasicTextField(
-                                    value = value,
-                                    onValueChange = onValueChange,
-                                    textStyle = TextStyle(color = C.white, fontSize = 14.sp),
-                                    cursorBrush = SolidColor(C.purple),
-                                    singleLine = singleLine,
-                                    keyboardOptions = keyboardOptions,
-                                    visualTransformation = vTransformation,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
             }
 
             if (isError && value.isNotBlank()) {
@@ -206,26 +197,24 @@ fun DateInput(
         internalValue = value
     }
 
-    val isError = isRequired && internalValue.isNotBlank() && !isValidDate(internalValue)
+    val display = formatDateMask(internalValue)
+    val isError = isRequired && display.isNotBlank() && !isValidDate(display)
     val errorMessage = when {
-        isError -> "Data inválida. Use DD/MM/AAAA e data futura"
-        internalValue.isBlank() && isRequired -> "Data é obrigatória"
+        isError -> "Data inválida. Escolha uma data futura"
+        display.isBlank() && isRequired -> "Data é obrigatória"
         else -> null
     }
 
     val onClick = {
         val calendar = Calendar.getInstance()
-        if (internalValue.isNotBlank()) {
-            try {
-                val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                sdf.isLenient = false
-                calendar.time = sdf.parse(internalValue)!!
-            } catch (e: Exception) {
-                calendar.add(Calendar.DAY_OF_YEAR, 1)
-            }
-        } else {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        val parsed = try {
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            sdf.isLenient = false
+            sdf.parse(display)
+        } catch (e: Exception) {
+            null
         }
+        calendar.time = parsed ?: Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }.time
 
         DatePickerDialog(
             context,
@@ -248,17 +237,16 @@ fun DateInput(
     }
 
     ValidatedTextField(
-        value = internalValue,
-        onValueChange = { internalValue = it; onValueChange(it) },
+        value = display,
+        onValueChange = {},
         label = label,
         placeholder = placeholder,
         icon = icon,
-        visualTransformation = DateMaskTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         isError = isError,
         errorMessage = errorMessage,
         modifier = modifier,
         onClick = onClick,
+        readOnly = true,
     )
 }
 
@@ -297,20 +285,19 @@ fun TimeInput(
         internalValue = value
     }
 
-    val isError = internalValue.isNotBlank() && !isValidTime(internalValue)
+    val display = formatTimeMask(internalValue)
+    val isError = display.isNotBlank() && !isValidTime(display)
     val errorMessage = if (isError) "Horário inválido. Use HH:mm" else null
 
     val onClick = {
         val calendar = Calendar.getInstance()
-        if (internalValue.isNotBlank()) {
-            try {
-                val parts = internalValue.split(":")
-                if (parts.size == 2) {
-                    calendar.set(Calendar.HOUR_OF_DAY, parts[0].toInt())
-                    calendar.set(Calendar.MINUTE, parts[1].toInt())
-                }
-            } catch (e: Exception) {
+        try {
+            val parts = display.split(":")
+            if (parts.size == 2 && parts[0].isNotBlank() && parts[1].isNotBlank()) {
+                calendar.set(Calendar.HOUR_OF_DAY, parts[0].toInt())
+                calendar.set(Calendar.MINUTE, parts[1].toInt())
             }
+        } catch (e: Exception) {
         }
 
         TimePickerDialog(
@@ -327,17 +314,16 @@ fun TimeInput(
     }
 
     ValidatedTextField(
-        value = internalValue,
-        onValueChange = { internalValue = it; onValueChange(it) },
+        value = display,
+        onValueChange = {},
         label = label,
         placeholder = placeholder,
         icon = icon,
-        visualTransformation = TimeMaskTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         isError = isError,
         errorMessage = errorMessage,
         modifier = modifier,
         onClick = onClick,
+        readOnly = true,
     )
 }
 
@@ -369,13 +355,19 @@ fun CurrencyInput(
         internalValue = value
     }
 
-    val cents = CurrencyMaskTransformation.parseToCents(internalValue)
+    fun normalized(s: String): String = s.filter { it.isDigit() }.take(14)
+
+    val cents = CurrencyMaskTransformation.parseToCents(normalized(internalValue))
     val isError = isRequired && cents == 0L && internalValue.isNotBlank()
     val errorMessage = if (isError) "Informe um valor maior que zero" else null
 
     ValidatedTextField(
         value = internalValue,
-        onValueChange = { internalValue = it; onValueChange(it) },
+        onValueChange = {
+            val n = normalized(it)
+            internalValue = n
+            onValueChange(n)
+        },
         label = label,
         placeholder = placeholder,
         icon = icon,

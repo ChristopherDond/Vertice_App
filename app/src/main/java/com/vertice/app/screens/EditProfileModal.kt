@@ -95,12 +95,19 @@ fun EditProfileModal(
         ) {
             Box(modifier = Modifier.fillMaxWidth().padding(bottom = 28.dp), contentAlignment = Alignment.Center) {
                 Box {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) { Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp) }
+                                    Box(
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        androidx.compose.foundation.Image(
+                                            painter = androidx.compose.ui.res.painterResource(com.vertice.app.R.drawable.foto_ana),
+                                            contentDescription = "Ana Silva",
+                                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                            modifier = Modifier.size(100.dp).clip(CircleShape),
+                                        )
+                                    }
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)

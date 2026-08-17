@@ -66,12 +66,20 @@ fun PerfilScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     // Profile avatar
-                    Box(
-                        modifier = Modifier
-                            .size(84.dp)
-                            .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) { Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp) }
+                                        Box(
+                                            modifier = Modifier
+                                                .size(120.dp)
+                                                .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape)
+                                                .border(3.dp, C.purple.copy(alpha = 0.35f), CircleShape),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            androidx.compose.foundation.Image(
+                                                painter = androidx.compose.ui.res.painterResource(com.vertice.app.R.drawable.foto_ana),
+                                                contentDescription = "Ana Silva",
+                                                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                                modifier = Modifier.size(120.dp).clip(CircleShape),
+                                            )
+                                        }
 
             Spacer(Modifier.height(12.dp))
             Text("Ana Silva", color = C.white, fontWeight = FontWeight.ExtraBold, fontSize = 22.sp)

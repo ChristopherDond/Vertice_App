@@ -118,14 +118,19 @@ fun HomeScreen(
                     )
                 }
                 // Profile avatar - navigate to Perfil on click
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape)
-                        .clickableRipple { onNavigate(Screen.Perfil) },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("AS", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(Brush.linearGradient(listOf(C.purple, C.pink)), CircleShape)
+                                        .clickableRipple { onNavigate(Screen.Perfil) },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    androidx.compose.foundation.Image(
+                                        painter = androidx.compose.ui.res.painterResource(com.vertice.app.R.drawable.foto_ana),
+                                        contentDescription = "Ana Silva",
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                                    )
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)

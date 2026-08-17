@@ -156,7 +156,7 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Avatar(initials = f.initials, size = 40, bg = f.bg)
+            Avatar(freelancer = f, size = 40, bg = f.bg)
             Column(modifier = Modifier.weight(1f)) {
                 Text(f.name, color = C.white, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Text("${f.role} · ${f.area}", color = C.muted, fontSize = 12.sp)

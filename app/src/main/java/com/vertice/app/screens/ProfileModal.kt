@@ -69,7 +69,7 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Box {
-                        Avatar(initials = f.initials, size = 74, bg = f.bg, fontSize = 24)
+                        Avatar(freelancer = f, size = 96, bg = f.bg, fontSize = 24)
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)

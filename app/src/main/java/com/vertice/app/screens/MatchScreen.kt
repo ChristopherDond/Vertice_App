@@ -3,13 +3,11 @@ package com.vertice.app.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.FilterList
@@ -42,6 +40,8 @@ import com.vertice.app.components.FilterBottomSheet
 import com.vertice.app.components.Pill
 import com.vertice.app.components.StatusBar
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.horizontalMouseScroll
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.data.FREELANCERS_SORTED
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
@@ -116,9 +116,9 @@ fun MatchScreen(
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 90.dp),
+                            .fillMaxSize()
+                            .verticalMouseScroll(rememberScrollState())
+                            .padding(bottom = 90.dp),
         ) {
             StatusBar()
 
@@ -202,9 +202,9 @@ fun MatchScreen(
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 22.dp, vertical = 12.dp),
+                                    .fillMaxWidth()
+                                    .horizontalMouseScroll(rememberScrollState())
+                                    .padding(horizontal = 22.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 CHIPS.forEach { c ->

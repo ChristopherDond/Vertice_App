@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
@@ -33,6 +32,7 @@ import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
 
@@ -138,12 +138,12 @@ fun OfferModal(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp)
-                .padding(top = 20.dp),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 20.dp),
+                ) {
             FLabel("Categoria *")
             SInput(value = category, onChange = { category = it }, options = CATEGORY_OPTS, icon = { Icon(Icons.Filled.Sell, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
             Spacer(Modifier.height(14.dp))

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +39,7 @@ import com.vertice.app.components.TArea
 import com.vertice.app.components.TInput
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.nav.HapticFeedback
 import kotlinx.coroutines.delay
@@ -87,12 +87,12 @@ fun EditProfileModal(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp)
-                .padding(top = 24.dp),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 24.dp),
+                ) {
             Box(modifier = Modifier.fillMaxWidth().padding(bottom = 28.dp), contentAlignment = Alignment.Center) {
                 Box {
                                     Box(

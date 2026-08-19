@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.data.Lesson
 import com.vertice.app.data.TModule
 import com.vertice.app.data.TRILHA
@@ -150,13 +150,13 @@ fun TrilhaModal(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp)
-                .padding(top = 20.dp)
-                .padding(bottom = 100.dp),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 20.dp)
+                        .padding(bottom = 100.dp),
+                ) {
             TRILHA.forEach { mod ->
                 ModuleBlock(
                     mod = mod,
@@ -331,12 +331,12 @@ private fun LessonView(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp)
-                .padding(top = 20.dp),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 20.dp),
+                ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AllInclusive
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.nav.HapticFeedback
 import com.vertice.app.ui.theme.LocalColors
 
@@ -112,10 +112,10 @@ fun ProModal(
 
     Column(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState()),
+                ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
@@ -26,6 +25,7 @@ import com.vertice.app.components.Avatar
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 
@@ -42,11 +42,11 @@ fun ProfileModal(f: Freelancer, onClose: () -> Unit, onContact: () -> Unit) {
 
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 100.dp),
-        ) {
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(bottom = 100.dp),
+                ) {
 
             Box(
                 modifier = Modifier

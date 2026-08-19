@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
 import com.vertice.app.nav.HapticFeedback
@@ -108,12 +108,12 @@ fun VioletaScreen(
             }
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 22.dp)
-                    .padding(top = 16.dp)
-                    .padding(bottom = 88.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .verticalMouseScroll(rememberScrollState())
+                                .padding(horizontal = 22.dp)
+                                .padding(top = 16.dp)
+                                .padding(bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {

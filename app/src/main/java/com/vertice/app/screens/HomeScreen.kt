@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bolt
@@ -36,6 +35,7 @@ import com.vertice.app.components.StatusBar
 import com.vertice.app.components.SLabel
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.nav.Screen
 import com.vertice.app.ui.theme.LocalColors
 import androidx.compose.ui.text.SpanStyle
@@ -54,9 +54,9 @@ fun HomeScreen(
     Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 90.dp),
+                            .fillMaxSize()
+                            .verticalMouseScroll(rememberScrollState())
+                            .padding(bottom = 90.dp),
         ) {
             StatusBar()
 

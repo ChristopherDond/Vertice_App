@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -39,6 +38,7 @@ import com.vertice.app.components.CurrencyMaskTransformation
 import com.vertice.app.components.ValidatedTextField
 import com.vertice.app.components.clickableNoRipple
 import com.vertice.app.components.clickableRipple
+import com.vertice.app.components.verticalMouseScroll
 import com.vertice.app.data.Freelancer
 import com.vertice.app.ui.theme.LocalColors
 import java.text.SimpleDateFormat
@@ -168,12 +168,12 @@ fun ContactModal(f: Freelancer, onClose: () -> Unit) {
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp)
-                .padding(top = 18.dp),
-        ) {
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalMouseScroll(rememberScrollState())
+                        .padding(horizontal = 22.dp)
+                        .padding(top = 18.dp),
+                ) {
             FLabel("Tipo de serviço *")
             SInput(value = service, onChange = { service = it }, options = SVC_OPTS, icon = { Icon(Icons.Filled.Build, null, tint = C.muted, modifier = Modifier.size(16.dp)) })
             Spacer(Modifier.height(14.dp))

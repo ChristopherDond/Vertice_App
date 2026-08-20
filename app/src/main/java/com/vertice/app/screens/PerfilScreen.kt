@@ -163,7 +163,7 @@ fun PerfilScreen(
                 ) {
                     Column {
                         Text("Trilha de Blindagem", color = C.white, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Text("$doneCount de ${modMapped.size} módulos concluídos · $done.size de $totalLessons lições", color = C.muted, fontSize = 12.sp)
+                        Text("$doneCount de ${modMapped.size} módulos concluídos · ${done.size} de $totalLessons lições", color = C.muted, fontSize = 12.sp)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Box(

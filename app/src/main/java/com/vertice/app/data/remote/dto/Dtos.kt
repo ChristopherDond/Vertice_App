@@ -128,6 +128,7 @@ data class FreelancerDto(
     @SerialName("is_pro") val isPro: Boolean = false,
     @SerialName("skills") val skills: List<String> = emptyList(),
     @SerialName("hourly_rate") val hourlyRate: Double = 0.0,
+    @SerialName("distance_km") val distanceKm: Int = 1,
 )
 
 @Serializable

@@ -6,7 +6,6 @@ import com.vertice.app.data.remote.api.LearningApi
 import com.vertice.app.data.remote.api.MatchApi
 import com.vertice.app.data.remote.api.ProfileApi
 import com.vertice.app.data.remote.api.SubscriptionApi
-import com.vertice.app.domain.model.distanceKmOf
 import com.vertice.app.data.remote.dto.AutoRenewRequestDto
 import com.vertice.app.data.remote.dto.BalanceDto
 import com.vertice.app.data.remote.dto.CardDto
@@ -209,7 +208,7 @@ class FakeMatchApi : MatchApi {
                 !proOnly || f.isPro
             }
             .filter { f ->
-                distanceKmOf(f.id) <= maxKm
+                f.distanceKm <= maxKm
             }
             .filter { f ->
                 query.isBlank() ||

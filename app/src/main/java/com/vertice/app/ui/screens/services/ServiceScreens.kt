@@ -251,6 +251,7 @@ fun FilterScreen(
                             value = distance,
                             onValueChange = { distance = it },
                             valueRange = 1f..50f,
+                            steps = 48,
                             colors = androidx.compose.material3.SliderDefaults.colors(
                                 thumbColor = colors.gradientStart,
                                 activeTrackColor = colors.gradientStart,

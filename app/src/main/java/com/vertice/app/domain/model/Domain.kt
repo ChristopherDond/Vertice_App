@@ -103,6 +103,7 @@ data class Freelancer(
     val isPro: Boolean = false,
     val skills: List<String> = emptyList(),
     val hourlyRate: Double = 0.0,
+    val distanceKm: Int = 1,
 ) {
     val firstName: String get() = name.trim().split(" ").firstOrNull().orEmpty()
     val ratingLabel: String get() = String.format("%.1f", rating).replace('.', ',')
@@ -112,13 +113,6 @@ data class Freelancer(
         gender == Gender.FEMALE -> "b"
         else -> "m"
     }
-    val distanceKm: Int get() = distanceKmOf(id)
-}
-
-fun distanceKmOf(id: String): Int {
-    val h = id.hashCode()
-    val abs = if (h == Int.MIN_VALUE) 0 else Math.abs(h)
-    return 1 + abs % 12
 }
 
 data class MatchFilters(

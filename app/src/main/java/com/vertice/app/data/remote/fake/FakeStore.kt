@@ -49,7 +49,7 @@ object FakeStore {
             availability = "Disponível esta semana",
             bio = "Planejamento financeiro pessoal e para pequenos negócios. Certificada CFP. Ajuda a organizar finanças e investir com segurança.",
             gender = "FEMALE", hoursWorked = 1240, jobsDone = 38, isVioleta = true, isPro = true,
-            skills = listOf("Planejamento", "Investimentos", "CFP"), hourlyRate = 180.0,
+            skills = listOf("Planejamento", "Investimentos", "CFP"), hourlyRate = 180.0, distanceKm = 4,
         ),
         FreelancerDto(
             id = "flw_carlos", name = "Carlos Mendes", role = "Pedreiro", area = "Construção Civil",
@@ -57,7 +57,7 @@ object FakeStore {
             availability = "Disponível agora",
             bio = "Reformas residenciais, instalações hidráulicas e acabamento. 12 anos de experiência em SP.",
             gender = "MALE", hoursWorked = 2880, jobsDone = 48, isPro = true,
-            skills = listOf("Reforma", "Hidráulica", "Acabamento"), hourlyRate = 95.0,
+            skills = listOf("Reforma", "Hidráulica", "Acabamento"), hourlyRate = 95.0, distanceKm = 12,
         ),
         FreelancerDto(
             id = "flw_andre", name = "André Pereira", role = "Mestre de Obras", area = "Construção Civil",
@@ -65,7 +65,7 @@ object FakeStore {
             availability = "Disponível amanhã",
             bio = "Gerenciamento completo de obras residenciais e comerciais. Da fundação ao acabamento. 15 anos de canteiro de obras.",
             gender = "MALE", hoursWorked = 3600, jobsDone = 31,
-            skills = listOf("Gestão de obra", "Cronograma", "Orçamento"), hourlyRate = 120.0,
+            skills = listOf("Gestão de obra", "Cronograma", "Orçamento"), hourlyRate = 120.0, distanceKm = 23,
         ),
         FreelancerDto(
             id = "flw_luisa", name = "Luísa Fonseca", role = "Lojista", area = "Comércio & Varejo",
@@ -73,7 +73,7 @@ object FakeStore {
             availability = "Disponível amanhã",
             bio = "Gestão de loja de moda feminina, vitrinismo e controle de estoque.",
             gender = "FEMALE", hoursWorked = 890, jobsDone = 31, isVioleta = true,
-            skills = listOf("Vitrinismo", "Estoque", "Vendas"), hourlyRate = 80.0,
+            skills = listOf("Vitrinismo", "Estoque", "Vendas"), hourlyRate = 80.0, distanceKm = 38,
         ),
         FreelancerDto(
             id = "flw_beatriz", name = "Beatriz Costa", role = "Eletricista", area = "Instalações Elétricas",
@@ -81,7 +81,7 @@ object FakeStore {
             availability = "Disponível agora",
             bio = "Instalações elétricas residenciais e comerciais. Certificada pelo CREA.",
             gender = "FEMALE", hoursWorked = 3100, jobsDone = 62, isVioleta = true, isPro = true,
-            skills = listOf("Elétrica", "CREA", "Manutenção"), hourlyRate = 110.0,
+            skills = listOf("Elétrica", "CREA", "Manutenção"), hourlyRate = 110.0, distanceKm = 7,
         ),
         FreelancerDto(
             id = "flw_regina", name = "Regina Oliveira", role = "Pintora", area = "Pintura Residencial",
@@ -89,7 +89,7 @@ object FakeStore {
             availability = "Disponível esta semana",
             bio = "Pintura interna e externa, texturas e efeitos decorativos. Atuo em toda São Paulo.",
             gender = "FEMALE", hoursWorked = 980, jobsDone = 27, isVioleta = true,
-            skills = listOf("Pintura", "Textura", "Efeitos"), hourlyRate = 85.0,
+            skills = listOf("Pintura", "Textura", "Efeitos"), hourlyRate = 85.0, distanceKm = 31,
         ),
         FreelancerDto(
             id = "flw_joao", name = "João Pereira", role = "Encanador", area = "Serviços Hidráulicos",
@@ -97,7 +97,7 @@ object FakeStore {
             availability = "Disponível amanhã",
             bio = "Reparos e instalações hidráulicas, desentupimentos e manutenção preventiva.",
             gender = "MALE", hoursWorked = 1450, jobsDone = 39,
-            skills = listOf("Hidráulica", "Desentupimento", "Reparos"), hourlyRate = 90.0,
+            skills = listOf("Hidráulica", "Desentupimento", "Reparos"), hourlyRate = 90.0, distanceKm = 16,
         ),
         FreelancerDto(
             id = "flw_marina", name = "Marina Souza", role = "Diarista", area = "Serviços Domésticos",
@@ -105,7 +105,7 @@ object FakeStore {
             availability = "Disponível agora",
             bio = "Limpeza residencial e comercial, organização de ambientes e pós-obra.",
             gender = "FEMALE", hoursWorked = 2100, jobsDone = 84, isVioleta = true,
-            skills = listOf("Limpeza", "Organização", "Pós-obra"), hourlyRate = 70.0,
+            skills = listOf("Limpeza", "Organização", "Pós-obra"), hourlyRate = 70.0, distanceKm = 2,
         ),
         FreelancerDto(
             id = "flw_ana", name = "Ana Silva", role = "Cabeleireira", area = "Beleza",
@@ -113,7 +113,7 @@ object FakeStore {
             availability = "Disponível agora",
             bio = "Especialista em cortes, coloração e tratamentos capilares. Atendimento domiciliar e em salão. 8 anos transformando looks.",
             gender = "FEMALE", hoursWorked = 1980, jobsDone = 56, isVioleta = true,
-            skills = listOf("Corte", "Coloração", "Tratamento"), hourlyRate = 130.0,
+            skills = listOf("Corte", "Coloração", "Tratamento"), hourlyRate = 130.0, distanceKm = 9,
         ),
         FreelancerDto(
             id = "flw_roberto", name = "Roberto Oliveira", role = "Chef Particular", area = "Alimentação",
@@ -121,7 +121,7 @@ object FakeStore {
             availability = "Disponível amanhã",
             bio = "Chef formado em gastronomia, cardápios personalizados para eventos e jantares íntimos. Cozinha brasileira e mediterrânea.",
             gender = "MALE", hoursWorked = 1620, jobsDone = 42,
-            skills = listOf("Eventos", "Menu", "Gastronomia"), hourlyRate = 200.0,
+            skills = listOf("Eventos", "Menu", "Gastronomia"), hourlyRate = 200.0, distanceKm = 27,
         ),
         FreelancerDto(
             id = "flw_diego", name = "Diego Santos", role = "Faxineiro Profissional", area = "Limpeza",
@@ -129,7 +129,7 @@ object FakeStore {
             availability = "Disponível agora",
             bio = "Limpeza pesada, pós-obra, escritórios e residências. Equipamentos profissionais e produtos ecológicos.",
             gender = "MALE", hoursWorked = 2290, jobsDone = 71,
-            skills = listOf("Pesada", "Ecológico", "Escritórios"), hourlyRate = 75.0,
+            skills = listOf("Pesada", "Ecológico", "Escritórios"), hourlyRate = 75.0, distanceKm = 44,
         ),
         FreelancerDto(
             id = "flw_juliana", name = "Juliana Ribeiro", role = "Personal Organizer", area = "Serviços",
@@ -137,7 +137,7 @@ object FakeStore {
             availability = "Disponível esta semana",
             bio = "Organização de residências, mudanças e home offices. Método próprio para otimizar espaços e rotinas. Certificada NAPO.",
             gender = "FEMALE", hoursWorked = 720, jobsDone = 29, isVioleta = true,
-            skills = listOf("Organização", "Mudanças", "NAPO"), hourlyRate = 100.0,
+            skills = listOf("Organização", "Mudanças", "NAPO"), hourlyRate = 100.0, distanceKm = 19,
         ),
     )
 

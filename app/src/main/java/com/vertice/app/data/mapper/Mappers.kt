@@ -61,7 +61,7 @@ fun FreelancerDto.toDomain() = Freelancer(
     },
     avatarUrl = avatarUrl, hoursWorked = hoursWorked, jobsDone = jobsDone,
     isVioleta = isVioleta, isPro = isPro,
-    skills = skills, hourlyRate = hourlyRate,
+    skills = skills, hourlyRate = hourlyRate, distanceKm = distanceKm,
 )
 
 fun BalanceDto.toDomain() = Balance(available = available, pending = pending, currency = currency)

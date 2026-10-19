@@ -102,7 +102,11 @@ fun MatchScreen(
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("Match", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                    Text("${results.size} profissionais encontrados", style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
+                    Text(
+                        if (results.size == 1) "1 profissional encontrado" else "${results.size} profissionais encontrados",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textSecondary,
+                    )
                 }
                 Box(
                     Modifier.size(42.dp).clip(RoundedCornerShape(13.dp)).background(colors.gradientStart.copy(alpha = 0.13f)).clickable { onOpenFilter() },

@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.User
 import com.vertice.app.ui.components.FadeSlideIn
 import com.vertice.app.ui.components.TopBar
 import com.vertice.app.ui.components.VerticeSwitch
@@ -101,6 +105,12 @@ fun ConfiguracoesScreen(
     onAltPassword: () -> Unit,
 ) {
     val colors = LocalVerticeColors.current
+    var user by remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(Unit) {
+        ServiceLocator.profileRepository.me().onOk { user = it }
+    }
+
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TopBar(title = "Configurações", onBack = onBack)
         LazyColumn(
@@ -121,9 +131,9 @@ fun ConfiguracoesScreen(
                         Spacer(Modifier.height(10.dp))
                         Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
                             Column {
-                                SettingRow(Icons.Filled.Person, "Nome completo", "Ana Silva", onClick = {})
-                                SettingRow(Icons.Filled.Email, "E-mail", "vorcaro@gmail.com", onClick = onAltEmail)
-                                SettingRow(Icons.Filled.Phone, "Telefone", "(11) 9273-3802", onClick = onAltPhone)
+                                SettingRow(Icons.Filled.Person, "Nome completo", user?.name ?: "", onClick = {})
+                                SettingRow(Icons.Filled.Email, "E-mail", user?.email ?: "", onClick = onAltEmail)
+                                SettingRow(Icons.Filled.Phone, "Telefone", user?.phone ?: "", onClick = onAltPhone)
                                 SettingRow(Icons.Filled.Lock, "Senha", "Alterar", onClick = onAltPassword)
                             }
                         }
@@ -140,18 +150,18 @@ fun ConfiguracoesScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.LocationOn, null, tint = colors.gradientStart, modifier = Modifier.size(19.dp))
                                     Spacer(Modifier.width(10.dp))
-                                    Text("Rua Harmonia, 1234", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(user?.address?.street ?: "", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                                 }
                                 Spacer(Modifier.height(14.dp))
-                                VerticeTextField("Vila Madalena", {}, "Bairro", "Seu bairro")
+                                VerticeTextField(user?.address?.district ?: "", {}, "Bairro", "Seu bairro")
                                 Spacer(Modifier.height(14.dp))
                                 Row {
-                                    Box(Modifier.weight(1f)) { VerticeTextField("São Paulo", {}, "Cidade", "") }
+                                    Box(Modifier.weight(1f)) { VerticeTextField(user?.address?.city ?: "", {}, "Cidade", "") }
                                     Spacer(Modifier.width(12.dp))
-                                    Box(Modifier.width(80.dp)) { VerticeTextField("SP", {}, "UF", "") }
+                                    Box(Modifier.width(80.dp)) { VerticeTextField(user?.address?.state ?: "", {}, "UF", "") }
                                 }
                                 Spacer(Modifier.height(14.dp))
-                                VerticeTextField("05435-000", {}, "CEP", "")
+                                VerticeTextField(user?.address?.cep ?: "", {}, "CEP", "")
                             }
                         }
                     }

@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.domain.model.User
 import com.vertice.app.ui.components.FadeSlideIn
 import com.vertice.app.ui.components.PrimaryButton
 import com.vertice.app.ui.components.SecondaryButton
@@ -106,11 +108,15 @@ private fun ChangeShell(
 fun AlterarEmailScreen(onBack: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var current by remember { mutableStateOf<User?>(null) }
+    LaunchedEffect(Unit) {
+        ServiceLocator.profileRepository.me().onOk { current = it }
+    }
     ChangeShell(
         title = "Alterar e-mail",
         subtitle = "Informe o novo e-mail e confirme sua senha atual para continuar.",
         currentLabel = "E-mail atual",
-        currentValue = "vorcaro@gmail.com",
+        currentValue = current?.email.orEmpty(),
         onBack = onBack,
         onConfirm = {
             var result: String? = "Verifique os dados informados"
@@ -130,11 +136,15 @@ fun AlterarEmailScreen(onBack: () -> Unit) {
 fun AlterarTelefoneScreen(onBack: () -> Unit) {
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var current by remember { mutableStateOf<User?>(null) }
+    LaunchedEffect(Unit) {
+        ServiceLocator.profileRepository.me().onOk { current = it }
+    }
     ChangeShell(
         title = "Alterar telefone",
         subtitle = "Informe o novo número e confirme sua senha atual para continuar.",
         currentLabel = "Telefone atual",
-        currentValue = "(11) 9273-3802",
+        currentValue = current?.phone.orEmpty(),
         onBack = onBack,
         onConfirm = {
             var result: String? = "Verifique os dados informados"

@@ -45,6 +45,7 @@ import com.vertice.app.core.di.ServiceLocator
 import com.vertice.app.domain.model.Freelancer
 import com.vertice.app.domain.model.MatchFilters
 import com.vertice.app.domain.model.ServiceCategory
+import com.vertice.app.domain.validation.CurrencyFormatter
 import com.vertice.app.ui.components.FadeSlideIn
 import com.vertice.app.ui.components.PrimaryButton
 import com.vertice.app.ui.components.SearchBar
@@ -129,14 +130,14 @@ fun MatchScreen(onBack: () -> Unit, onOpenFilter: () -> Unit, onContact: (Freela
                                         Icon(Icons.Filled.Star, null, tint = colors.warning, modifier = Modifier.size(13.dp))
                                         Spacer(Modifier.width(4.dp))
                                         Text(
-                                            "${f.rating} · ${f.reviewCount} avaliações · ${f.distanceKm} km",
+                                            "${f.ratingLabel} · ${f.reviewCount} avaliações · ${f.distanceKm} km",
                                             style = MaterialTheme.typography.labelSmall,
                                             color = colors.textSecondary,
                                         )
                                     }
                                 }
                                 Text(
-                                    "R$ ${f.hourlyRate}/h",
+                                    "${CurrencyFormatter.format(f.hourlyRate)}/h",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = colors.gradientStart,

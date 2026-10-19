@@ -64,6 +64,8 @@ fun VerticeApp() {
     var showSplash by remember { mutableStateOf(true) }
     var filterCategory by remember { mutableStateOf(ServiceCategory.ALL) }
     var filterKm by remember { mutableStateOf(50f) }
+    var filterVerified by remember { mutableStateOf(false) }
+    var filterPro by remember { mutableStateOf(false) }
     var selectedFreelancer by remember { mutableStateOf<Freelancer?>(null) }
     var selectedLesson by remember { mutableStateOf<Lesson?>(null) }
 
@@ -132,6 +134,11 @@ fun VerticeApp() {
                 composable(Routes.MATCH) {
                     MainTabs(nav) { _ ->
                         MatchScreen(
+                            selectedCategory = filterCategory,
+                            maxKm = filterKm,
+                            verifiedOnly = filterVerified,
+                            proOnly = filterPro,
+                            onCategoryChange = { filterCategory = it },
                             onBack = { nav.select(Routes.INICIO) },
                             onOpenFilter = { nav.navigate(Routes.FILTER) },
                             onContact = { f -> selectedFreelancer = f; nav.navigate(Routes.CONTACT) },
@@ -198,9 +205,13 @@ fun VerticeApp() {
                     FilterScreen(
                         selected = filterCategory,
                         maxKm = filterKm,
-                        onApply = { cat, km ->
+                        verified = filterVerified,
+                        pro = filterPro,
+                        onApply = { cat, km, ver, pro ->
                             filterCategory = cat
                             filterKm = km
+                            filterVerified = ver
+                            filterPro = pro
                             nav.popBackStack()
                         },
                         onBack = { nav.popBackStack() },

@@ -149,7 +149,7 @@ fun ContactProviderScreen(freelancer: Freelancer?, onBack: () -> Unit, onSend: (
                             Icon(Icons.Filled.Star, null, tint = colors.warning, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(5.dp))
                             Text(
-                                "${freelancer?.rating ?: 4.9} · ${freelancer?.reviewCount ?: 0} avaliações",
+                                "${freelancer?.ratingLabel ?: "4,9"} · ${freelancer?.reviewCount ?: 0} avaliações",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colors.textSecondary,
                             )
@@ -199,14 +199,16 @@ fun ContactProviderScreen(freelancer: Freelancer?, onBack: () -> Unit, onSend: (
 fun FilterScreen(
     selected: ServiceCategory,
     maxKm: Float,
-    onApply: (ServiceCategory, Float) -> Unit,
+    verified: Boolean,
+    pro: Boolean,
+    onApply: (ServiceCategory, Float, Boolean, Boolean) -> Unit,
     onBack: () -> Unit,
 ) {
     val colors = LocalVerticeColors.current
     var category by remember { mutableStateOf(selected) }
     var distance by remember { mutableStateOf(maxKm) }
-    var verifiedOnly by remember { mutableStateOf(true) }
-    var proOnly by remember { mutableStateOf(false) }
+    var verifiedOnly by remember { mutableStateOf(verified) }
+    var proOnly by remember { mutableStateOf(pro) }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TopBar(title = "Filtros", onBack = onBack)
@@ -274,10 +276,14 @@ fun FilterScreen(
                         SecondaryButton("Limpar", Modifier.fillMaxWidth()) {
                             category = ServiceCategory.ALL
                             distance = 50f
+                            verifiedOnly = false
+                            proOnly = false
                         }
                     }
                     Box(Modifier.weight(1f)) {
-                        PrimaryButton("Aplicar", Modifier.fillMaxWidth()) { onApply(category, distance) }
+                        PrimaryButton("Aplicar", Modifier.fillMaxWidth()) {
+                            onApply(category, distance, verifiedOnly, proOnly)
+                        }
                     }
                 }
             }

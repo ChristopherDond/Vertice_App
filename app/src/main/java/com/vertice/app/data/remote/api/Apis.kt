@@ -91,6 +91,8 @@ interface MatchApi {
         @Query("q") query: String,
         @Query("category") category: String,
         @Query("violeta") violetaOnly: Boolean,
+        @Query("maxKm") maxKm: Float,
+        @Query("proOnly") proOnly: Boolean,
     ): List<FreelancerDto>
 
     @GET("match/{id}")

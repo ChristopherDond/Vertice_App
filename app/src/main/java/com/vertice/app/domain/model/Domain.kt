@@ -112,17 +112,21 @@ data class Freelancer(
         gender == Gender.FEMALE -> "b"
         else -> "m"
     }
-    val distanceKm: Int get() {
-        val h = id.hashCode()
-        val abs = if (h == Int.MIN_VALUE) 0 else Math.abs(h)
-        return 1 + abs % 12
-    }
+    val distanceKm: Int get() = distanceKmOf(id)
+}
+
+fun distanceKmOf(id: String): Int {
+    val h = id.hashCode()
+    val abs = if (h == Int.MIN_VALUE) 0 else Math.abs(h)
+    return 1 + abs % 12
 }
 
 data class MatchFilters(
     val query: String = "",
     val category: ServiceCategory = ServiceCategory.ALL,
     val violetaOnly: Boolean = false,
+    val maxKm: Float = 50f,
+    val proOnly: Boolean = false,
 )
 
 data class ServiceRequest(

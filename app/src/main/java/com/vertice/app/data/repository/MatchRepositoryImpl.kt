@@ -21,6 +21,8 @@ class MatchRepositoryImpl(private val api: MatchApi) : MatchRepository {
             query = filters.query.trim(),
             category = filters.category.name,
             violetaOnly = filters.violetaOnly,
+            maxKm = filters.maxKm,
+            proOnly = filters.proOnly,
         ).map { it.toDomain() }
         cache = result
         result

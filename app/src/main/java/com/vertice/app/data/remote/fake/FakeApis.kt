@@ -6,6 +6,7 @@ import com.vertice.app.data.remote.api.LearningApi
 import com.vertice.app.data.remote.api.MatchApi
 import com.vertice.app.data.remote.api.ProfileApi
 import com.vertice.app.data.remote.api.SubscriptionApi
+import com.vertice.app.domain.model.distanceKmOf
 import com.vertice.app.data.remote.dto.AutoRenewRequestDto
 import com.vertice.app.data.remote.dto.BalanceDto
 import com.vertice.app.data.remote.dto.CardDto
@@ -189,14 +190,26 @@ class FakeProfileApi : ProfileApi {
 }
 
 class FakeMatchApi : MatchApi {
-    override suspend fun search(query: String, category: String, violetaOnly: Boolean): List<FreelancerDto> {
+    override suspend fun search(
+        query: String,
+        category: String,
+        violetaOnly: Boolean,
+        maxKm: Float,
+        proOnly: Boolean,
+    ): List<FreelancerDto> {
         tick(400)
         return FakeStore.freelancers
             .filter { f ->
                 category == "ALL" || f.category == category
             }
             .filter { f ->
-                !violetaOnly || f.gender == "FEMALE"
+                !violetaOnly || f.isVioleta
+            }
+            .filter { f ->
+                !proOnly || f.isPro
+            }
+            .filter { f ->
+                distanceKmOf(f.id) <= maxKm
             }
             .filter { f ->
                 query.isBlank() ||

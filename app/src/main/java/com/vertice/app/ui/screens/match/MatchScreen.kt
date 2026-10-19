@@ -69,15 +69,31 @@ private fun FreelancerAvatar(f: Freelancer) {
 }
 
 @Composable
-fun MatchScreen(onBack: () -> Unit, onOpenFilter: () -> Unit, onContact: (Freelancer) -> Unit) {
+fun MatchScreen(
+    selectedCategory: ServiceCategory,
+    maxKm: Float,
+    verifiedOnly: Boolean,
+    proOnly: Boolean,
+    onCategoryChange: (ServiceCategory) -> Unit,
+    onBack: () -> Unit,
+    onOpenFilter: () -> Unit,
+    onContact: (Freelancer) -> Unit,
+) {
     val colors = LocalVerticeColors.current
     var query by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf(ServiceCategory.ALL) }
     var results by remember { mutableStateOf<List<Freelancer>>(emptyList()) }
 
-    LaunchedEffect(query, category) {
+    LaunchedEffect(query, selectedCategory, maxKm, verifiedOnly, proOnly) {
         ServiceLocator.matchRepository
-            .search(MatchFilters(query = query, category = category))
+            .search(
+                MatchFilters(
+                    query = query,
+                    category = selectedCategory,
+                    violetaOnly = verifiedOnly,
+                    maxKm = maxKm,
+                    proOnly = proOnly,
+                ),
+            )
             .onOk { results = it }
     }
 
@@ -100,7 +116,7 @@ fun MatchScreen(onBack: () -> Unit, onOpenFilter: () -> Unit, onContact: (Freela
             Spacer(Modifier.height(14.dp))
             androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(ServiceCategory.entries.toList()) { cat ->
-                    SelectableChip(cat.label, cat == category) { category = cat }
+                    SelectableChip(cat.label, cat == selectedCategory) { onCategoryChange(cat) }
                 }
             }
         }

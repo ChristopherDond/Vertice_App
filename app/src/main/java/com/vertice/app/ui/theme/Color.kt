@@ -2,56 +2,40 @@ package com.vertice.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-data class VerticeColors(
-    val navy: Color,
-    val card: Color,
-    val card2: Color,
-    val purple: Color,
-    val purpleL: Color,
-    val pink: Color,
-    val white: Color,
-    val muted: Color,
-    val mutedL: Color,
-    val green: Color,
-    val amber: Color,
-    val border: Color,
-    val glass: Color,
-    val inputBg: Color,
-)
+val Purple900 = Color(0xFF3A0B5C)
+val Purple800 = Color(0xFF4A1170)
+val Purple700 = Color(0xFF5B1A85)
+val Purple600 = Color(0xFF6D28A8)
+val Purple500 = Color(0xFF8B3FD1)
+val Purple400 = Color(0xFFA855F7)
+val Purple300 = Color(0xFFC084FC)
+val Purple200 = Color(0xFFD8B4FE)
+val Purple100 = Color(0xFFEDE0FF)
 
-val DarkColors = VerticeColors(
-    navy = Color(0xFF0D0F1C),
-    card = Color(0xFF1A1D30),
-    card2 = Color(0xFF222540),
-    purple = Color(0xFF7C3AED),
-    purpleL = Color(0xFF9B5FF7),
-    pink = Color(0xFFEC4899),
-    white = Color(0xFFFFFFFF),
-    muted = Color(0xFF7B82A8),
-    mutedL = Color(0xFFA0A8CC),
-    green = Color(0xFF10B981),
-    amber = Color(0xFFF59E0B),
-    border = Color(0x12FFFFFF),
-    glass = Color(0x0AFFFFFF),
-    inputBg = Color(0xFF222540),
-)
+val Pink500 = Color(0xFFEC4899)
+val Pink400 = Color(0xFFF472B6)
+val Pink300 = Color(0xFFF9A8D4)
 
-val LightColors = VerticeColors(
-    navy = Color(0xFFF0EDFF),
-    card = Color(0xFFFFFFFF),
-    card2 = Color(0xFFF4F2FF),
-    purple = Color(0xFF7C3AED),
-    purpleL = Color(0xFF7C3AED),
-    pink = Color(0xFFEC4899),
-    white = Color(0xFF1A1235),
-    muted = Color(0xFF7B78A8),
-    mutedL = Color(0xFF4E4A75),
-    green = Color(0xFF059669),
-    amber = Color(0xFFD97706),
-    border = Color(0x14000000),
-    glass = Color(0x08000000),
-    inputBg = Color(0xFFEDE9FF),
-)
+val Violet400 = Color(0xFFA78BFA)
+val Violet300 = Color(0xFFC4B5FD)
 
-fun Color.withAlpha(alpha: Int): Color = this.copy(alpha = alpha / 255f)
+val SuccessGreen = Color(0xFF22C55E)
+val SuccessGreenDark = Color(0xFF16A34A)
+val WarningAmber = Color(0xFFF59E0B)
+val ErrorRed = Color(0xFFEF4444)
+val InfoBlue = Color(0xFF3B82F6)
 
+val DarkBackground = Color(0xFF0E0616)
+val DarkSurface = Color(0xFF170C24)
+val DarkSurfaceVariant = Color(0xFF221334)
+val DarkOutline = Color(0xFF3B2554)
+
+val LightBackground = Color(0xFFFBF8FF)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFF3EBFF)
+val LightOutline = Color(0xFFE2D3F7)
+
+val TextPrimaryDark = Color(0xFFF7F2FF)
+val TextSecondaryDark = Color(0xFFB9A8D1)
+val TextPrimaryLight = Color(0xFF1B0B2B)
+val TextSecondaryLight = Color(0xFF6B5A80)

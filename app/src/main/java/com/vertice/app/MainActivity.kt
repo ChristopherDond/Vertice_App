@@ -1,122 +1,128 @@
 package com.vertice.app
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.background
+
+import androidx.compose.ui.graphics.Color
+
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import com.vertice.app.nav.BottomNav
-import com.vertice.app.nav.Screen
-import com.vertice.app.screens.ContactModal
-import com.vertice.app.screens.EditProfileModal
-import com.vertice.app.screens.HomeScreen
-import com.vertice.app.screens.MatchScreen
-import com.vertice.app.screens.OfferModal
-import com.vertice.app.screens.PerfilScreen
-import com.vertice.app.screens.ProfileModal
-import com.vertice.app.screens.ProModal
-import com.vertice.app.screens.TrilhaModal
-import com.vertice.app.screens.VioletaScreen
-import com.vertice.app.data.FREELANCERS
-import com.vertice.app.ui.theme.LocalColors
-import com.vertice.app.ui.theme.VerticeThemeProvider
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.ui.screens.figma.ContratarSheet
+import com.vertice.app.ui.screens.figma.FigmaCadastro
+import com.vertice.app.ui.screens.figma.FigmaInicial
+import com.vertice.app.ui.screens.figma.FigmaLogin
+import com.vertice.app.ui.screens.figma.FigmaMatch
+import com.vertice.app.ui.screens.figma.FigmaPerfilUser
+import com.vertice.app.ui.screens.figma.FigmaSplash
+import com.vertice.app.ui.screens.figma.FigmaVioleta
+import com.vertice.app.ui.screens.figma.FiltrosDialog
+import com.vertice.app.ui.screens.figma.ProMatch
+import com.vertice.app.ui.screens.figma.VTab
+import com.vertice.app.ui.theme.VerticeTheme
+import androidx.compose.animation.core.animateFloatAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { VerticeApp() }
-    }
-}
-
-@Composable
-fun VerticeApp() {
-    var dark by rememberSaveable { mutableStateOf(true) }
-    var screen by rememberSaveable { mutableStateOf(Screen.Home) }
-    var violetaOn by rememberSaveable { mutableStateOf(false) }
-    var contactName by rememberSaveable { mutableStateOf<String?>(null) }
-    var profileName by rememberSaveable { mutableStateOf<String?>(null) }
-    var trilhaOpen by rememberSaveable { mutableStateOf(false) }
-    var trilhaDone by rememberSaveable { mutableStateOf(listOf("s1", "s2", "s3", "d1", "d2", "d3")) }
-    var editOpen by rememberSaveable { mutableStateOf(false) }
-    var offerOpen by rememberSaveable { mutableStateOf(false) }
-    var proOpen by rememberSaveable { mutableStateOf(false) }
-
-    val contactTarget = contactName?.let { n -> FREELANCERS.find { it.name == n } }
-    val profileTarget = profileName?.let { n -> FREELANCERS.find { it.name == n } }
-
-    VerticeThemeProvider(dark = dark, onToggle = { dark = !dark }) {
-        val C = LocalColors
-        Box(modifier = Modifier.fillMaxSize().background(C.navy)) {
-            Crossfade(targetState = screen, animationSpec = tween(300)) { currentScreen ->
-                when (currentScreen) {
-                    Screen.Home -> HomeScreen(
-                        onNavigate = { screen = it },
-                        openPro = { proOpen = true },
-                        openOffer = { offerOpen = true },
-                    )
-                    Screen.Match -> MatchScreen(
-                                            violetaOn = violetaOn,
-                                            setVioletaOn = { violetaOn = it },
-                                            onContact = { contactName = it.name },
-                                            onProfile = { profileName = it.name },
-                                        )
-                    Screen.Violeta -> VioletaScreen(on = violetaOn, setOn = { violetaOn = it })
-                    Screen.Perfil -> PerfilScreen(
-                        done = trilhaDone.toSet(),
-                        openEdit = { editOpen = true },
-                        openPro = { proOpen = true },
-                        openTrilha = { trilhaOpen = true },
-                    )
-                    Screen.Confirmacao -> PlaceholderScreen("Confirmação")
-                }
+        ServiceLocator.init(applicationContext)
+        enableEdgeToEdge()
+        setContent {
+            VerticeTheme {
+                Flow()
             }
-
-            BottomNav(active = screen, onNav = { screen = it }, modifier = Modifier.align(Alignment.BottomCenter))
-
-            profileTarget?.let { f ->
-                ProfileModal(
-                    f = f,
-                    onClose = { profileName = null },
-                    onContact = { profileName = null; contactName = f.name },
-                )
-            }
-
-            contactTarget?.let { f ->
-                ContactModal(f = f, onClose = { contactName = null })
-            }
-
-            if (trilhaOpen) TrilhaModal(
-                onClose = { trilhaOpen = false },
-                initialDone = trilhaDone.toSet(),
-                onDoneChange = { trilhaDone = it.toList() },
-            )
-            if (editOpen) EditProfileModal(onClose = { editOpen = false })
-            if (offerOpen) OfferModal(onClose = { offerOpen = false })
-            if (proOpen) ProModal(onClose = { proOpen = false })
         }
     }
 }
 
+private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL }
+
 @Composable
-private fun PlaceholderScreen(name: String) {
-    val C = LocalColors
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(C.navy),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text("$name — próxima entrega", color = C.muted)
+private fun Flow() {
+    var step by remember { mutableStateOf(Step.SPLASH) }
+    var contratar by remember { mutableStateOf<ProMatch?>(null) }
+    var filtros by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = contratar != null || filtros) {
+        if (filtros) filtros = false else contratar = null
+    }
+
+    Crossfade(targetState = step, animationSpec = tween(320), label = "flow") { current ->
+        when (current) {
+            Step.SPLASH -> FigmaSplash(onDone = { step = Step.LOGIN })
+            Step.LOGIN -> FigmaLogin(onEntrar = { step = Step.INICIAL }, onCadastrar = { step = Step.CADASTRO })
+            Step.CADASTRO -> FigmaCadastro(onBack = { step = Step.LOGIN })
+            Step.INICIAL -> FigmaInicial(onNav = { tab ->
+                when (tab) {
+                    VTab.MATCH -> step = Step.MATCH
+                    VTab.VIOLETA -> step = Step.VIOLETA
+                    else -> {}
+                }
+            })
+            Step.MATCH -> FigmaMatch(
+                onNav = { tab ->
+                    when (tab) {
+                        VTab.INICIO -> step = Step.INICIAL
+                        VTab.VIOLETA -> step = Step.VIOLETA
+                        VTab.PERFIL -> step = Step.PERFIL
+                        else -> {}
+                    }
+                },
+                onContratar = { contratar = it },
+                onFiltros = { filtros = true },
+                onVerPerfil = { step = Step.PERFIL },
+            )
+            Step.VIOLETA -> FigmaVioleta(onNav = { tab ->
+                when (tab) {
+                    VTab.INICIO -> step = Step.INICIAL
+                    VTab.MATCH -> step = Step.MATCH
+                    VTab.PERFIL -> step = Step.PERFIL
+                    else -> {}
+                }
+            })
+            Step.PERFIL -> FigmaPerfilUser(onNav = { tab ->
+                when (tab) {
+                    VTab.INICIO -> step = Step.INICIAL
+                    VTab.MATCH -> step = Step.MATCH
+                    VTab.VIOLETA -> step = Step.VIOLETA
+                    else -> {}
+                }
+            })
+        }
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        contratar?.let { p ->
+            ContratarSheet(p) { contratar = null }
+        }
+        if (filtros) {
+            val scrim by animateFloatAsState(if (filtros) 1f else 0f, tween(300), label = "scrim")
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f * scrim))
+                    .clickable { filtros = false },
+            )
+            Box(Modifier.align(Alignment.BottomCenter)) {
+                FiltrosDialog { filtros = false }
+            }
+        }
     }
 }

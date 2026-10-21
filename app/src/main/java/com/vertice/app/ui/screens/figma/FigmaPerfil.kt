@@ -1,15 +1,20 @@
 package com.vertice.app.ui.screens.figma
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,260 +28,362 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.vertice.app.R
+import androidx.compose.ui.zIndex
+import com.vertice.app.ui.components.PressSoft
+import com.vertice.app.ui.components.vClick
 import com.vertice.app.ui.design.Roboto
+import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.vs
 import com.vertice.app.ui.icons.IcoAkarIconsCheck
+import com.vertice.app.ui.icons.IcoArrowRightBold
 import com.vertice.app.ui.icons.IcoBoxiconsShieldFilled
-import com.vertice.app.ui.components.vClick
-import com.vertice.app.ui.components.PressSoft
+import com.vertice.app.ui.icons.IcoChevronRightBold
+import com.vertice.app.ui.icons.IcoCrosshairFill
+import com.vertice.app.ui.icons.IcoFileTextFill
+import com.vertice.app.ui.icons.IcoImageFill
+import com.vertice.app.ui.icons.IcoPencilSimpleFill
 
-private val PerfilBg = Color(0xFFF7F2FF)
-private val GradPro = listOf(Color(0x00641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
-private val GradBar = listOf(Color(0x00641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
-private val KSkill = Color(0xFF9657F3).copy(alpha = 0.25f)
-private val KSkillLine = Color(0xFF904EF2)
-private val KSkillText = Color(0xFF883FF4)
-private val KGreen = Color(0xFF21C001)
-private val KMuted = Color(0xFF929292)
+private object VPerfil {
+    val bg = VColor.Bg
+    val gradPro = listOf(Color(0xFF641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
+    val gradBar = listOf(Color(0xFF641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
+    val chipBg = Color(0x269657F3)
+    val chipLine = Color(0x4D904EF2)
+    val chipText = VColor.Purple
+    val divider = Color(0xFFCDC9D4)
+    val track = VColor.Gray4
+    val doneBg = Color(0x269657F3)
+    val doneLine = Color(0x4D904EF2)
+    val doneSquare = VColor.PurpleSoft
+    val green = Color(0xFF21C001)
+    val lockBg = Color(0xFFF4F4F4)
+    val lockLine = Color(0xFFEAEAEA)
+    val lockInk = VColor.Gray2
+    val configBg = Color(0xFFEDE6F5)
+}
+
+data class TrailItem(
+    val title: String,
+    val icon: ImageVector,
+    val done: Boolean,
+    val locked: Boolean,
+)
+
+object PerfilMock {
+    const val name = "Ana Silva"
+    const val planTitle = "Vertice Pro"
+    const val planSubtitle = "Desbloqueie novos recursos, matchs e muito mais!"
+    val skills = listOf("Costura", "Confecção", "Manejo")
+    const val trailTitle = "Trilha de blindagem"
+    const val trailProgress = 52
+    const val trailFooter = "Toque para ver a trilha completa"
+    const val settings = "Configurações"
+    val trail = listOf(
+        TrailItem("Segurança pessoal", IcoBoxiconsShieldFilled, true, false),
+        TrailItem("Direitos do MEI", IcoFileTextFill, true, false),
+        TrailItem("Gestão de clientes", IcoCrosshairFill, false, true),
+    )
+}
 
 @Composable
 fun FigmaPerfilUser(onNav: (VTab) -> Unit) {
     val scroll = rememberScrollState()
-    Box(Modifier.fillMaxSize().background(PerfilBg)) {
-        Box(Modifier.fillMaxSize().verticalScroll(scroll)) {
-            Box(Modifier.fillMaxWidth().height(889.dp)) {
-                Image(
-                    painterResource(R.drawable.img_avatar_ana),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .offset(129.dp, 89.dp)
-                        .size(135.dp)
-                        .clip(CircleShape)
-                        .border(0.75.dp, Color(0xFF1B1B1B), CircleShape),
-                    contentScale = ContentScale.Crop,
-                )
-                Text(
-                    "Ana Silva",
-                    modifier = Modifier.offset(129.dp, 237.dp).width(300.dp),
-                    style = vs(32f, 800, 37.64f, 0f, Roboto),
-                    color = Color.Black,
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                )
-
-                Box(
-                    Modifier
-                        .offset(16.dp, 292.dp)
-                        .width(361.dp)
-                        .height(82.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Brush.horizontalGradient(GradPro))
-                        .vClick(PressSoft) { },
-                ) {
-                    Image(
-                        painterResource(R.drawable.ic_v_medal),
-                        contentDescription = null,
-                        modifier = Modifier.offset(24.dp, 24.dp).size(35.dp),
-                    )
-                    Text(
-                        "Vertice Pro",
-                        modifier = Modifier.offset(78.dp, 10.dp),
-                        style = vs(20f, 800, 23.52f, 0f, Roboto),
-                        color = Color.White,
-                        maxLines = 1,
-                    )
-                    Text(
-                        "Desbloqueie novos recursos, matchs e suporte",
-                        modifier = Modifier.offset(78.dp, 35.dp).width(226.dp),
-                        style = vs(13f, 400, 15.29f, 0f, Roboto),
-                        color = Color.White,
-                        maxLines = 2,
-                    )
-                    Image(
-                        painterResource(R.drawable.ic_v_chevron_right),
-                        contentDescription = null,
-                        modifier = Modifier.offset(316.dp, 26.dp).size(30.dp),
-                    )
-                }
-
-                Box(Modifier.offset(16.dp, 387.dp).width(361.dp).height(0.75.dp).background(Color(0xFFE5E5E5)))
-
-                Text(
-                    "Minhas habilidades:",
-                    modifier = Modifier.offset(16.dp, 392.dp),
-                    style = vs(18f, 400, 21.17f, 0f, Roboto),
-                    color = Color.Black,
-                    maxLines = 1,
-                )
-
-                Skill("Costura", 17, 420, 83)
-                Skill("Confecção", 106, 420, 97)
-                Skill("Manejo", 209, 420, 78)
-
-                Box(
-                    Modifier
-                        .offset(19.dp, 467.dp)
-                        .width(360.dp)
-                        .height(331.dp)
-                        .clip(RoundedCornerShape(15.dp))
-                        .background(Color.White),
-                ) {
-                    Text(
-                        "Trilha de blindagem",
-                        modifier = Modifier.offset(10.dp, 15.dp),
-                        style = vs(18f, 400, 21.17f, 0f, Roboto),
-                        color = Color.Black,
-                        maxLines = 1,
-                    )
-                    Box(
-                        Modifier
-                            .offset(273.dp, 11.dp)
-                            .width(38.dp)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(Color(0x169657F3))
-                            .border(0.6.dp, KSkillLine, RoundedCornerShape(10.dp)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            "50%",
-                            style = vs(16f, 500, 18.82f, 0f, Roboto),
-                            color = KSkillText,
-                            maxLines = 1,
-                        )
-                    }
-                    Image(
-                        painterResource(R.drawable.ic_v_chevron_black),
-                        contentDescription = null,
-                        modifier = Modifier.offset(317.dp, 12.dp).size(30.dp),
-                    )
-                    Box(
-                        Modifier
-                            .offset(9.dp, 54.dp)
-                            .width(338.dp)
-                            .height(9.dp)
-                            .clip(RoundedCornerShape(100.dp))
-                            .background(Color(0xFFD9D9D9)),
-                    )
-                    Box(
-                        Modifier
-                            .offset(9.dp, 54.dp)
-                            .width(176.dp)
-                            .height(9.dp)
-                            .clip(RoundedCornerShape(100.dp))
-                            .background(Brush.horizontalGradient(GradBar)),
-                    )
-
-                    ModuleRow("Segurança pessoal", 6, 76, true)
-                    ModuleRow("Direitos do MEI", 6, 146, true)
-                    ModuleRow("Gestão de clientes", 6, 216, false)
-
-                    Image(
-                        painterResource(R.drawable.ic_v_arrow_right_black),
-                        contentDescription = null,
-                        modifier = Modifier.offset(243.dp, 293.dp).size(20.dp),
-                    )
-                    Text(
-                        "Toque para ver a trilha completa",
-                        modifier = Modifier.offset(9.dp, 293.dp).width(229.dp),
-                        style = vs(16f, 400, 18.82f, 0f, Roboto),
-                        color = Color.Black,
-                        maxLines = 1,
-                    )
-                }
-
-                Box(
-                    Modifier
-                        .offset(19.dp, 811.dp)
-                        .width(360.dp)
-                        .height(61.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF9386A1))
-                        .vClick(PressSoft) { },
-                ) {
-                    Image(
-                        painterResource(R.drawable.ic_v_pencil),
-                        contentDescription = null,
-                        modifier = Modifier.offset(100.dp, 18.dp).size(24.dp),
-                    )
-                    Text(
-                        "Configurações",
-                        modifier = Modifier.offset(126.dp, 20.dp),
-                        style = vs(16f, 400, 18.82f, 0f, Roboto),
-                        color = Color.Black,
-                        maxLines = 1,
-                    )
-                }
-            }
+    Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .verticalScroll(scroll)
+                .statusBarsPadding()
+                .padding(bottom = 76.dp),
+        ) {
+            Avatar(
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 12.dp),
+            )
+            Text(
+                PerfilMock.name,
+                modifier = Modifier.fillMaxWidth().padding(top = 13.dp),
+                style = vs(32f, 800, 37.64f, 0f, Roboto),
+                color = Color.Black,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+            )
+            PlanCard(Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
+            Box(
+                Modifier
+                    .padding(top = 12.dp)
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(VPerfil.divider),
+            )
+            Text(
+                "Minhas habilidades:",
+                modifier = Modifier.padding(start = 16.dp, top = 5.dp),
+                style = vs(18f, 400, 21.17f, 0f, Roboto),
+                color = Color.Black,
+                maxLines = 1,
+            )
+            SkillsRow(Modifier.padding(start = 17.dp, top = 7.dp))
+            TrailCard(
+                Modifier
+                    .padding(start = 19.dp, top = 15.dp, end = 14.dp)
+                    .fillMaxWidth(),
+            )
+            SettingsButton(
+                Modifier
+                    .padding(start = 19.dp, top = 13.dp, end = 14.dp)
+                    .fillMaxWidth(),
+            )
         }
-
-        VBottomNav(VTab.PERFIL, onNav, Modifier.align(Alignment.BottomCenter))
+        VBottomNav(
+            VTab.PERFIL,
+            onNav,
+            Modifier.align(Alignment.BottomCenter).zIndex(10f),
+            navPadding = true,
+        )
     }
 }
 
 @Composable
-private fun Skill(label: String, x: Int, y: Int, w: Int) {
+private fun Avatar(modifier: Modifier = Modifier) {
     Box(
-        Modifier
-            .offset(x.dp, y.dp)
-            .width(w.dp)
-            .height(32.dp)
-            .clip(RoundedCornerShape(100.dp))
-            .background(KSkill)
-            .border(0.6.dp, KSkillLine, RoundedCornerShape(100.dp)),
+        modifier
+            .size(135.dp)
+            .clip(CircleShape)
+            .background(Color.White)
+            .border(0.75.dp, VColor.InkSoft, CircleShape)
+            .semantics { contentDescription = "Foto de perfil de Ana Silva" },
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = vs(16f, 500, 18.82f, 0f, Roboto), color = KSkillText, maxLines = 1)
+        Icon(
+            IcoImageFill,
+            contentDescription = null,
+            modifier = Modifier.size(42.dp),
+            tint = VColor.InkSoft,
+        )
     }
 }
 
 @Composable
-private fun ModuleRow(label: String, x: Int, y: Int, done: Boolean) {
-    val bg = if (done) Color(0x169657F3) else Color(0xFFF0F0F0)
-    val line = if (done) KSkillLine else KMuted
+private fun PlanCard(modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .height(82.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Brush.horizontalGradient(VPerfil.gradPro))
+            .vClick(PressSoft) {}
+            .semantics { contentDescription = "Vertice Pro, assinar" }
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            IcoBoxiconsShieldFilled,
+            contentDescription = null,
+            modifier = Modifier.size(35.dp),
+            tint = Color.White,
+        )
+        Spacer(Modifier.width(19.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                PerfilMock.planTitle,
+                style = vs(20f, 800, 23.52f, 0f, Roboto),
+                color = Color.White,
+                maxLines = 1,
+            )
+            Text(
+                PerfilMock.planSubtitle,
+                modifier = Modifier.padding(top = 2.dp),
+                style = vs(13f, 400, 15.29f, 0f, Roboto),
+                color = Color.White,
+                maxLines = 2,
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        Icon(
+            IcoChevronRightBold,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+            tint = Color.White,
+        )
+    }
+}
+
+@Composable
+private fun SkillsRow(modifier: Modifier = Modifier) {
+    Row(modifier.padding(end = 16.dp)) {
+        PerfilMock.skills.forEachIndexed { index, label ->
+            if (index > 0) Spacer(Modifier.width(6.dp))
+            Box(
+                Modifier
+                    .height(32.dp)
+                    .clip(RoundedCornerShape(100.dp))
+                    .background(VPerfil.chipBg)
+                    .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(100.dp))
+                    .padding(horizontal = 12.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    label,
+                    style = vs(16f, 500, 18.82f, 0f, Roboto),
+                    color = VPerfil.chipText,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrailCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.White)
+            .padding(start = 10.dp, end = 13.dp, top = 15.dp, bottom = 15.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                PerfilMock.trailTitle,
+                modifier = Modifier.weight(1f),
+                style = vs(18f, 400, 21.17f, 0f, Roboto),
+                color = Color.Black,
+                maxLines = 1,
+            )
+            Box(
+                Modifier
+                    .height(32.dp)
+                    .width(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(VPerfil.chipBg)
+                    .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "${PerfilMock.trailProgress}%",
+                    style = vs(16f, 500, 18.82f, 0f, Roboto),
+                    color = VPerfil.chipText,
+                    maxLines = 1,
+                )
+            }
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                IcoChevronRightBold,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = Color.Black,
+            )
+        }
+        ProgressBar(Modifier.fillMaxWidth().padding(top = 8.dp))
+        Column(Modifier.padding(top = 13.dp)) {
+            PerfilMock.trail.forEachIndexed { index, item ->
+                if (index > 0) Spacer(Modifier.height(9.dp))
+                TrailRow(item)
+            }
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+                .vClick(PressSoft) {}
+                .semantics { contentDescription = PerfilMock.trailFooter },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                PerfilMock.trailFooter,
+                modifier = Modifier.weight(1f),
+                style = vs(16f, 400, 18.82f, 0f, Roboto),
+                color = Color.Black,
+                maxLines = 1,
+            )
+            Icon(
+                IcoArrowRightBold,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = Color.Black,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProgressBar(modifier: Modifier = Modifier) {
     Box(
-        Modifier
-            .offset(x.dp, y.dp)
-            .width(337.dp)
-            .height(61.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(bg)
-            .border(0.6.dp, line, RoundedCornerShape(10.dp)),
+        modifier
+            .height(9.dp)
+            .clip(RoundedCornerShape(100.dp))
+            .background(VPerfil.track),
     ) {
         Box(
             Modifier
-                .offset(12.dp, 13.dp)
+                .fillMaxWidth(PerfilMock.trailProgress / 100f)
+                .height(9.dp)
+                .clip(RoundedCornerShape(100.dp))
+                .background(Brush.horizontalGradient(VPerfil.gradBar)),
+        )
+    }
+}
+
+@Composable
+private fun TrailRow(item: TrailItem) {
+    val bg = if (item.locked) VPerfil.lockBg else VPerfil.doneBg
+    val line = if (item.locked) VPerfil.lockLine else VPerfil.doneLine
+    val square = if (item.locked) VPerfil.lockInk else VPerfil.doneSquare
+    val label = if (item.locked) VPerfil.lockInk else Color.Black
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(61.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(bg)
+            .border(
+                if (item.locked) 1.dp else 0.75.dp,
+                line,
+                RoundedCornerShape(10.dp),
+            )
+            .padding(horizontal = 12.dp)
+            .semantics {
+                contentDescription =
+                    if (item.locked) "${item.title}, bloqueado" else "${item.title}, concluído"
+            },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
                 .size(35.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(if (done) Color(0xFF9657F3) else Color(0xFF979797)),
+                .background(square),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                IcoBoxiconsShieldFilled,
+                item.icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
                 tint = Color.White,
             )
         }
+        Spacer(Modifier.width(9.dp))
         Text(
-            label,
-            modifier = Modifier.offset(56.dp, 21.dp),
+            item.title,
+            modifier = Modifier.weight(1f),
             style = vs(16f, 500, 18.82f, 0f, Roboto),
-            color = if (done) Color.Black else KMuted,
+            color = label,
             maxLines = 1,
         )
-        if (done) {
+        if (item.done) {
             Box(
                 Modifier
-                    .offset(300.dp, 20.dp)
                     .size(22.dp)
                     .clip(CircleShape)
-                    .background(KGreen),
+                    .background(VPerfil.green),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
@@ -287,5 +394,33 @@ private fun ModuleRow(label: String, x: Int, y: Int, done: Boolean) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsButton(modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .height(61.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(VPerfil.configBg)
+            .vClick(PressSoft) {}
+            .semantics { contentDescription = PerfilMock.settings },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            IcoPencilSimpleFill,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = Color.Black,
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            PerfilMock.settings,
+            style = vs(16f, 400, 18.82f, 0f, Roboto),
+            color = Color.Black,
+            maxLines = 1,
+        )
     }
 }

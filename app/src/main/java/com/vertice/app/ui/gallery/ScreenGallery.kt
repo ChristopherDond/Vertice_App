@@ -1,5 +1,7 @@
 package com.vertice.app.ui.gallery
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.vertice.app.ui.design.VColor
@@ -23,6 +29,7 @@ import com.vertice.app.ui.screens.figma.FigmaMatch
 import com.vertice.app.ui.screens.figma.FigmaPerfilUser
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
+import com.vertice.app.ui.screens.figma.VTab
 import com.vertice.app.ui.screens.figma.VioletaState
 import com.vertice.app.ui.screens.figma.FiltrosDialog
 import com.vertice.app.ui.screens.figma.pros
@@ -36,19 +43,47 @@ object Screens {
 
 @Composable
 fun ScreenGallery(id: String) {
+    var tab by remember(id) {
+        mutableStateOf(
+            when (id) {
+                "Match", "PopupContratar", "PopupFiltros" -> VTab.MATCH
+                "Violeta", "VioletaDesativado", "VioletaAtivo" -> VTab.VIOLETA
+                "Perfil" -> VTab.PERFIL
+                else -> VTab.INICIO
+            },
+        )
+    }
+    val nav: (VTab) -> Unit = { tab = it }
+
     Box(Modifier.fillMaxSize().background(VColor.Bg)) {
         when (id) {
             "PROBE" -> Probe()
             "Splash" -> FigmaSplash()
             "Login" -> FigmaLogin()
             "Cadastro" -> FigmaCadastro()
-            "Inicial" -> FigmaInicial()
-            "Match", "PopupContratar", "PopupFiltros" ->
-                FigmaMatch(onNav = {}, onContratar = {}, onFiltros = {}, onVerPerfil = {})
-            "Perfil" -> FigmaPerfilUser(onNav = {})
-            "Violeta" -> FigmaVioleta(onNav = {})
-            "VioletaDesativado" -> FigmaVioleta(onNav = {}, initialState = VioletaState.DESATIVADO)
-            "VioletaAtivo" -> FigmaVioleta(onNav = {}, initialState = VioletaState.ATIVO)
+            "Inicial", "Match", "Perfil", "Violeta",
+            "VioletaDesativado", "VioletaAtivo",
+            "PopupContratar", "PopupFiltros",
+            -> Crossfade(tab, animationSpec = tween(280), label = "gallery") { current ->
+                when (current) {
+                    VTab.INICIO -> FigmaInicial(onNav = nav)
+                    VTab.MATCH -> FigmaMatch(
+                        onNav = nav,
+                        onContratar = {},
+                        onFiltros = {},
+                        onVerPerfil = { tab = VTab.PERFIL },
+                    )
+                    VTab.VIOLETA -> FigmaVioleta(
+                        onNav = nav,
+                        initialState = when (id) {
+                            "VioletaDesativado" -> VioletaState.DESATIVADO
+                            "VioletaAtivo" -> VioletaState.ATIVO
+                            else -> VioletaState.VERIFICACAO
+                        },
+                    )
+                    VTab.PERFIL -> FigmaPerfilUser(onNav = nav)
+                }
+            }
             else -> Placeholder(id)
         }
         when (id) {

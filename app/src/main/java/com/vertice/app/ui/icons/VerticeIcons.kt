@@ -137,6 +137,36 @@ val IcoCameraFill: ImageVector by lazy {
         .build()
 }
 
+val IcoCrosshairFill: ImageVector by lazy {
+    ImageVector.Builder(name = "ph:crosshair-fill", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
+        .addPath(addPathNodes("M128 60a68 68 0 1 0 68 68a68.07 68.07 0 0 0-68-68Zm0 120a52 52 0 1 1 52-52a52.06 52.06 0 0 1-52 52Zm0-80a28 28 0 1 0 28 28a28 28 0 0 0-28-28Zm0 40a12 12 0 1 1 12-12a12 12 0 0 1-12 12ZM224 120h-20.36A76.13 76.13 0 0 0 136 52.36V32a8 8 0 0 0-16 0v20.36A76.13 76.13 0 0 0 52.36 120H32a8 8 0 0 0 0 16h20.36A76.13 76.13 0 0 0 120 203.64V224a8 8 0 0 0 16 0v-20.36A76.13 76.13 0 0 0 203.64 136H224a8 8 0 0 0 0-16Z"), fill = SolidColor(Color.Black))
+        .build()
+}
+
+val IcoImageFill: ImageVector by lazy {
+    ImageVector.Builder(name = "ph:image-fill", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
+        .addPath(addPathNodes("M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16Zm0 160H40V56h176v144Zm-136-88a20 20 0 1 0-20-20a20 20 0 0 0 20 20Zm124.92 11.11a8 8 0 0 0-13.84 0l-46.28 76.89H96l-26.8-43a8 8 0 0 0-13.4 0L40 180.75V56h176Z"), fill = SolidColor(Color.Black))
+        .build()
+}
+
+val IcoPencilSimpleFill: ImageVector by lazy {
+    ImageVector.Builder(name = "ph:pencil-simple-fill", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
+        .addPath(addPathNodes("M227.31 73.37L182.63 28.69a16 16 0 0 0-22.63 0L36.69 152A15.86 15.86 0 0 0 32 163.31V208a16 16 0 0 0 16 16h44.69a15.86 15.86 0 0 0 11.31-4.69L227.31 96a16 16 0 0 0 0-22.63ZM51.31 160l90.35-90.35l16.68 16.69l-90.34 90.34ZM48 208v-33.38l16 16V208Zm165.65-149.66l-16.68-16.69l16-16l16.68 16.69Z"), fill = SolidColor(Color.Black))
+        .build()
+}
+
+val IcoChevronRightBold: ImageVector by lazy {
+    ImageVector.Builder(name = "ph:caret-right-bold", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
+        .addPath(addPathNodes("M184 128L96 200V56l88 72Z"), fill = SolidColor(Color.Black))
+        .build()
+}
+
+val IcoArrowRightBold: ImageVector by lazy {
+    ImageVector.Builder(name = "ph:arrow-right-bold", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
+        .addPath(addPathNodes("M224 128a12 12 0 0 1-3.51 8.49l-72 72a12 12 0 0 1-16.98-16.98L183 140H44a12 12 0 0 1 0-24h139l-51.49-51.51a12 12 0 0 1 16.98-16.98l72 72A12 12 0 0 1 224 128Z"), fill = SolidColor(Color.Black))
+        .build()
+}
+
 val IcoFileTextFill: ImageVector by lazy {
     ImageVector.Builder(name = "ph:file-text-fill", defaultWidth = 24.000.dp, defaultHeight = 24.000.dp, viewportWidth = 256.000f, viewportHeight = 256.000f)
         .addPath(addPathNodes("M213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66ZM160 51.31L188.69 80H160Zm32 152.69H64V32h80v56a8 8 0 0 0 8 8h40ZM88 136a8 8 0 0 1 8-8h64a8 8 0 0 1 0 16H96a8 8 0 0 1-8-8Zm0 32a8 8 0 0 1 8-8h64a8 8 0 0 1 0 16H96a8 8 0 0 1-8-8Z"), fill = SolidColor(Color.Black))

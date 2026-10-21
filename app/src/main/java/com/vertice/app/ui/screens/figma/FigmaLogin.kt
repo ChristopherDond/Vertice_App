@@ -49,6 +49,9 @@ import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VGrad
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.vs
+import com.vertice.app.ui.components.vClick
+import com.vertice.app.ui.components.PressWhite
+import com.vertice.app.ui.components.PressSoft
 import kotlinx.coroutines.delay
 
 private val Montserrat = androidx.compose.ui.text.font.FontFamily(
@@ -127,7 +130,7 @@ fun FigmaLogin(
             "Esqueceu a senha?",
             vs(10f, 700, 10f),
             VColor.PurpleMuted2,
-            Modifier.offset(x = 258.dp, y = 565.dp).clickable { onEsqueci() },
+            Modifier.offset(x = 258.dp, y = 565.dp).vClick(PressSoft) { onEsqueci() },
         )
 
         Box(
@@ -137,7 +140,7 @@ fun FigmaLogin(
                 .height(36.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(VColor.Purple)
-                .clickable { onEntrar() },
+                .vClick(PressWhite) { onEntrar() },
         ) {
             VText("Entrar", vs(14f, 800, 16.47f), VColor.White, Modifier.align(Alignment.Center))
         }

@@ -27,6 +27,8 @@ import com.vertice.app.ui.icons.IcoAntDesignHomeFilled
 import com.vertice.app.ui.icons.IcoBiShuffle
 import com.vertice.app.ui.icons.IcoBoxiconsShieldFilled
 import com.vertice.app.ui.icons.IcoIconamoonProfileFill
+import com.vertice.app.ui.components.vClick
+import com.vertice.app.ui.components.PressAccent
 
 enum class VTab(val label: String, val icon: ImageVector) {
     INICIO("Início", IcoAntDesignHomeFilled),
@@ -56,7 +58,7 @@ fun VBottomNav(
             Column(
                 Modifier
                     .weight(1f)
-                    .clickable { onSelect(tab) },
+                    .vClick(PressAccent, scaleDown = 0.92f) { onSelect(tab) },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Icon(tab.icon, null, Modifier.size(23.dp), tint = tint)

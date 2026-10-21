@@ -89,6 +89,17 @@ object VGrad {
         tileMode = androidx.compose.ui.graphics.TileMode.Clamp,
     )
 
+    fun gradCustomer(size: androidx.compose.ui.geometry.Size) = Brush.linearGradient(
+        colorStops = arrayOf(
+            0f to Color(0xFF641BE2),
+            0.4207f to Color(0xFF9B13AC),
+            0.8413f to Color(0xFFD20B76),
+        ),
+        start = androidx.compose.ui.geometry.Offset(size.width * 0.2316f, size.height * 0.1067f),
+        end = androidx.compose.ui.geometry.Offset(size.width * 1.1422f, size.height * 1.3233f),
+        tileMode = androidx.compose.ui.graphics.TileMode.Clamp,
+    )
+
     fun cardPink(size: androidx.compose.ui.geometry.Size) = Brush.linearGradient(
         colorStops = arrayOf(
             0.3125f to Color(0xFF904EF2),

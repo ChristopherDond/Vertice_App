@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -28,12 +29,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -45,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import com.vertice.app.R
 import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
+import com.vertice.app.ui.design.VGrad
 import com.vertice.app.ui.design.vs
 import com.vertice.app.ui.icons.IcoAkarIconsCheck
 import com.vertice.app.ui.icons.IcoBiShuffle
@@ -55,6 +60,8 @@ import com.vertice.app.ui.icons.IcoPathFill
 import com.vertice.app.ui.icons.IcoSirenFill
 import com.vertice.app.ui.icons.IcoShieldCheckFill
 import com.vertice.app.ui.icons.IcoUsersFill
+import com.vertice.app.ui.components.vClick
+import com.vertice.app.ui.components.PressWhite
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 
@@ -76,11 +83,13 @@ private fun WhiteTop() {
 
 @Composable
 private fun HeaderBar() {
+    var headerSize by remember { mutableStateOf(Size.Zero) }
     Box(
         Modifier
             .fillMaxWidth()
             .height(220.dp)
-            .background(Brush.linearGradient(GradCustomer)),
+            .onSizeChanged { headerSize = Size(it.width.toFloat(), it.height.toFloat()) }
+            .background(VGrad.gradCustomer(headerSize)),
     )
 }
 
@@ -142,15 +151,15 @@ private fun DashUploadBox(
                     ),
                 )
             }
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
+            .then(if (onClick != null) Modifier.vClick(scaleDown = 0.95f) { onClick() } else Modifier),
     ) {
         content()
     }
 }
 
 @Composable
-fun FigmaVioleta(onNav: (VTab) -> Unit) {
-    var state by remember { mutableStateOf(VioletaState.VERIFICACAO) }
+fun FigmaVioleta(onNav: (VTab) -> Unit, initialState: VioletaState = VioletaState.VERIFICACAO) {
+    var state by remember { mutableStateOf(initialState) }
 
     Crossfade(state, animationSpec = tween(340), label = "viol") { s ->
         when (s) {
@@ -270,10 +279,10 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
         HeaderBar()
         WhiteTop()
 
-        Image(
-            painterResource(R.drawable.ic_v_shield_header),
+        androidx.compose.foundation.Image(
+            painterResource(R.drawable.ic_v_shield38),
             contentDescription = null,
-            modifier = Modifier.offset(175.dp, 102.dp).size(38.dp),
+            modifier = Modifier.offset(175.75.dp, 102.dp).size(38.dp),
         )
 
         Text(
@@ -341,7 +350,18 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 .clip(RoundedCornerShape(15.dp))
                 .background(CardWhite)
                 .border(1.dp, Color(0xFFE5E5E5), RoundedCornerShape(15.dp))
-                .alpha(0.6f),
+                .alpha(0.6f)
+                .drawBehind {
+                    val sx = density
+                    listOf(455f, 483f).forEach { yDp ->
+                        drawLine(
+                            color = Color(0xFF000000).copy(alpha = 0.14f),
+                            start = Offset(8f * sx, (yDp - 418f) * sx),
+                            end = Offset(340f * sx, (yDp - 418f) * sx),
+                            strokeWidth = 1f * sx,
+                        )
+                    }
+                },
         ) {
             data class Row(
                 val label: String,
@@ -354,46 +374,38 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 val checkW: Float,
             )
             val rows = listOf(
-                Row("Identidade verificada", "Verificado em jan 2026", 108.5f, 153f, 445f, 444.5f, 434f, 18f),
-                Row("Telefone confirmado", "Verificado em jan 2025", 106.5f, 103f, 473f, 473.5f, 464f, 19f),
-                Row("Protocolo violeta", "Verificado em jan 2025", 100.5f, 89f, 499f, 501.5f, 492f, 19f),
+                Row("Identidade verificada", "Verificado em jan 2026", 32f, 153f, 437f, 438f, 434f, 18f),
+                Row("Telefone confirmado", "Verificado em jan 2025", 55f, 103f, 465f, 467f, 464f, 19f),
+                Row("Protocolo violeta", "Verificado em jan 2025", 56f, 89f, 491f, 495f, 492f, 19f),
             )
             rows.forEachIndexed { i, r ->
                 Image(
                     painterResource(R.drawable.ic_v_check_mark),
                     contentDescription = null,
                     modifier = Modifier
-                        .offset(x = (34f - 20f).dp, y = (r.checkTop - 418f).dp)
+                        .offset(x = (34f - 20f - 2.1f).dp, y = (r.checkTop - 418f - 3.6f).dp)
                         .size(width = r.checkW.dp, height = 17.dp),
                 )
                 Text(
                     r.label,
                     modifier = Modifier
-                        .offset(x = (r.labelX - 20f).dp, y = (r.labelTop - 418f - 8f).dp)
+                        .offset(x = (r.labelX - 20f).dp, y = (r.labelTop - 418f - 3.4f).dp)
                         .width(r.labelW.dp),
                     style = vs(10f, 700, 11.76f, 0f, Roboto),
-                    color = Color.Black.copy(alpha = 0.8f),
+                    color = Color.Black,
                     textAlign = TextAlign.Start,
                     maxLines = 1,
                 )
                 Text(
                     r.date,
                     modifier = Modifier
-                        .offset(x = (273f - 20f).dp, y = (r.dateTop - 418f - 6.5f).dp)
+                        .offset(x = (273f - 20f).dp, y = (r.dateTop - 418f - 3.4f).dp)
                         .width(90.dp),
                     style = vs(8f, 400, 10.4f, 0f, Roboto),
                     color = Muted,
                     maxLines = 1,
                 )
-                if (i < 2) {
-                    Box(
-                        Modifier
-                            .offset(8.dp, if (i == 0) 37.dp else 68.dp)
-                            .width(332.dp)
-                            .height(0.5.dp)
-                            .background(Color(0xFF000000)),
-                    )
-                }
+
             }
         }
 
@@ -550,7 +562,7 @@ private fun Ativo(onGo: () -> Unit) {
                 .clip(RoundedCornerShape(15.dp))
                 .background(Color(0x33FFFFFF))
                 .border(0.6.dp, Color(0x66FFFFFF), RoundedCornerShape(15.dp))
-                .clickable { onGo() },
+                .vClick(PressWhite) { onGo() },
             contentAlignment = Alignment.Center,
         ) {
             Text(

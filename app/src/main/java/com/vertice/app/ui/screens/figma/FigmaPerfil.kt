@@ -32,6 +32,8 @@ import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.vs
 import com.vertice.app.ui.icons.IcoAkarIconsCheck
 import com.vertice.app.ui.icons.IcoBoxiconsShieldFilled
+import com.vertice.app.ui.components.vClick
+import com.vertice.app.ui.components.PressSoft
 
 private val PerfilBg = Color(0xFFF7F2FF)
 private val GradPro = listOf(Color(0x00641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
@@ -74,7 +76,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit) {
                         .height(82.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .background(Brush.horizontalGradient(GradPro))
-                        .clickable { },
+                        .vClick(PressSoft) { },
                 ) {
                     Image(
                         painterResource(R.drawable.ic_v_medal),
@@ -195,7 +197,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit) {
                         .height(61.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color(0xFF9386A1))
-                        .clickable { },
+                        .vClick(PressSoft) { },
                 ) {
                     Image(
                         painterResource(R.drawable.ic_v_pencil),

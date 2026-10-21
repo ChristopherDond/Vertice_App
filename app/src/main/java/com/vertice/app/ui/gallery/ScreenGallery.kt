@@ -15,18 +15,22 @@ import androidx.compose.ui.unit.dp
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.T
+import com.vertice.app.ui.screens.figma.ContratarSheet
 import com.vertice.app.ui.screens.figma.FigmaCadastro
 import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
+import com.vertice.app.ui.screens.figma.FigmaMatch
+import com.vertice.app.ui.screens.figma.FigmaPerfilUser
 import com.vertice.app.ui.screens.figma.FigmaSplash
+import com.vertice.app.ui.screens.figma.FigmaVioleta
+import com.vertice.app.ui.screens.figma.VioletaState
+import com.vertice.app.ui.screens.figma.FiltrosDialog
+import com.vertice.app.ui.screens.figma.pros
 
 object Screens {
     val all = listOf(
-        "Splash", "Login", "Cadastro", "EsqueciSenha", "Inicial", "Match",
-        "Filtro", "Perfil", "Configuracoes", "Trilha", "Pro", "ProConfirmacao",
-        "OferecerServico", "ContatarPrestador", "VioletaOff", "VioletaVerify",
-        "VioletaOn", "Financeiro", "FinanceiroReal", "FinanceiroAlt",
-        "CartaoDebito", "BotaoAssinar", "Menu",
+        "PROBE", "Splash", "Login", "Cadastro", "Inicial", "Match", "Perfil", "Violeta",
+        "VioletaDesativado", "VioletaAtivo", "PopupContratar", "PopupFiltros",
     )
 }
 
@@ -38,27 +42,19 @@ fun ScreenGallery(id: String) {
             "Splash" -> FigmaSplash()
             "Login" -> FigmaLogin()
             "Cadastro" -> FigmaCadastro()
-            "EsqueciSenha" -> Placeholder("EsqueciSenha")
             "Inicial" -> FigmaInicial()
-            "Match" -> Placeholder("Match")
-            "Filtro" -> Placeholder("Filtro")
-            "Perfil" -> Placeholder("Perfil")
-            "Configuracoes" -> Placeholder("Configuracoes")
-            "Trilha" -> Placeholder("Trilha")
-            "Pro" -> Placeholder("Pro")
-            "ProConfirmacao" -> Placeholder("ProConfirmacao")
-            "OferecerServico" -> Placeholder("OferecerServico")
-            "ContatarPrestador" -> Placeholder("ContatarPrestador")
-            "VioletaOff" -> Placeholder("VioletaOff")
-            "VioletaVerify" -> Placeholder("VioletaVerify")
-            "VioletaOn" -> Placeholder("VioletaOn")
-            "Financeiro" -> Placeholder("Financeiro")
-            "FinanceiroReal" -> Placeholder("FinanceiroReal")
-            "FinanceiroAlt" -> Placeholder("FinanceiroAlt")
-            "CartaoDebito" -> Placeholder("CartaoDebito")
-            "BotaoAssinar" -> Placeholder("BotaoAssinar")
-            "Menu" -> Placeholder("Menu")
-            else -> Placeholder("?$id")
+            "Match", "PopupContratar", "PopupFiltros" ->
+                FigmaMatch(onNav = {}, onContratar = {}, onFiltros = {}, onVerPerfil = {})
+            "Perfil" -> FigmaPerfilUser(onNav = {})
+            "Violeta" -> FigmaVioleta(onNav = {})
+            "VioletaDesativado" -> FigmaVioleta(onNav = {}, initialState = VioletaState.DESATIVADO)
+            "VioletaAtivo" -> FigmaVioleta(onNav = {}, initialState = VioletaState.ATIVO)
+            else -> Placeholder(id)
+        }
+        when (id) {
+            "PopupContratar" -> ContratarSheet(pros[0], onDismiss = {})
+            "PopupFiltros" -> FiltrosDialog(onDismiss = {})
+            else -> Unit
         }
     }
 }

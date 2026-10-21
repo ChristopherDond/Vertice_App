@@ -91,7 +91,7 @@ object PerfilMock {
 }
 
 @Composable
-fun FigmaPerfilUser(onNav: (VTab) -> Unit) {
+fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}) {
     val scroll = rememberScrollState()
     Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
         Column(
@@ -138,7 +138,8 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit) {
                     .fillMaxWidth(),
             )
             SettingsButton(
-                Modifier
+                onClick = onSettings,
+                modifier = Modifier
                     .padding(start = 19.dp, top = 13.dp, end = 14.dp)
                     .fillMaxWidth(),
             )
@@ -398,13 +399,13 @@ private fun TrailRow(item: TrailItem) {
 }
 
 @Composable
-private fun SettingsButton(modifier: Modifier = Modifier) {
+private fun SettingsButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier
             .height(61.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(VPerfil.configBg)
-            .vClick(PressSoft) {}
+            .vClick(PressSoft, onClick = onClick)
             .semantics { contentDescription = PerfilMock.settings },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,

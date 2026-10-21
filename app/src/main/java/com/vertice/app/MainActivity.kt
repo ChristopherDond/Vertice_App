@@ -30,6 +30,7 @@ import com.vertice.app.ui.screens.figma.FigmaCadastro
 import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
 import com.vertice.app.ui.screens.figma.FigmaMatch
+import com.vertice.app.ui.screens.figma.FigmaEditarPerfil
 import com.vertice.app.ui.screens.figma.FigmaPerfilUser
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL }
+private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL, EDITAR_PERFIL }
 
 @Composable
 private fun Flow() {
@@ -97,14 +98,21 @@ private fun Flow() {
                     else -> {}
                 }
             })
-            Step.PERFIL -> FigmaPerfilUser(onNav = { tab ->
-                when (tab) {
-                    VTab.INICIO -> step = Step.INICIAL
-                    VTab.MATCH -> step = Step.MATCH
-                    VTab.VIOLETA -> step = Step.VIOLETA
-                    else -> {}
-                }
-            })
+            Step.PERFIL -> FigmaPerfilUser(
+                onNav = { tab ->
+                    when (tab) {
+                        VTab.INICIO -> step = Step.INICIAL
+                        VTab.MATCH -> step = Step.MATCH
+                        VTab.VIOLETA -> step = Step.VIOLETA
+                        else -> {}
+                    }
+                },
+                onSettings = { step = Step.EDITAR_PERFIL },
+            )
+            Step.EDITAR_PERFIL -> FigmaEditarPerfil(
+                onBack = { step = Step.PERFIL },
+                onLogout = { step = Step.LOGIN },
+            )
         }
     }
 

@@ -1,6 +1,7 @@
 package com.vertice.app
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 
 import androidx.compose.foundation.background
 
@@ -43,6 +44,7 @@ import kotlinx.coroutines.launch
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
 import com.vertice.app.ui.screens.figma.FiltrosDialog
+import com.vertice.app.ui.screens.figma.PerfilPrestadorDialog
 import com.vertice.app.ui.screens.figma.ProMatch
 import com.vertice.app.ui.screens.figma.VTab
 import com.vertice.app.ui.theme.VerticeTheme
@@ -68,12 +70,17 @@ private fun Flow() {
     var step by remember { mutableStateOf(Step.SPLASH) }
     var contratar by remember { mutableStateOf<ProMatch?>(null) }
     var filtros by remember { mutableStateOf(false) }
+    var verPerfil by remember { mutableStateOf<ProMatch?>(null) }
     var licao by remember { mutableStateOf<Lesson?>(null) }
     var proCobranca by remember { mutableStateOf("" to "") }
     val scope = rememberCoroutineScope()
 
-    BackHandler(enabled = contratar != null || filtros) {
-        if (filtros) filtros = false else contratar = null
+    BackHandler(enabled = contratar != null || filtros || verPerfil != null) {
+        when {
+            contratar != null -> contratar = null
+            verPerfil != null -> verPerfil = null
+            else -> filtros = false
+        }
     }
 
     Crossfade(targetState = step, animationSpec = tween(320), label = "flow") { current ->
@@ -124,7 +131,7 @@ private fun Flow() {
                 },
                 onContratar = { contratar = it },
                 onFiltros = { filtros = true },
-                onVerPerfil = { step = Step.PERFIL },
+                onVerPerfil = { verPerfil = it },
             )
             Step.VIOLETA -> FigmaVioleta(onNav = { tab ->
                 when (tab) {
@@ -181,6 +188,24 @@ private fun Flow() {
             )
             Box(Modifier.align(Alignment.BottomCenter)) {
                 FiltrosDialog { filtros = false }
+            }
+        }
+        verPerfil?.let { p ->
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { verPerfil = null },
+            )
+            Box(Modifier.align(Alignment.BottomCenter)) {
+                PerfilPrestadorDialog(
+                    p = p,
+                    onDismiss = { verPerfil = null },
+                    onContact = { verPerfil = null; contratar = p },
+                )
             }
         }
     }

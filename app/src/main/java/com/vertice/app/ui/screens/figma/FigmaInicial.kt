@@ -230,7 +230,7 @@ fun FigmaInicial(
                 }
                 T("PERFIL", 140, 28, 60, 10f, 800, Color.White, 1, 11.76f)
                 T("Complete seu perfil\npara mais matches", 140, 39, 135, 10f, 500, Color.White, 2, 15.3f)
-                Ico(IcoDashiconsArrowRightAlt2, 322, 42, 20, 20, Color(0x6EFFFFFF))
+                Ico(IcoDashiconsArrowRightAlt2, 293, 43, 20, 20, Color(0xB3FFFFFF))
             }
 
             Btn("Encontrar Parceiro", 30, 371, 157, Purple, Color.White) { onEncontrarParceiro() }

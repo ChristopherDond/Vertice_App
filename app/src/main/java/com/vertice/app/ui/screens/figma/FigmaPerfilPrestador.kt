@@ -1,0 +1,228 @@
+package com.vertice.app.ui.screens.figma
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.vertice.app.ui.components.PressWhite
+import com.vertice.app.ui.components.vClick
+import com.vertice.app.ui.design.Roboto
+import com.vertice.app.ui.design.vs
+import com.vertice.app.ui.icons.IcoAntDesignStarFilled
+import com.vertice.app.ui.icons.IcoBiChatLeftTextFill
+
+private val SheetBg = Color(0xFFF1E9FD)
+private val CardBg = Color(0xFFFFFCFC)
+private val Ink = Color(0xFF4D3274)
+private val SoftInk = Color(0xC24D3274)
+private val Purple = Color(0xFF904EF2)
+private val Pink = Color(0xFFEC4899)
+private val Green = Color(0xFF1E7629)
+private val Star = Color(0xFFEBB400)
+
+private data class Avaliacao(val autor: String, val nota: Int, val texto: String, val quando: String)
+
+// Dados de exemplo (protótipo). Trocar por repositório quando houver backend.
+private fun avaliacoesDe(p: ProMatch): List<Avaliacao> = when (p.name) {
+    "Camila Ferreira" -> listOf(
+        Avaliacao("Marta S.", 5, "Organizou o fluxo de caixa da minha loja em uma semana. Explica tudo de forma simples.", "há 3 dias"),
+        Avaliacao("João P.", 5, "Me ajudou a entender os impostos do MEI sem enrolação.", "há 2 semanas"),
+    )
+    "Carlos Mendes" -> listOf(
+        Avaliacao("Ana L.", 5, "Chegou no horário e deixou tudo limpo. Recomendo.", "há 5 dias"),
+        Avaliacao("Roberto T.", 5, "Serviço bem feito e preço justo.", "há 1 semana"),
+    )
+    "André Pereira" -> listOf(
+        Avaliacao("Cláudia M.", 5, "Cumpriu o cronograma da reforma do começo ao fim.", "há 4 dias"),
+        Avaliacao("Paulo R.", 4, "Ótima coordenação da equipe, pequeno atraso na entrega.", "há 3 semanas"),
+    )
+    else -> listOf(
+        Avaliacao("Fernanda C.", 5, "Montou a vitrine e organizou o estoque. A loja ficou outra.", "há 6 dias"),
+        Avaliacao("Bia N.", 4, "Atenciosa e pontual.", "há 2 semanas"),
+    )
+}
+
+@Composable
+fun PerfilPrestadorDialog(p: ProMatch, onDismiss: () -> Unit, onContact: () -> Unit) {
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { shown = true }
+    val enter by animateFloatAsState(if (shown) 1f else 0f, tween(300), label = "perfilPrestadorEnter")
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(max = 680.dp)
+            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+            .graphicsLayer { translationY = (1f - enter) * 80.dp.toPx() }
+            .background(SheetBg)
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+            .padding(top = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(Modifier.size(width = 59.dp, height = 5.dp).clip(RoundedCornerShape(100.dp)).background(Color(0xFFCCCCCC)))
+
+        Column(
+            Modifier
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 30.dp, vertical = 20.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(72.dp)) {
+                    Image(
+                        painterResource(p.photo),
+                        contentDescription = p.name,
+                        modifier = Modifier.size(72.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                    if (p.online) {
+                        Box(
+                            Modifier.align(Alignment.BottomEnd).size(14.dp).clip(CircleShape).background(Color.White).padding(2.dp)
+                                .clip(CircleShape).background(Green),
+                        )
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(p.name, style = vs(18f, 800, 22f, 0f, Roboto), color = Color.Black, maxLines = 1)
+                    Text(p.role, style = vs(13f, 400, 17f, 0f, Roboto), color = SoftInk, maxLines = 1)
+                    Spacer(Modifier.height(6.dp))
+                    Box(
+                        Modifier
+                            .clip(RoundedCornerShape(100.dp))
+                            .background(Color(0x59CAA6FF))
+                            .border(1.dp, Color(0x59904EF2), RoundedCornerShape(100.dp))
+                            .padding(horizontal = 10.dp, vertical = 3.dp),
+                    ) {
+                        Text(p.tag, style = vs(10f, 500, 12f, 0f, Roboto), color = Color(0xFF883FF4), maxLines = 1)
+                    }
+                }
+                Column(
+                    Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFE8D9FF))
+                        .border(1.dp, Color(0xFF9657F3), RoundedCornerShape(10.dp))
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("${p.match}%", style = vs(20f, 800, 24f, 0f, Roboto), color = Color(0xFF9657F3))
+                    Text("match", style = vs(8f, 300, 10f, 0f, Roboto), color = Color.Black)
+                }
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFEDEDED))
+                    .border(0.75.dp, Color(0xFFD5D5D5), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Icon(IcoAntDesignStarFilled, null, Modifier.size(14.dp), tint = Star)
+                Text(p.rating, style = vs(11f, 600, 14f, 0f, Roboto), color = Color.Black)
+                Box(Modifier.width(1.dp).height(16.dp).background(Color(0xFFCFCFCF)))
+                Text("${p.services} serviços", style = vs(11f, 300, 14f, 0f, Roboto), color = Color(0xFF432473))
+                Box(Modifier.width(1.dp).height(16.dp).background(Color(0xFFCFCFCF)))
+                Text(p.status, style = vs(11f, 800, 14f, 0f, Roboto), color = Green, maxLines = 1)
+            }
+
+            Spacer(Modifier.height(20.dp))
+            Text("Sobre", style = vs(14f, 800, 18f, 0f, Roboto), color = Ink)
+            Spacer(Modifier.height(6.dp))
+            Text(p.desc, style = vs(13f, 400, 18f, 0f, Roboto), color = SoftInk)
+
+            Spacer(Modifier.height(20.dp))
+            Text("Avaliações recentes", style = vs(14f, 800, 18f, 0f, Roboto), color = Ink)
+            Spacer(Modifier.height(8.dp))
+            avaliacoesDe(p).forEach { a ->
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 10.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(CardBg)
+                        .padding(14.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(a.autor, style = vs(12f, 700, 16f, 0f, Roboto), color = Color.Black, modifier = Modifier.weight(1f))
+                        repeat(a.nota) { Icon(IcoAntDesignStarFilled, null, Modifier.size(11.dp), tint = Star) }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(a.texto, style = vs(12f, 400, 16f, 0f, Roboto), color = SoftInk)
+                    Spacer(Modifier.height(4.dp))
+                    Text(a.quando, style = vs(10f, 400, 13f, 0f, Roboto), color = Color(0x994D3274))
+                }
+            }
+        }
+
+        Row(
+            Modifier.fillMaxWidth().padding(start = 30.dp, end = 30.dp, top = 4.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(41.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(CardBg)
+                    .border(0.75.dp, Color(0xFFE0E0E0), RoundedCornerShape(15.dp))
+                    .vClick(PressWhite) { onDismiss() },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("Fechar", style = vs(14f, 800, 17f, 0f, Roboto), color = Color.Black)
+            }
+            Row(
+                Modifier
+                    .weight(1f)
+                    .height(41.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(Pink)
+                    .vClick(PressWhite) { onContact() },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(IcoBiChatLeftTextFill, null, Modifier.size(14.dp), tint = Color.White)
+                Spacer(Modifier.width(8.dp))
+                Text("Contatar", style = vs(14f, 800, 17f, 0f, Roboto), color = Color.White)
+            }
+        }
+    }
+}

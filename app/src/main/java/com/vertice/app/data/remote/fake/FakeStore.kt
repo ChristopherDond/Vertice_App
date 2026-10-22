@@ -190,65 +190,84 @@ object FakeStore {
         emergencyButtonEnabled = true,
     )
 
-    var trilhaDone: MutableSet<String> = mutableSetOf(
-        "s1", "s2", "s3", "d1", "d2", "d3",
-    )
+    var trilhaDone: MutableSet<String> = mutableSetOf()
 
+    // Conteúdo da Trilha de Blindagem. Sem valores em reais nem percentuais:
+    // eles mudam todo ano — a lição aponta para o gov.br/mei.
+    // O id da lição é letra(s) + número: LearningRepositoryImpl usa a parte de letras como moduleId.
     val modules: List<ModuleDto> = listOf(
         ModuleDto("m1", "Segurança Pessoal", listOf(
             LessonDto("s1", "Proteção digital", listOf(
-                LessonCardDto("Sua identidade online", "Use senhas únicas para cada app. Ative verificação em duas etapas no WhatsApp: Configurações → Conta → Verificação.", "Nunca compartilhe códigos de verificação, nem com \"suporte técnico\"."),
-                LessonCardDto("Cuidado com golpes", "Desconfie de mensagens urgentes pedindo dinheiro ou dados. Golpistas criam urgência falsa para você agir sem pensar.", "Recebeu proposta suspeita? Pesquise o CPF no Serasa antes de responder."),
+                LessonCardDto("Senhas e verificação em duas etapas", "Use uma senha diferente para cada aplicativo importante e ative a verificação em duas etapas no WhatsApp e no e-mail. Assim, mesmo que alguém descubra sua senha, não consegue entrar sozinho.", "Nunca passe códigos recebidos por SMS ou aplicativo para ninguém, nem para quem diz ser do suporte."),
+                LessonCardDto("Golpes que usam a pressa", "Golpistas criam urgência para você agir sem pensar: pedido de Pix \"para liberar o pagamento\", link para \"atualizar cadastro\", cliente que paga a mais e pede o troco de volta. Respire e confirme por outro canal.", "Desconfie de qualquer pedido de dinheiro antes de começar o serviço. Se algo parecer estranho, pare e converse com alguém de confiança."),
+                LessonCardDto("O celular é a sua loja", "Use bloqueio de tela, mantenha os aplicativos atualizados e baixe apenas das lojas oficiais. Se perder o celular, bloqueie o chip e troque as senhas o quanto antes.", "Guarde uma cópia dos seus contatos de clientes fora do aparelho."),
             )),
             LessonDto("s2", "Segurança em Reuniões", listOf(
-                LessonCardDto("Primeiro encontro", "Marque em local público e movimentado: café, coworking ou shopping. Avise alguém de confiança onde você estará.", "Use a Rota Segura do Protocolo Violeta para compartilhar localização."),
+                LessonCardDto("Primeiro encontro", "Marque em local público e movimentado: café, coworking ou shopping. Avise alguém de confiança onde você estará e a que horas pretende voltar.", "Use a Rota Segura do Protocolo Violeta para compartilhar sua localização."),
                 LessonCardDto("Sinais de alerta", "Desconfie de quem pede desconto antes de ver o trabalho, exige sigilo total ou pressiona para assinar na hora.", "Você tem o direito de encerrar qualquer negociação que cause desconforto."),
+                LessonCardDto("Reunião online", "Prefira aplicativos de chamada conhecidos, confirme quem está do outro lado antes de compartilhar a tela ou documentos e não envie documentos pessoais sem necessidade.", "Se a pessoa não quer mostrar o rosto nem se identificar, trate como sinal de alerta."),
             )),
-            LessonDto("s3", "Contratos simples", listOf(
-                LessonCardDto("Por que usar contrato?", "Mesmo simples, um contrato protege ambas as partes. Inclua: o que será feito, prazo, valor total e forma de pagamento.", "Contrato via WhatsApp ou e-mail também tem validade legal no Brasil."),
-                LessonCardDto("O que não pode faltar", "Nome e CPF de ambos, descrição clara do serviço, valor, forma de pagamento e o que acontece se alguém desistir.", "Guarde sempre uma cópia. Print de conversa ou PDF enviado por e-mail servem."),
+            LessonDto("s3", "Contratos seguros", listOf(
+                LessonCardDto("Por que usar contrato?", "Mesmo simples, um contrato protege os dois lados. Ele registra o que será feito, o prazo, o valor total e a forma de pagamento.", "Contrato por e-mail ou mensagem também serve como prova do combinado."),
+                LessonCardDto("O que não pode faltar", "Nome e CPF (ou CNPJ) de ambos, descrição clara do serviço, valor, forma de pagamento e o que acontece se alguém desistir.", "Guarde sempre uma cópia: PDF por e-mail ou conversa salva."),
+                LessonCardDto("Cuidado antes de assinar", "Leia tudo antes de assinar, inclusive multas e prazos. Não assine nada em branco nem sob pressão. Se não entender uma parte, peça para explicarem.", "Em caso de dúvida, procure o Sebrae ou o Procon da sua cidade."),
             )),
         )),
         ModuleDto("m2", "Direitos do MEI", listOf(
             LessonDto("d1", "O que é MEI", listOf(
-                LessonCardDto("Microempreendedor Individual", "MEI é um registro que formaliza seu negócio com CNPJ próprio. Faturamento de até R$81.000/ano com direitos de trabalhadora.", "Com CNPJ você acessa crédito mais fácil e pode emitir nota fiscal."),
-                LessonCardDto("Quanto custa?", "Mensalidade varia por área: R$72 para comércio, R$76 para serviços. Paga via DAS (boleto mensal) até o dia 20.", "Acesse gov.br/mei para emitir o DAS gratuitamente todo mês."),
+                LessonCardDto("Microempreendedor Individual", "MEI é a forma de formalizar um pequeno negócio com CNPJ próprio. Existe um limite de faturamento por ano e uma lista de atividades que podem ser MEI.", "Consulte o limite e a lista de atividades atualizados no Portal do Empreendedor (gov.br/mei)."),
+                LessonCardDto("Por que formalizar?", "Com CNPJ você pode emitir nota fiscal, abrir conta e pedir crédito como empresa, e passa a contribuir para a Previdência (INSS), com direito a benefícios.", "Abrir o MEI é gratuito. Desconfie de sites que cobram para fazer o cadastro."),
             )),
             LessonDto("d2", "Obrigações fiscais", listOf(
-                LessonCardDto("O que você precisa fazer", "Pagar o DAS mensalmente e entregar a Declaração Anual do Simples (DASN-SIMEI) até 31 de maio de cada ano.", "A declaração anual é gratuita e feita pelo site do governo. Não precisa de contador."),
-                LessonCardDto("Emissão de nota fiscal", "Algumas prefeituras exigem nota para serviços. Verifique na prefeitura da sua cidade como emitir a NFS-e.", "Guardar comprovantes facilita muito na hora da declaração anual."),
+                LessonCardDto("Pagar o DAS todo mês", "O DAS é o boleto único mensal do MEI. O valor depende da atividade e é atualizado pelo governo. O vencimento é no dia 20 de cada mês.", "Emita o DAS só pelo gov.br/mei ou pelo aplicativo MEI. Cuidado com boletos falsos enviados por mensagem."),
+                LessonCardDto("Declaração anual", "Todo ano o MEI entrega a Declaração Anual de Faturamento (DASN-SIMEI) até 31 de maio, pelo Portal do Empreendedor. É gratuita e dá para fazer sem contador.", "Guarde notas e comprovantes: eles ajudam a informar o faturamento do ano."),
+                LessonCardDto("Nota fiscal", "Quando você vende ou presta serviço para outra empresa, precisa emitir nota fiscal. Para pessoa física, a regra depende da atividade e do município.", "Confirme na prefeitura da sua cidade como emitir a nota de serviço."),
             )),
             LessonDto("d3", "Benefícios do INSS", listOf(
-                LessonCardDto("Você tem direito a", "Aposentadoria por idade, auxílio-doença, salário-maternidade (4 meses), pensão por morte — tudo com o DAS em dia.", "Você precisa de ao menos 12 meses de contribuição para acessar auxílio-doença."),
-                LessonCardDto("Salário-maternidade", "A MEI tem direito a 4 meses de salário mínimo. Solicite pelo site Meu INSS com antecedência.", "Continue pagando o DAS durante a licença para não perder a qualidade de segurada."),
+                LessonCardDto("Você tem direito a", "Com o DAS em dia, o MEI conta com aposentadoria por idade, auxílio por incapacidade temporária (antigo auxílio-doença), salário-maternidade e pensão por morte para a família. Cada benefício tem um tempo mínimo de contribuição.", "Se parar de pagar o DAS, você pode perder a proteção da Previdência. Regularize assim que puder."),
+                LessonCardDto("Salário-maternidade", "A MEI que cumpre o tempo mínimo de contribuição pode receber salário-maternidade por 120 dias. O pedido é feito pelo Meu INSS (aplicativo ou site).", "Guarde os comprovantes de pagamento do DAS: eles podem ser pedidos na análise."),
             )),
         )),
-        ModuleDto("m3", "Gestão de Clientes", listOf(
+        ModuleDto("m3", "Melhores Contratos", listOf(
+            LessonDto("c1", "Contrato simples e claro", listOf(
+                LessonCardDto("O básico de um bom contrato", "Escreva quem contrata e quem presta o serviço, o que será entregue, o prazo, o valor e a forma de pagamento. Frases curtas e linguagem do dia a dia evitam mal-entendidos.", "Contrato claro não precisa de palavras difíceis: precisa ser entendido pelos dois lados."),
+                LessonCardDto("Combinado por escrito vale", "Um acordo por e-mail ou mensagem também serve de prova. Peça que o cliente responda \"de acordo\" e guarde a conversa.", "Salve as conversas e os arquivos importantes em um lugar seguro."),
+            )),
+            LessonDto("c2", "Orçamento e entrada", listOf(
+                LessonCardDto("Orçamento por escrito", "Antes de começar, envie um orçamento com o que está incluído, o que não está e quanto custa cada parte. Assim o cliente sabe o que esperar e você evita pedidos extras de graça.", "Defina quantos ajustes ou revisões já estão incluídos no preço."),
+                LessonCardDto("Entrada e forma de pagamento", "Combinar uma entrada ajuda a cobrir seus materiais e mostra compromisso dos dois lados. Combine também como e quando o restante será pago e registre tudo por escrito.", "Prefira pagamentos que deixam comprovante, como Pix ou transferência, e guarde o comprovante."),
+            )),
+            LessonDto("c3", "Prazos, entregas e cancelamento", listOf(
+                LessonCardDto("Prazo e entrega", "Combine as datas de início e de entrega e o que acontece se um dos lados atrasar. Se o cliente precisa enviar algo (medidas, fotos, materiais), coloque isso no combinado.", "Avise o cliente logo que perceber que um prazo pode mudar."),
+                LessonCardDto("E se mudar de ideia?", "Escreva como funciona o cancelamento: o que é devolvido, o que fica para cobrir o trabalho já feito e com quanta antecedência avisar. Isso evita conflito e protege os dois.", "Se não houver acordo, tente primeiro conversar; depois, o Procon da sua cidade pode orientar."),
+            )),
+        )),
+        ModuleDto("m4", "Gestão de Clientes", listOf(
             LessonDto("g1", "Atendimento profissional", listOf(
-                LessonCardDto("Primeira impressão importa", "Responda em até 2 horas úteis. Use linguagem clara e educada. Apresente-se com nome e o que você faz.", "Crie mensagem de boas-vindas automática no WhatsApp Business para fora do horário."),
-                LessonCardDto("Como lidar com reclamações", "Ouça sem interromper. Reconheça o problema, peça desculpas se for o caso, e proponha solução concreta com prazo.", "Um cliente que teve um problema resolvido bem se torna fiel e indica você."),
+                LessonCardDto("Primeira impressão importa", "Responda com educação e clareza, apresente seu nome e o que você faz, e diga em quanto tempo vai retornar. Cumprir o prazo que você mesmo anunciou passa confiança.", "No WhatsApp Business você pode criar mensagem de saudação e de ausência."),
+                LessonCardDto("Como lidar com reclamações", "Ouça sem interromper. Reconheça o problema, peça desculpas se for o caso e proponha uma solução concreta com prazo.", "Um problema bem resolvido pode fortalecer a confiança do cliente."),
             )),
             LessonDto("g2", "Como cobrar corretamente", listOf(
-                LessonCardDto("Defina seu preço com clareza", "Seja transparente sobre o valor antes de começar. Envie um orçamento escrito com o que está incluído.", "Nunca comece um serviço sem pelo menos 30-50% de entrada."),
-                LessonCardDto("Inadimplência", "Envie lembrete gentil 1 dia antes do vencimento. Se atrasar, contate diretamente — sem ameaças, mas com firmeza.", "Use o Serasa para consultar o CPF de clientes novos antes de fazer crédito."),
+                LessonCardDto("Defina seu preço com clareza", "Seja transparente sobre o valor antes de começar. Envie um orçamento escrito com o que está incluído.", "Combine entrada e forma de pagamento antes de iniciar (veja o módulo Melhores Contratos)."),
+                LessonCardDto("Atraso no pagamento", "Envie um lembrete gentil um dia antes do vencimento. Se atrasar, entre em contato direto, sem ameaças, mas com firmeza.", "Com clientes novos, prefira receber parte antes de começar em vez de dar prazo longo."),
             )),
             LessonDto("g3", "Fidelização de clientes", listOf(
-                LessonCardDto("Clientes que voltam", "Manter um cliente custa 5x menos que conquistar um novo. Mande mensagem no aniversário, avise promoções, pergunte como foi.", "Um cliente satisfeito indica em média 3 pessoas. Peça avaliação ao final."),
-                LessonCardDto("Programa simples de fidelidade", "A cada 5 serviços, ofereça desconto ou benefício. Mesmo algo pequeno cria lealdade.", "Anote dados dos clientes frequentes: nome, serviço preferido, última data."),
+                LessonCardDto("Clientes que voltam", "Manter contato depois do serviço, perguntando se ficou satisfeito e avisando novidades, ajuda o cliente a lembrar de você e a indicar para outras pessoas.", "Peça uma avaliação ou indicação ao final do serviço, com educação."),
+                LessonCardDto("Programa simples de fidelidade", "A cada certo número de serviços, ofereça um desconto ou um pequeno benefício. Mesmo algo simples cria vínculo.", "Anote o nome, o serviço preferido e a data do último atendimento dos clientes frequentes."),
             )),
         )),
-        ModuleDto("m4", "Melhores Contratos", listOf(
+        ModuleDto("m5", "Finanças do Negócio", listOf(
             LessonDto("f1", "Controle de gastos", listOf(
-                LessonCardDto("Separe pessoal do profissional", "Tenha uma conta bancária separada para o negócio, mesmo que gratuita (Nubank, Inter, C6 Bank).", "Misturar dinheiro pessoal e do negócio é a principal causa de dívidas entre MEIs."),
-                LessonCardDto("Anote tudo", "Use planilha simples ou app gratuito (Organizze, Mobills) para registrar toda entrada e saída semanalmente.", "Com 3 meses de dados você já consegue ver os meses mais fracos e se planejar."),
+                LessonCardDto("Separe o pessoal do profissional", "Se puder, use uma conta separada para o negócio. Misturar o dinheiro da casa com o do trabalho dificulta saber se você está tendo lucro.", "Compare as tarifas antes de escolher um banco ou conta para o negócio."),
+                LessonCardDto("Anote tudo", "Registre toda entrada e toda saída, toda semana, em caderno, planilha ou aplicativo gratuito. Depois de alguns meses você enxerga os meses mais fracos e se planeja melhor.", "Escolha um dia fixo da semana para atualizar suas anotações."),
             )),
             LessonDto("f2", "Como precificar", listOf(
-                LessonCardDto("A fórmula básica", "Custo + Despesas fixas + Margem de lucro = Preço. Inclua tempo de deslocamento, materiais e retrabalho.", "Pesquise quanto cobram outros profissionais da sua área antes de definir seu preço."),
-                LessonCardDto("Por hora vs. por projeto", "Cobrar por hora é mais fácil no início. Por projeto é melhor quando você já sabe quanto tempo cada trabalho leva.", "Nunca reduza o preço abaixo do custo — trabalhar no prejuízo não sustenta o negócio."),
+                LessonCardDto("A fórmula básica", "Custo + despesas fixas + margem de lucro = preço. Inclua tempo de deslocamento, materiais e retrabalho.", "Pesquise o que outros profissionais da sua área cobram antes de definir seu preço."),
+                LessonCardDto("Por hora ou por projeto", "Cobrar por hora é mais simples no começo. Por projeto funciona melhor quando você já sabe quanto tempo cada trabalho leva.", "Evite cobrar abaixo do seu custo: trabalhar no prejuízo não sustenta o negócio."),
             )),
             LessonDto("f3", "Primeiros investimentos", listOf(
-                LessonCardDto("Reserva de emergência primeiro", "Antes de investir, tenha 3 meses de despesas em conta que rende acima da poupança (CDB ou Tesouro Selic).", "Nubank e PicPay oferecem rendimento automático sem custo."),
-                LessonCardDto("Invista no negócio", "Depois da reserva, invista em ferramentas, cursos e divulgação. Um celular melhor para fotos pode dobrar seus pedidos.", "Instagram e WhatsApp Business são as ferramentas mais baratas e eficazes para MEI."),
+                LessonCardDto("Reserva para imprevistos primeiro", "Antes de investir, monte uma reserva para cobrir alguns meses de despesas, em uma aplicação segura da qual você consiga resgatar o dinheiro rápido.", "Desconfie de promessa de ganho garantido e rápido."),
+                LessonCardDto("Invista no negócio", "Depois da reserva, invista no que faz o negócio render: ferramentas, cursos e divulgação. Um bom celular para fotografar seus produtos, por exemplo, ajuda a mostrar seu trabalho.", "Redes sociais e WhatsApp Business são formas de divulgar com baixo custo."),
             )),
         )),
     )

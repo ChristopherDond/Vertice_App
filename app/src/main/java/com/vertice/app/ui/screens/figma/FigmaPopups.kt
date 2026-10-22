@@ -58,6 +58,7 @@ import com.vertice.app.ui.design.Inter
 import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.vs
+import com.vertice.app.ui.components.moneyInput
 import com.vertice.app.ui.icons.IcoAkarIconsCircleCheckFill
 import com.vertice.app.ui.components.vClick
 import com.vertice.app.ui.components.PressWhite
@@ -401,8 +402,9 @@ fun ContratarSheet(p: ProMatch, onDismiss: () -> Unit) {
                     )
                     BasicTextField(
                         value = orcamento,
-                        onValueChange = { v -> orcamento = v.filter { c -> c.isDigit() || c == ',' } },
+                        onValueChange = { v -> orcamento = v.moneyInput() },
                         singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                         textStyle = vs(15f, 300, 18f, 0f, Inter).copy(color = VColor.Ink),
                         modifier = Modifier
                             .offset(x = 34.dp, y = 10.dp)

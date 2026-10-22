@@ -67,6 +67,7 @@ interface FinanceRepository {
 interface LearningRepository {
     suspend fun modules(): VerticeResult<List<TModule>>
     fun progress(): Flow<Set<String>>
+    fun studyStreakDays(): Flow<Int>
     suspend fun markLesson(lessonId: String, done: Boolean): VerticeResult<Unit>
 }
 

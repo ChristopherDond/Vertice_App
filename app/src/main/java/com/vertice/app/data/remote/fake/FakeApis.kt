@@ -327,7 +327,9 @@ class FakeSubscriptionApi : SubscriptionApi {
             status = "UP_TO_DATE",
             autoRenew = true,
             autoRenewMethod = body.paymentMethod,
-            nextChargeDate = "08/01/2026",
+            nextChargeDate = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale("pt", "BR")).format(
+                java.util.Calendar.getInstance().apply { add(java.util.Calendar.MONTH, 1) }.time,
+            ),
         )
         FakeStore.currentUser = FakeStore.currentUser.copy(isPro = true)
         return FakeStore.subscription

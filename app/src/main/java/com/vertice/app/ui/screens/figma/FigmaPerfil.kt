@@ -91,7 +91,7 @@ object PerfilMock {
 }
 
 @Composable
-fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}) {
+fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}) {
     val scroll = rememberScrollState()
     Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
         Column(
@@ -133,7 +133,8 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}) {
             )
             SkillsRow(Modifier.padding(start = 17.dp, top = 7.dp))
             TrailCard(
-                Modifier
+                onOpen = onTrail,
+                modifier = Modifier
                     .padding(start = 19.dp, top = 15.dp, end = 14.dp)
                     .fillMaxWidth(),
             )
@@ -244,7 +245,7 @@ private fun SkillsRow(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TrailCard(modifier: Modifier = Modifier) {
+private fun TrailCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier
             .clip(RoundedCornerShape(15.dp))
@@ -294,7 +295,7 @@ private fun TrailCard(modifier: Modifier = Modifier) {
             Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
-                .vClick(PressSoft) {}
+                .vClick(PressSoft, onClick = onOpen)
                 .semantics { contentDescription = PerfilMock.trailFooter },
             verticalAlignment = Alignment.CenterVertically,
         ) {

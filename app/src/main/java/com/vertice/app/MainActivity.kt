@@ -31,7 +31,15 @@ import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
 import com.vertice.app.ui.screens.figma.FigmaMatch
 import com.vertice.app.ui.screens.figma.FigmaEditarPerfil
+import com.vertice.app.ui.screens.figma.FigmaOferecerServico
 import com.vertice.app.ui.screens.figma.FigmaPerfilUser
+import com.vertice.app.ui.screens.figma.FigmaPro
+import com.vertice.app.ui.screens.figma.FigmaProConfirmacao
+import com.vertice.app.ui.screens.figma.FigmaTrilhaRoute
+import com.vertice.app.ui.screens.learn.LessonScreen
+import com.vertice.app.domain.model.Lesson
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
 import com.vertice.app.ui.screens.figma.FiltrosDialog
@@ -53,13 +61,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL, EDITAR_PERFIL }
+private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL, EDITAR_PERFIL, TRILHA, LICAO, PRO, PRO_CONFIRMACAO, OFERECER_SERVICO }
 
 @Composable
 private fun Flow() {
     var step by remember { mutableStateOf(Step.SPLASH) }
     var contratar by remember { mutableStateOf<ProMatch?>(null) }
     var filtros by remember { mutableStateOf(false) }
+    var licao by remember { mutableStateOf<Lesson?>(null) }
+    var proCobranca by remember { mutableStateOf("" to "") }
+    val scope = rememberCoroutineScope()
 
     BackHandler(enabled = contratar != null || filtros) {
         if (filtros) filtros = false else contratar = null
@@ -69,14 +80,39 @@ private fun Flow() {
         when (current) {
             Step.SPLASH -> FigmaSplash(onDone = { step = Step.LOGIN })
             Step.LOGIN -> FigmaLogin(onEntrar = { step = Step.INICIAL }, onCadastrar = { step = Step.CADASTRO })
-            Step.CADASTRO -> FigmaCadastro(onBack = { step = Step.LOGIN })
-            Step.INICIAL -> FigmaInicial(onNav = { tab ->
-                when (tab) {
-                    VTab.MATCH -> step = Step.MATCH
-                    VTab.VIOLETA -> step = Step.VIOLETA
-                    else -> {}
-                }
-            })
+            Step.CADASTRO -> FigmaCadastro(
+                onBack = { step = Step.LOGIN },
+                onDone = { step = Step.INICIAL },
+            )
+            Step.INICIAL -> FigmaInicial(
+                onNav = { tab ->
+                    when (tab) {
+                        VTab.MATCH -> step = Step.MATCH
+                        VTab.VIOLETA -> step = Step.VIOLETA
+                        VTab.PERFIL -> step = Step.PERFIL
+                        else -> {}
+                    }
+                },
+                onPro = { step = Step.PRO },
+                onEncontrarParceiro = { step = Step.MATCH },
+                onOferecerServico = { step = Step.OFERECER_SERVICO },
+            )
+            Step.PRO -> FigmaPro(
+                onBack = { step = Step.INICIAL },
+                onSubscribed = { preco, data ->
+                    proCobranca = preco to data
+                    step = Step.PRO_CONFIRMACAO
+                },
+            )
+            Step.PRO_CONFIRMACAO -> FigmaProConfirmacao(
+                priceLabel = proCobranca.first,
+                nextCharge = proCobranca.second,
+                onDone = { step = Step.INICIAL },
+            )
+            Step.OFERECER_SERVICO -> FigmaOferecerServico(
+                onBack = { step = Step.INICIAL },
+                onPublished = { step = Step.INICIAL },
+            )
             Step.MATCH -> FigmaMatch(
                 onNav = { tab ->
                     when (tab) {
@@ -108,11 +144,26 @@ private fun Flow() {
                     }
                 },
                 onSettings = { step = Step.EDITAR_PERFIL },
+                onTrail = { step = Step.TRILHA },
             )
             Step.EDITAR_PERFIL -> FigmaEditarPerfil(
                 onBack = { step = Step.PERFIL },
                 onLogout = { step = Step.LOGIN },
             )
+            Step.TRILHA -> FigmaTrilhaRoute(
+                onBack = { step = Step.PERFIL },
+                onOpenLesson = { lesson -> licao = lesson; step = Step.LICAO },
+            )
+            Step.LICAO -> licao?.let { lesson ->
+                BackHandler(enabled = true) { step = Step.TRILHA }
+                LessonScreen(
+                    lesson = lesson,
+                    onBack = { step = Step.TRILHA },
+                    onComplete = {
+                        scope.launch { ServiceLocator.learningRepository.markLesson(lesson.id, true) }
+                    },
+                )
+            }
         }
     }
 

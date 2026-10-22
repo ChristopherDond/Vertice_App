@@ -12,6 +12,9 @@ interface LessonProgressDao {
     @Query("SELECT lessonId FROM lesson_progress WHERE done = 1")
     fun doneLessonIds(): Flow<List<String>>
 
+    @Query("SELECT updatedAt FROM lesson_progress WHERE done = 1")
+    fun doneTimestamps(): Flow<List<Long>>
+
     @Query("SELECT lessonId FROM lesson_progress WHERE moduleId = :moduleId AND done = 1")
     suspend fun doneByModule(moduleId: String): List<String>
 

@@ -104,7 +104,7 @@ fun FigmaLogin(
         VText("CPF ou e-mail:", T.bodyMd, VColor.PurpleMuted, Modifier.offset(x = 53.dp, y = 419.dp))
         LoginField(
             value = cpf,
-            onValueChange = { cpf = it },
+            onValueChange = { cpf = it.filter { c -> !c.isWhitespace() }.take(100) },
             y = 443.dp,
             keyboardType = KeyboardType.Email,
             onImefinished = {},

@@ -96,7 +96,12 @@ private fun Ico(v: ImageVector, x: Int, y: Int, w: Int, h: Int, tint: Color) {
 }
 
 @Composable
-fun FigmaInicial(onNav: (VTab) -> Unit = {}) {
+fun FigmaInicial(
+    onNav: (VTab) -> Unit = {},
+    onPro: () -> Unit = {},
+    onEncontrarParceiro: () -> Unit = { onNav(VTab.MATCH) },
+    onOferecerServico: () -> Unit = {},
+) {
     var proVisible by remember { mutableStateOf(true) }
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) { appear.animateTo(1f, tween(420, easing = LinearEasing)) }
@@ -129,7 +134,8 @@ fun FigmaInicial(onNav: (VTab) -> Unit = {}) {
                         .width(333.dp)
                         .height(46.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(ProBg),
+                        .background(ProBg)
+                        .clickable { onPro() },
                 ) {
                     Box(
                         Modifier
@@ -227,8 +233,8 @@ fun FigmaInicial(onNav: (VTab) -> Unit = {}) {
                 Ico(IcoDashiconsArrowRightAlt2, 322, 42, 20, 20, Color(0x6EFFFFFF))
             }
 
-            Btn("Encontrar Parceiro", 30, 371, 157, Purple, Color.White) {}
-            Btn("Oferecer Serviço", 207, 371, 156, BtnLight, Color.Black) {}
+            Btn("Encontrar Parceiro", 30, 371, 157, Purple, Color.White) { onEncontrarParceiro() }
+            Btn("Oferecer Serviço", 207, 371, 156, BtnLight, Color.Black) { onOferecerServico() }
 
             T("ATIVIDADE RECENTE", 30, 459, 118, 10f, 500, Label, 1, 11.73f)
 

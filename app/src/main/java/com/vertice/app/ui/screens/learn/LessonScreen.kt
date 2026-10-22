@@ -39,7 +39,7 @@ import com.vertice.app.ui.components.TopBar
 import com.vertice.app.ui.theme.LocalVerticeColors
 
 @Composable
-fun LessonScreen(lesson: Lesson, onBack: () -> Unit) {
+fun LessonScreen(lesson: Lesson, onBack: () -> Unit, onComplete: () -> Unit = {}) {
     val colors = LocalVerticeColors.current
     var index by remember { mutableIntStateOf(0) }
     val card = lesson.cards.getOrNull(index)
@@ -102,7 +102,7 @@ fun LessonScreen(lesson: Lesson, onBack: () -> Unit) {
                         if (index == lesson.cards.lastIndex) "Concluir" else "Próximo",
                         Modifier.fillMaxWidth(),
                     ) {
-                        if (index == lesson.cards.lastIndex) onBack() else index++
+                        if (index == lesson.cards.lastIndex) { onComplete(); onBack() } else index++
                     }
                 }
             }

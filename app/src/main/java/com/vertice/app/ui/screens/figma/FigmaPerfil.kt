@@ -91,7 +91,7 @@ object PerfilMock {
 }
 
 @Composable
-fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}) {
+fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}, onFinanceiro: () -> Unit = {}) {
     val scroll = rememberScrollState()
     Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
         Column(
@@ -115,7 +115,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 maxLines = 1,
                 textAlign = TextAlign.Center,
             )
-            PlanCard(Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
+            PlanCard(onFinanceiro, Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
             Box(
                 Modifier
                     .padding(top = 12.dp)
@@ -175,14 +175,14 @@ private fun Avatar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun PlanCard(modifier: Modifier = Modifier) {
+private fun PlanCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier
             .fillMaxWidth()
             .height(82.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Brush.horizontalGradient(VPerfil.gradPro))
-            .vClick(PressSoft) {}
+            .vClick(PressSoft) { onClick() }
             .semantics { contentDescription = "Vertice Pro, assinar" }
             .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,

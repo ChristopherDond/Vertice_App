@@ -27,6 +27,7 @@ import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
 import com.vertice.app.ui.screens.figma.FigmaMatch
 import com.vertice.app.ui.screens.figma.FigmaEditarPerfil
+import com.vertice.app.ui.screens.figma.FigmaFinanceiro
 import com.vertice.app.ui.screens.figma.FigmaPerfilUser
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
@@ -63,6 +64,7 @@ fun ScreenGallery(id: String) {
             "Login" -> FigmaLogin()
             "Cadastro" -> FigmaCadastro()
             "EditarPerfil" -> FigmaEditarPerfil()
+            "Financeiro" -> FigmaFinanceiro()
             "Inicial", "Match", "Perfil", "Violeta",
             "VioletaDesativado", "VioletaAtivo",
             "PopupContratar", "PopupFiltros",

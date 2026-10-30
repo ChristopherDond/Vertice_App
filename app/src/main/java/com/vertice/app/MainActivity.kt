@@ -32,6 +32,7 @@ import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
 import com.vertice.app.ui.screens.figma.FigmaMatch
 import com.vertice.app.ui.screens.figma.FigmaEditarPerfil
+import com.vertice.app.ui.screens.figma.FigmaFinanceiro
 import com.vertice.app.ui.screens.figma.FigmaOferecerServico
 import com.vertice.app.ui.screens.figma.FigmaPerfilUser
 import com.vertice.app.ui.screens.figma.FigmaPro
@@ -63,7 +64,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL, EDITAR_PERFIL, TRILHA, LICAO, PRO, PRO_CONFIRMACAO, OFERECER_SERVICO }
+private enum class Step { SPLASH, LOGIN, CADASTRO, INICIAL, MATCH, VIOLETA, PERFIL, EDITAR_PERFIL, TRILHA, LICAO, PRO, PRO_CONFIRMACAO, OFERECER_SERVICO, FINANCEIRO }
 
 @Composable
 private fun Flow() {
@@ -152,7 +153,9 @@ private fun Flow() {
                 },
                 onSettings = { step = Step.EDITAR_PERFIL },
                 onTrail = { step = Step.TRILHA },
+                onFinanceiro = { step = Step.FINANCEIRO },
             )
+            Step.FINANCEIRO -> FigmaFinanceiro(onBack = { step = Step.PERFIL })
             Step.EDITAR_PERFIL -> FigmaEditarPerfil(
                 onBack = { step = Step.PERFIL },
                 onLogout = { step = Step.LOGIN },

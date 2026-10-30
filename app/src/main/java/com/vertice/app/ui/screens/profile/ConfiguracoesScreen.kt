@@ -97,7 +97,6 @@ private fun SwitchRow(icon: ImageVector, title: String, subtitle: String) {
     }
 }
 
-@Suppress("UNUSED_PARAMETER")
 @Composable
 fun ConfiguracoesScreen(
     onBack: () -> Unit,
@@ -107,7 +106,6 @@ fun ConfiguracoesScreen(
 ) {
     val colors = LocalVerticeColors.current
     var user by remember { mutableStateOf<User?>(null) }
-    var popup by remember { mutableStateOf(ConfigPopup.NENHUM) }
 
     LaunchedEffect(Unit) {
         ServiceLocator.profileRepository.me().onOk { user = it }
@@ -134,9 +132,9 @@ fun ConfiguracoesScreen(
                         Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
                             Column {
                                 SettingRow(Icons.Filled.Person, "Nome completo", user?.name ?: "", onClick = {})
-                                SettingRow(Icons.Filled.Email, "E-mail", user?.email ?: "", onClick = { popup = ConfigPopup.EMAIL_CODIGO })
+                                SettingRow(Icons.Filled.Email, "E-mail", user?.email ?: "", onClick = onAltEmail)
                                 SettingRow(Icons.Filled.Phone, "Telefone", user?.phone ?: "", onClick = onAltPhone)
-                                SettingRow(Icons.Filled.Lock, "Senha", "Alterar", onClick = { popup = ConfigPopup.SENHA_RECUPERAR })
+                                SettingRow(Icons.Filled.Lock, "Senha", "Alterar", onClick = onAltPassword)
                             }
                         }
                     }
@@ -185,13 +183,5 @@ fun ConfiguracoesScreen(
                 }
             }
         }
-        ConfiguracoesPopups(
-            popup = popup,
-            userName = user?.name.orEmpty(),
-            userEmail = user?.email.orEmpty(),
-            userPhone = user?.phone.orEmpty(),
-            onPopup = { popup = it },
-            onDismiss = { popup = ConfigPopup.NENHUM },
-        )
     }
 }

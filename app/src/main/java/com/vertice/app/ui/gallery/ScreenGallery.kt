@@ -35,15 +35,11 @@ import com.vertice.app.ui.screens.figma.VTab
 import com.vertice.app.ui.screens.figma.VioletaState
 import com.vertice.app.ui.screens.figma.FiltrosDialog
 import com.vertice.app.ui.screens.figma.pros
-import com.vertice.app.ui.screens.profile.ConfigPopup
-import com.vertice.app.ui.screens.profile.ConfiguracoesPopups
 
 object Screens {
     val all = listOf(
         "PROBE", "Splash", "Login", "Cadastro", "Inicial", "Match", "Perfil", "Violeta",
         "VioletaDesativado", "VioletaAtivo", "PopupContratar", "PopupFiltros",
-        "PopupSenhaRecuperar", "PopupSenhaNova", "PopupSenhaOk",
-        "PopupEmailCodigo", "PopupEmailNovo", "PopupSuporte",
     )
 }
 
@@ -92,34 +88,11 @@ fun ScreenGallery(id: String) {
                     VTab.PERFIL -> FigmaPerfilUser(onNav = nav)
                 }
             }
-            "PopupSenhaRecuperar", "PopupSenhaNova", "PopupSenhaOk",
-            "PopupEmailCodigo", "PopupEmailNovo", "PopupSuporte",
-            -> Unit
             else -> Placeholder(id)
         }
         when (id) {
             "PopupContratar" -> ContratarSheet(pros[0], onDismiss = {})
             "PopupFiltros" -> FiltrosDialog(onDismiss = {})
-            else -> Unit
-        }
-        when (id) {
-            "PopupSenhaRecuperar", "PopupSenhaNova", "PopupSenhaOk",
-            "PopupEmailCodigo", "PopupEmailNovo", "PopupSuporte",
-            -> ConfiguracoesPopups(
-                popup = when (id) {
-                    "PopupSenhaRecuperar" -> ConfigPopup.SENHA_RECUPERAR
-                    "PopupSenhaNova" -> ConfigPopup.SENHA_NOVA
-                    "PopupSenhaOk" -> ConfigPopup.SENHA_OK
-                    "PopupEmailCodigo" -> ConfigPopup.EMAIL_CODIGO
-                    "PopupEmailNovo" -> ConfigPopup.EMAIL_NOVO
-                    else -> ConfigPopup.SUPORTE
-                },
-                userName = "Maria Silva",
-                userEmail = "maria.silva@exemplo.com",
-                userPhone = "(11) 98765-4321",
-                onPopup = {},
-                onDismiss = {},
-            )
             else -> Unit
         }
     }

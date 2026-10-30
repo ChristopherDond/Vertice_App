@@ -22,6 +22,7 @@ import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.T
 import com.vertice.app.ui.screens.figma.ContratarSheet
+import com.vertice.app.ui.screens.figma.EditarPerfilMock
 import com.vertice.app.ui.screens.figma.FigmaCadastro
 import com.vertice.app.ui.screens.figma.FigmaInicial
 import com.vertice.app.ui.screens.figma.FigmaLogin
@@ -35,13 +36,35 @@ import com.vertice.app.ui.screens.figma.VTab
 import com.vertice.app.ui.screens.figma.VioletaState
 import com.vertice.app.ui.screens.figma.FiltrosDialog
 import com.vertice.app.ui.screens.figma.pros
+import com.vertice.app.ui.screens.profile.ConfigPopup
+import com.vertice.app.ui.screens.profile.ConfiguracoesPopups
+import com.vertice.app.ui.screens.profile.ConfiguracoesScreen
 
 object Screens {
     val all = listOf(
         "PROBE", "Splash", "Login", "Cadastro", "Inicial", "Match", "Perfil", "Violeta",
         "VioletaDesativado", "VioletaAtivo", "PopupContratar", "PopupFiltros",
+        "EditarPerfil", "Financeiro", "Configuracoes",
+        "PopupNome", "PopupSenhaRecuperar", "PopupSenhaNova", "PopupSenhaOk",
+        "PopupEmailCodigo", "PopupEmailNovo", "PopupEmailOk",
+        "PopupTelefoneCodigo", "PopupTelefoneNovo", "PopupTelefoneOk",
+        "PopupSuporte",
     )
 }
+
+private val popupDaGaleria: Map<String, ConfigPopup> = mapOf(
+    "PopupNome" to ConfigPopup.NOME,
+    "PopupSenhaRecuperar" to ConfigPopup.SENHA_RECUPERAR,
+    "PopupSenhaNova" to ConfigPopup.SENHA_NOVA,
+    "PopupSenhaOk" to ConfigPopup.SENHA_OK,
+    "PopupEmailCodigo" to ConfigPopup.EMAIL_CODIGO,
+    "PopupEmailNovo" to ConfigPopup.EMAIL_NOVO,
+    "PopupEmailOk" to ConfigPopup.EMAIL_OK,
+    "PopupTelefoneCodigo" to ConfigPopup.TELEFONE_CODIGO,
+    "PopupTelefoneNovo" to ConfigPopup.TELEFONE_NOVO,
+    "PopupTelefoneOk" to ConfigPopup.TELEFONE_OK,
+    "PopupSuporte" to ConfigPopup.SUPORTE,
+)
 
 @Composable
 fun ScreenGallery(id: String) {
@@ -65,6 +88,12 @@ fun ScreenGallery(id: String) {
             "Cadastro" -> FigmaCadastro()
             "EditarPerfil" -> FigmaEditarPerfil()
             "Financeiro" -> FigmaFinanceiro()
+            "Configuracoes" -> ConfiguracoesScreen(
+                onBack = {},
+                onAltEmail = {},
+                onAltPhone = {},
+                onAltPassword = {},
+            )
             "Inicial", "Match", "Perfil", "Violeta",
             "VioletaDesativado", "VioletaAtivo",
             "PopupContratar", "PopupFiltros",
@@ -88,12 +117,25 @@ fun ScreenGallery(id: String) {
                     VTab.PERFIL -> FigmaPerfilUser(onNav = nav)
                 }
             }
+            // Popups de configuração aparecem sobre a tela de editar perfil, como no app.
+            in popupDaGaleria.keys -> FigmaEditarPerfil()
             else -> Placeholder(id)
         }
         when (id) {
             "PopupContratar" -> ContratarSheet(pros[0], onDismiss = {})
             "PopupFiltros" -> FiltrosDialog(onDismiss = {})
             else -> Unit
+        }
+        val popup = popupDaGaleria[id]
+        if (popup != null) {
+            ConfiguracoesPopups(
+                popup = popup,
+                userName = EditarPerfilMock.name,
+                userEmail = EditarPerfilMock.email,
+                userPhone = "(11) 98765-4321",
+                onPopup = {},
+                onDismiss = {},
+            )
         }
     }
 }
@@ -115,4 +157,4 @@ private fun Placeholder(name: String) {
                 .background(VColor.PurpleLine),
         )
     }
-}
+}

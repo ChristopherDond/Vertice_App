@@ -8,11 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import com.vertice.app.core.di.ServiceLocator
 import com.vertice.app.ui.gallery.ScreenGallery
 import com.vertice.app.ui.theme.VerticeTheme
 
 class CaptureActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        ServiceLocator.init(applicationContext)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val id = intent.getStringExtra("screen") ?: ""

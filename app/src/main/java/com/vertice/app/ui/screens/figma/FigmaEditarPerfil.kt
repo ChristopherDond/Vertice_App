@@ -80,6 +80,8 @@ import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.vs
+import com.vertice.app.ui.screens.profile.ConfigPopup
+import com.vertice.app.ui.screens.profile.ConfiguracoesPopups
 import com.vertice.app.ui.icons.IcoAkarIconsPlus
 import com.vertice.app.ui.icons.IcoImageFill
 
@@ -110,7 +112,6 @@ object EditarPerfilMock {
 @Composable
 fun FigmaEditarPerfil(
     onBack: () -> Unit = {},
-    onChangePassword: () -> Unit = {},
     onLogout: () -> Unit = {},
     @DrawableRes avatarRes: Int? = null,
 ) {
@@ -125,6 +126,7 @@ fun FigmaEditarPerfil(
     var number by remember { mutableStateOf(EditarPerfilMock.number) }
     var city by remember { mutableStateOf(EditarPerfilMock.city) }
     var notifyProposals by remember { mutableStateOf(true) }
+    var popup by remember { mutableStateOf(ConfigPopup.NENHUM) }
     var fullName by remember { mutableStateOf(EditarPerfilMock.name) }
     val skills = remember { mutableStateListOf(*EditarPerfilMock.skills.toTypedArray()) }
 
@@ -160,10 +162,10 @@ fun FigmaEditarPerfil(
                 EpSectionHeader(1, "Informações pessoais", "Atualize seus dados básicos")
                 Spacer(Modifier.height(16.dp))
                 EpField("Nome completo") {
-                    EpInput(fullName, { fullName = it.take(80) }, placeholder = "ex: ana maria rodrigues")
+                    EpAlterRow(fullName, "Alterar nome") { popup = ConfigPopup.NOME }
                 }
                 Spacer(Modifier.height(14.dp))
-                EpField("Senha") { EpPasswordRow(onChangePassword) }
+                EpField("Senha") { EpPasswordRow { popup = ConfigPopup.SENHA_NOVA } }
                 Spacer(Modifier.height(14.dp))
                 EpField("Data de Nascimento") {
                     EpInput(
@@ -203,22 +205,11 @@ fun FigmaEditarPerfil(
                 EpSectionHeader(2, "Contato", "Para confirmações e novidades")
                 Spacer(Modifier.height(16.dp))
                 EpField("E-mail") {
-                    EpInput(
-                        value = email,
-                        onValueChange = { email = it.trim() },
-                        placeholder = "ex: você@exemplo.com",
-                        keyboardType = KeyboardType.Email,
-                    )
+                    EpAlterRow(email, "Alterar e-mail") { popup = ConfigPopup.EMAIL_CODIGO }
                 }
                 Spacer(Modifier.height(14.dp))
                 EpField("Telefone") {
-                    EpInput(
-                        value = phone,
-                        onValueChange = { phone = it.digitsOnly(11) },
-                        placeholder = "(00) 00000-0000",
-                        keyboardType = KeyboardType.Phone,
-                        transformation = EpMask("(##) #####-####"),
-                    )
+                    EpAlterRow(phone.formatPhone(), "Alterar telefone") { popup = ConfigPopup.TELEFONE_CODIGO }
                 }
             }
 
@@ -273,6 +264,16 @@ fun FigmaEditarPerfil(
             EpLogoutButton(onLogout, Modifier.padding(horizontal = 16.dp).padding(top = 24.dp))
             Spacer(Modifier.height(32.dp))
         }
+
+        ConfiguracoesPopups(
+            popup = popup,
+            userName = fullName,
+            userEmail = email,
+            userPhone = phone,
+            onPopup = { popup = it },
+            onDismiss = { popup = ConfigPopup.NENHUM },
+            senhaVoltar = ConfigPopup.NENHUM,
+        )
     }
 }
 
@@ -408,6 +409,12 @@ private fun EpInput(
 /** Senha nunca é pré-preenchida: o campo só mostra máscara e leva para "Alterar senha". */
 @Composable
 private fun EpPasswordRow(onClick: () -> Unit) {
+    EpAlterRow("••••••••••••", "Senha, toque para alterar", onClick)
+}
+
+/** Campo somente leitura com link "Alterar": usado para dados que mudam por popup (e-mail, telefone, senha). */
+@Composable
+private fun EpAlterRow(value: String, contentDescription: String, onClick: () -> Unit) {
     val shape = RoundedCornerShape(10.dp)
     Row(
         Modifier
@@ -417,11 +424,17 @@ private fun EpPasswordRow(onClick: () -> Unit) {
             .background(VColor.White)
             .border(1.dp, EpInputLine, shape)
             .vClick(PressSoft) { onClick() }
-            .semantics { contentDescription = "Senha, toque para alterar" }
+            .semantics { this.contentDescription = contentDescription }
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        VText("••••••••••••", vs(14f, 400, 16.94f, family = Inter), VColor.Ink, Modifier.weight(1f))
+        VText(
+            value.ifBlank { "Não informado" },
+            vs(14f, 400, 16.94f, family = Inter),
+            if (value.isBlank()) EpPlaceholder else VColor.Ink,
+            Modifier.weight(1f),
+            maxLines = 1,
+        )
         VText("Alterar", vs(12f, 600, 14.52f, family = Inter), VColor.Purple)
     }
 }
@@ -572,6 +585,17 @@ private fun EpLogoutButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 private fun String.digitsOnly(max: Int): String = filter(Char::isDigit).take(max)
+
+/** Exibe os dígitos do telefone com máscara brasileira: (11) 99999-9999. */
+private fun String.formatPhone(): String {
+    val d = filter(Char::isDigit)
+    return when {
+        d.length <= 2 -> d
+        d.length <= 6 -> "(${d.take(2)}) ${d.drop(2)}"
+        d.length <= 10 -> "(${d.take(2)}) ${d.substring(2, 6)}-${d.drop(6)}"
+        else -> "(${d.take(2)}) ${d.substring(2, 7)}-${d.drop(7)}"
+    }
+}
 
 /** Guarda só dígitos no estado e exibe com máscara ('#' = dígito). */
 private class EpMask(private val mask: String) : VisualTransformation {

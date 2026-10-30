@@ -20,12 +20,21 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,6 +43,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onOk
 import com.vertice.app.ui.components.PressSoft
 import com.vertice.app.ui.components.vClick
 import com.vertice.app.ui.design.Roboto
@@ -51,6 +62,7 @@ import com.vertice.app.ui.icons.IcoPencilSimpleFill
 private object VPerfil {
     val bg = VColor.Bg
     val gradPro = listOf(Color(0xFF641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
+    val gradVioleta = listOf(Color(0xFF4C10D8), Color(0xFF8B12B6), Color(0xFFD61476))
     val gradBar = listOf(Color(0xFF641BE2), Color(0xFF9B13AC), Color(0xFFD20B76))
     val chipBg = Color(0x269657F3)
     val chipLine = Color(0x4D904EF2)
@@ -91,8 +103,14 @@ object PerfilMock {
 }
 
 @Composable
-fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}, onFinanceiro: () -> Unit = {}) {
+fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}, onFinanceiro: () -> Unit = {}, onPro: () -> Unit = {}) {
     val scroll = rememberScrollState()
+    var isPro by remember { mutableStateOf(false) }
+    var violetaAtiva by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        ServiceLocator.financeRepository.subscription().onOk { isPro = it.active }
+        ServiceLocator.profileRepository.violeta().onOk { violetaAtiva = it.enabled }
+    }
     Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
         Column(
             Modifier
@@ -115,7 +133,22 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 maxLines = 1,
                 textAlign = TextAlign.Center,
             )
-            PlanCard(onFinanceiro, Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
+            if (isPro || violetaAtiva) {
+                Row(
+                    Modifier.fillMaxWidth().padding(top = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                ) {
+                    if (isPro) {
+                        Insignia("Vertice Pro", Icons.Filled.WorkspacePremium, VPerfil.gradPro)
+                    }
+                    if (violetaAtiva) {
+                        Insignia("Protocolo Violeta", IcoBoxiconsShieldFilled, VPerfil.gradVioleta)
+                    }
+                }
+            }
+            if (!isPro) {
+                PlanCard(onPro, Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
+            }
             Box(
                 Modifier
                     .padding(top = 12.dp)
@@ -136,6 +169,12 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 onOpen = onTrail,
                 modifier = Modifier
                     .padding(start = 19.dp, top = 15.dp, end = 14.dp)
+                    .fillMaxWidth(),
+            )
+            FinanceButton(
+                onClick = onFinanceiro,
+                modifier = Modifier
+                    .padding(start = 19.dp, top = 13.dp, end = 14.dp)
                     .fillMaxWidth(),
             )
             SettingsButton(
@@ -216,6 +255,29 @@ private fun PlanCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.size(20.dp),
             tint = Color.White,
         )
+    }
+}
+
+@Composable
+private fun Insignia(label: String, icon: ImageVector, cores: List<Color>) {
+    val shape = RoundedCornerShape(100.dp)
+    Row(
+        Modifier
+            .shadow(4.dp, shape, ambientColor = cores.last(), spotColor = cores.first())
+            .clip(shape)
+            .background(Brush.horizontalGradient(cores))
+            .border(1.dp, Color.White.copy(alpha = 0.35f), shape)
+            .padding(start = 8.dp, end = 12.dp)
+            .height(32.dp)
+            .semantics { contentDescription = "Insígnia $label" },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(20.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.25f)),
+            contentAlignment = Alignment.Center,
+        ) { Icon(icon, null, Modifier.size(13.dp), tint = Color.White) }
+        Spacer(Modifier.width(6.dp))
+        Text(label, style = vs(14f, 700, 16.5f, 0f, Roboto), color = Color.White, maxLines = 1)
     }
 }
 
@@ -420,6 +482,34 @@ private fun SettingsButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Spacer(Modifier.width(6.dp))
         Text(
             PerfilMock.settings,
+            style = vs(16f, 400, 18.82f, 0f, Roboto),
+            color = Color.Black,
+            maxLines = 1,
+        )
+    }
+}
+
+@Composable
+private fun FinanceButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .height(61.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(VPerfil.configBg)
+            .vClick(PressSoft, onClick = onClick)
+            .semantics { contentDescription = "Financeiro" },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Filled.AccountBalanceWallet,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = Color.Black,
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            "Financeiro",
             style = vs(16f, 400, 18.82f, 0f, Roboto),
             color = Color.Black,
             maxLines = 1,

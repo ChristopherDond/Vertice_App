@@ -74,6 +74,7 @@ private fun Flow() {
     var verPerfil by remember { mutableStateOf<ProMatch?>(null) }
     var licao by remember { mutableStateOf<Lesson?>(null) }
     var proCobranca by remember { mutableStateOf("" to "") }
+    var proVoltar by remember { mutableStateOf(Step.INICIAL) }
     val scope = rememberCoroutineScope()
 
     BackHandler(enabled = contratar != null || filtros || verPerfil != null) {
@@ -101,12 +102,12 @@ private fun Flow() {
                         else -> {}
                     }
                 },
-                onPro = { step = Step.PRO },
+                onPro = { proVoltar = Step.INICIAL; step = Step.PRO },
                 onEncontrarParceiro = { step = Step.MATCH },
                 onOferecerServico = { step = Step.OFERECER_SERVICO },
             )
             Step.PRO -> FigmaPro(
-                onBack = { step = Step.INICIAL },
+                onBack = { step = proVoltar },
                 onSubscribed = { preco, data ->
                     proCobranca = preco to data
                     step = Step.PRO_CONFIRMACAO
@@ -115,7 +116,7 @@ private fun Flow() {
             Step.PRO_CONFIRMACAO -> FigmaProConfirmacao(
                 priceLabel = proCobranca.first,
                 nextCharge = proCobranca.second,
-                onDone = { step = Step.INICIAL },
+                onDone = { step = proVoltar },
             )
             Step.OFERECER_SERVICO -> FigmaOferecerServico(
                 onBack = { step = Step.INICIAL },
@@ -134,7 +135,7 @@ private fun Flow() {
                 onFiltros = { filtros = true },
                 onVerPerfil = { verPerfil = it },
             )
-            Step.VIOLETA -> FigmaVioleta(onNav = { tab ->
+            Step.VIOLETA -> FigmaVioleta(persist = true, onNav = { tab ->
                 when (tab) {
                     VTab.INICIO -> step = Step.INICIAL
                     VTab.MATCH -> step = Step.MATCH
@@ -154,6 +155,7 @@ private fun Flow() {
                 onSettings = { step = Step.EDITAR_PERFIL },
                 onTrail = { step = Step.TRILHA },
                 onFinanceiro = { step = Step.FINANCEIRO },
+                onPro = { proVoltar = Step.PERFIL; step = Step.PRO },
             )
             Step.FINANCEIRO -> FigmaFinanceiro(onBack = { step = Step.PERFIL })
             Step.EDITAR_PERFIL -> FigmaEditarPerfil(

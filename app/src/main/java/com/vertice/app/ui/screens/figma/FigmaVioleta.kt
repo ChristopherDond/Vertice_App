@@ -1,5 +1,6 @@
 package com.vertice.app.ui.screens.figma
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -23,9 +24,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,11 +48,17 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vertice.app.R
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onErr
+import com.vertice.app.core.result.onOk
+import kotlinx.coroutines.launch
 import com.vertice.app.ui.components.PressWhite
 import com.vertice.app.ui.components.vClick
 import com.vertice.app.ui.design.Roboto
@@ -89,14 +100,36 @@ private val VioletaFeatures = listOf(
 )
 
 @Composable
-fun FigmaVioleta(onNav: (VTab) -> Unit, initialState: VioletaState = VioletaState.DESATIVADO) {
+fun FigmaVioleta(
+    onNav: (VTab) -> Unit,
+    initialState: VioletaState = VioletaState.DESATIVADO,
+    /** true no app real: lê e grava o estado da proteção no repositório (a galeria deixa false). */
+    persist: Boolean = false,
+) {
     var state by remember { mutableStateOf(initialState) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(persist) {
+        if (persist) {
+            ServiceLocator.profileRepository.violeta().onOk { if (it.enabled) state = VioletaState.ATIVO }
+        }
+    }
+
+    fun alternar(ativar: Boolean) {
+        val anterior = state
+        state = if (ativar) VioletaState.ATIVO else VioletaState.DESATIVADO
+        if (persist) {
+            scope.launch {
+                ServiceLocator.profileRepository.setVioleta(ativar).onErr { state = anterior }
+            }
+        }
+    }
 
     Crossfade(state, animationSpec = tween(340), label = "viol") { s ->
         when (s) {
             VioletaState.VERIFICACAO -> Verificacao(onGo = { state = VioletaState.DESATIVADO }, onNav = onNav)
-            VioletaState.DESATIVADO -> Desativado(onGo = { state = VioletaState.ATIVO }, onNav = onNav)
-            VioletaState.ATIVO -> Ativo(onGo = { state = VioletaState.DESATIVADO })
+            VioletaState.DESATIVADO -> Desativado(onGo = { alternar(true) }, onNav = onNav)
+            VioletaState.ATIVO -> Ativo(onGo = { alternar(false) }, onBack = { onNav(VTab.INICIO) })
         }
     }
 }
@@ -508,7 +541,8 @@ private fun DashUploadBox(
 }
 
 @Composable
-private fun Ativo(onGo: () -> Unit) {
+private fun Ativo(onGo: () -> Unit, onBack: () -> Unit) {
+    BackHandler(enabled = true) { onBack() }
     Box(Modifier.fillMaxSize().background(Color(0xFFF7F2FF))) {
         Box(
             Modifier
@@ -521,6 +555,21 @@ private fun Ativo(onGo: () -> Unit) {
                     ),
                 ),
         )
+
+        Box(
+            Modifier
+                .statusBarsPadding()
+                .padding(start = 12.dp, top = 8.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color(0x33FFFFFF))
+                .border(0.6.dp, Color(0x66FFFFFF), CircleShape)
+                .vClick(PressWhite) { onBack() }
+                .semantics { contentDescription = "Voltar" },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(22.dp), tint = Color.White)
+        }
 
         Column(
             modifier = Modifier

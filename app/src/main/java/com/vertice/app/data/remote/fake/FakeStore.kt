@@ -181,7 +181,7 @@ object FakeStore {
     )
 
     var violeta: VioletaStatusDto = VioletaStatusDto(
-        enabled = true,
+        enabled = false,
         identityVerified = true,
         phoneVerified = true,
         identityVerifiedAt = "jan 2026",

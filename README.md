@@ -1,6 +1,6 @@
 [Read in English](README-english.md)
 
-# Vértice — App Android (Compose)
+# Vértice — App Android (Compose)0000.1
 
 Aplicativo **Android (Kotlin + Jetpack Compose)** do **Vértice** — plataforma que conecta empreendedores informais brasileiros a parceiros estratégicos de gestão. Port 1:1 do protótipo Figma Make (`App.tsx`).
 

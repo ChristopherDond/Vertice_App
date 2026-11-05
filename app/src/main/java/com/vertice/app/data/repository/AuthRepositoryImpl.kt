@@ -96,7 +96,7 @@ class AuthRepositoryImpl(
         sessionManager.clear()
     }
 
-    suspend fun currentToken(): String? = sessionManager.session.first()?.token
+    override suspend fun currentToken(): String? = sessionManager.session.first()?.token
 
     private fun com.vertice.app.data.remote.dto.SessionDto.toSession() = Session(
         token = token,

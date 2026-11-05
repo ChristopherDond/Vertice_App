@@ -33,6 +33,7 @@ interface AuthRepository {
     suspend fun changeEmail(newEmail: String): VerticeResult<User>
     suspend fun changePhone(newPhone: String): VerticeResult<User>
     suspend fun logout()
+    suspend fun currentToken(): String?
 }
 
 interface ProfileRepository {

@@ -87,7 +87,14 @@ private fun Flow() {
 
     Crossfade(targetState = step, animationSpec = tween(320), label = "flow") { current ->
         when (current) {
-            Step.SPLASH -> FigmaSplash(onDone = { step = Step.LOGIN })
+            Step.SPLASH -> FigmaSplash(
+                onDone = {
+                    scope.launch {
+                        val token = ServiceLocator.authRepository.currentToken()
+                        step = if (!token.isNullOrBlank()) Step.INICIAL else Step.LOGIN
+                    }
+                },
+            )
             Step.LOGIN -> FigmaLogin(onEntrar = { step = Step.INICIAL }, onCadastrar = { step = Step.CADASTRO })
             Step.CADASTRO -> FigmaCadastro(
                 onBack = { step = Step.LOGIN },

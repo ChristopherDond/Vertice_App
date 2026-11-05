@@ -56,6 +56,8 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     androidx.compose.foundation.layout.Box(
         Modifier
@@ -96,6 +98,7 @@ fun LoginScreen(
                     label = "CPF ou e-mail:",
                     placeholder = "000.000.000-00",
                     keyboardType = KeyboardType.Email,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
             Spacer(Modifier.height(14.dp))
@@ -104,16 +107,20 @@ fun LoginScreen(
                     value = password,
                     onValueChange = { password = it },
                     label = "Senha:",
-                    placeholder = "Sua senha",
+                    placeholder = "••••••••",
                     isPassword = true,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
             if (error != null) {
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(error!!, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
-            Spacer(Modifier.height(8.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Spacer(Modifier.height(12.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
                 Text(
                     "Esqueceu a senha?",
                     style = MaterialTheme.typography.labelSmall,
@@ -148,7 +155,26 @@ fun LoginScreen(
                     text = "Continue com Google",
                     provider = "google",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = {},
+                    onClick = {
+                        scope.launch {
+                            val tokenResult = com.vertice.app.core.auth.GoogleAuthHelper.signInWithGoogle(context)
+                            tokenResult.fold(
+                                onSuccess = { idToken ->
+                                    ServiceLocator.authRepository.loginWithProvider(
+                                        com.vertice.app.domain.model.AuthProvider.GOOGLE,
+                                        idToken,
+                                    )
+                                        .onOk { onLoggedIn() }
+                                        .onErr { error = it.message }
+                                },
+                                onFailure = { err ->
+                                    if (err !is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                                        error = err.message ?: "Falha ao autenticar com o Google"
+                                    }
+                                },
+                            )
+                        }
+                    },
                 )
             }
             Spacer(Modifier.height(12.dp))
@@ -157,7 +183,13 @@ fun LoginScreen(
                     text = "Continue com Apple",
                     provider = "apple",
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = {},
+                    onClick = {
+                        android.widget.Toast.makeText(
+                            context,
+                            "Disponível em breve na versão iOS",
+                            android.widget.Toast.LENGTH_SHORT,
+                        ).show()
+                    },
                 )
             }
             Spacer(Modifier.height(28.dp))

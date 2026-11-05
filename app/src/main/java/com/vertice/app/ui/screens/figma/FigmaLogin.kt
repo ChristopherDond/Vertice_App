@@ -221,10 +221,21 @@ fun FigmaLogin(
             onClick = {
                 scope.launch {
                     val tokenResult = com.vertice.app.core.auth.GoogleAuthHelper.signInWithGoogle(context)
-                    val idToken = tokenResult.getOrNull() ?: "fake-id-token"
-                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.GOOGLE, idToken)
-                        .onOk { onEntrar() }
-                        .onErr { err -> erro = err.message }
+                    tokenResult.fold(
+                        onSuccess = { idToken ->
+                            ServiceLocator.authRepository.loginWithProvider(
+                                com.vertice.app.domain.model.AuthProvider.GOOGLE,
+                                idToken
+                            )
+                                .onOk { onEntrar() }
+                                .onErr { err -> erro = err.message }
+                        },
+                        onFailure = { err ->
+                            if (err !is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                                erro = err.message ?: "Falha ao autenticar com o Google"
+                            }
+                        }
+                    )
                 }
             },
             icon = {
@@ -244,10 +255,11 @@ fun FigmaLogin(
             textColor = VColor.White,
             borderColor = null,
             onClick = {
-                scope.launch {
-                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.APPLE)
-                        .onOk { onEntrar() }
-                }
+                android.widget.Toast.makeText(
+                    context,
+                    "Disponível em breve na versão iOS",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
             },
             icon = {
                 Image(

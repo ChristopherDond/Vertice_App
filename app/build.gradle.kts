@@ -19,20 +19,20 @@ android {
 
         buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
         buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
-        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"804624990503-eak0ffs5bgifto0qot49213lrfa2723q.apps.googleusercontent.com\"")
     }
 
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
             buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
-            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"804624990503-eak0ffs5bgifto0qot49213lrfa2723q.apps.googleusercontent.com\"")
         }
         release {
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
             buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
-            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"804624990503-eak0ffs5bgifto0qot49213lrfa2723q.apps.googleusercontent.com\"")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

@@ -1,5 +1,6 @@
 package com.vertice.app.core.di
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.vertice.app.BuildConfig
 import com.vertice.app.core.session.SessionManager
@@ -37,12 +38,18 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 object ServiceLocator {
 
     private lateinit var appContext: Context
 
+    @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
         explicitNulls = false
@@ -63,8 +70,9 @@ object ServiceLocator {
             .apply {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(HttpLoggingInterceptor().apply {
-                        level = HttpLoggingInterceptor.Level.BASIC
+                        level = HttpLoggingInterceptor.Level.BODY
                     })
+                    configureDevSsl()
                 }
             }
             .connectTimeout(20, TimeUnit.SECONDS)
@@ -105,5 +113,24 @@ object ServiceLocator {
     fun init(context: Context) {
         appContext = context.applicationContext
         sessionManager = SessionManager(appContext)
+    }
+
+    @SuppressLint("CustomX509TrustManager")
+    private fun OkHttpClient.Builder.configureDevSsl(): OkHttpClient.Builder {
+        val trustAllCerts = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            }
+        )
+
+        val sslContext = SSLContext.getInstance("SSL")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        val sslSocketFactory = sslContext.socketFactory
+
+        sslSocketFactory(sslSocketFactory, trustAllCerts[0] as X509TrustManager)
+        hostnameVerifier { _, _ -> true }
+        return this
     }
 }

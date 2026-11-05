@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vertice_postgres
+    restart: always
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vertice_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-vertice_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vertice_admin -d vertice_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - vertice-network
+
+  api:
+    build:
+      context: /opt/vertice-api
+      dockerfile: Dockerfile
+    image: vertice-api:latest
+    container_name: vertice_api
+    restart: always
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: ${POSTGRES_USER:-vertice_admin}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB:-vertice_db}
+      JWT_SECRET: ${JWT_SECRET:-super_secret_vertice_jwt_key_2026_minimum_32_characters_long!}
+      JWT_EXPIRES_IN: 30d
+      CORS_ORIGIN: "*"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - vertice-network
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: vertice_caddy
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - vertice-network
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  vertice-network:
+    name: vertice-net
+    driver: bridge

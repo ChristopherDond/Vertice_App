@@ -21,3 +21,13 @@ captures/
 # Keystore / signing (NUNCA commitar)
 *.jks
 *.keystore
+
+# Node / Backend
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+backend/**/.env
+backend/**/node_modules/
+backend/**/dist/

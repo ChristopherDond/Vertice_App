@@ -17,16 +17,18 @@ android {
         versionName = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "API_BASE_URL", "\"https://api.vertice.app/v1/\"")
-        buildConfigField("boolean", "USE_FAKE_BACKEND", "true")
+        buildConfigField("String", "API_BASE_URL", "\"https://137.131.242.237/v1/\"")
+        buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
     }
 
     buildTypes {
         debug {
-            buildConfigField("boolean", "USE_FAKE_BACKEND", "true")
+            buildConfigField("String", "API_BASE_URL", "\"https://137.131.242.237/v1/\"")
+            buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
         }
         release {
             isMinifyEnabled = false
+            buildConfigField("String", "API_BASE_URL", "\"https://137.131.242.237/v1/\"")
             buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

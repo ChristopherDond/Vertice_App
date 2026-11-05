@@ -44,7 +44,14 @@ object GoogleAuthHelper {
         } catch (e: GetCredentialCancellationException) {
             Result.failure(e)
         } catch (e: Exception) {
-            Result.failure(e)
+            val isNoCreds = e::class.java.simpleName.contains("NoCredential", ignoreCase = true) ||
+                (e.message?.contains("No credentials", ignoreCase = true) == true)
+            val msg = if (isNoCreds) {
+                "Nenhuma conta Google conectada neste emulador. Adicione uma conta em 'Configurações > Contas' do Android ou teste no seu celular físico."
+            } else {
+                e.message ?: "Falha ao autenticar com o Google"
+            }
+            Result.failure(IllegalStateException(msg, e))
         }
     }
 }

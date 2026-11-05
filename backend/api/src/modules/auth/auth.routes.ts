@@ -64,27 +64,53 @@ export async function authRoutes(app: FastifyInstance) {
   app.post('/provider', async (request, reply) => {
     const { provider, id_token } = providerSchema.parse(request.body);
 
-    // Para ambiente demo/mock ou id_token de teste
-    const firebaseUid = `prov_${provider}_${id_token.substring(0, 16)}`;
+    let socialUid = `prov_${provider}_${id_token.substring(0, 16)}`;
+    let socialEmail = `social_${randomUUID().substring(0, 8)}@vertice.app`;
+    let socialName = 'Usuário Conectado';
+    let socialAvatar: string | null = null;
+
+    // Se for Google e não for token de teste, valida com a API oficial do Google
+    if (provider.toUpperCase() === 'GOOGLE' && id_token !== 'fake-id-token' && id_token.length > 20) {
+      try {
+        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${id_token}`);
+        if (googleRes.ok) {
+          const payload = (await googleRes.json()) as {
+            sub: string;
+            email?: string;
+            name?: string;
+            picture?: string;
+          };
+          socialUid = `google_${payload.sub}`;
+          if (payload.email) socialEmail = payload.email.toLowerCase().trim();
+          if (payload.name) socialName = payload.name;
+          if (payload.picture) socialAvatar = payload.picture;
+        } else {
+          request.log.warn({ status: googleRes.status }, 'Google tokeninfo retornou erro, usando payload padrão');
+        }
+      } catch (err) {
+        request.log.warn({ err }, 'Falha na requisição ao Google tokeninfo');
+      }
+    }
+
     let user = await db
       .selectFrom('usuarios')
-      .where('firebase_uid', '=', firebaseUid)
+      .where((eb) => eb.or([eb('firebase_uid', '=', socialUid), eb('email', '=', socialEmail)]))
       .selectAll()
       .executeTakeFirst();
 
     if (!user) {
       const newId = `usr_${randomUUID().substring(0, 8)}`;
-      const email = `social_${newId}@vertice.app`;
       user = await db
         .insertInto('usuarios')
         .values({
           id: newId,
-          firebase_uid: firebaseUid,
-          name: 'Usuário Conectado',
-          email,
+          firebase_uid: socialUid,
+          name: socialName,
+          email: socialEmail,
           phone: '+5511999999999',
           cpf: '00000000000',
           bio: 'Conta conectada via ' + provider,
+          avatar_url: socialAvatar,
           is_pro: false,
           violeta_verified: false,
           profile_completion: 40,
@@ -94,6 +120,9 @@ export async function authRoutes(app: FastifyInstance) {
 
       await db.insertInto('carteira_saldo').values({ usuario_id: newId }).execute();
       await db.insertInto('protocolo_violeta').values({ usuario_id: newId }).execute();
+    } else if (socialAvatar && !user.avatar_url) {
+      // Se já existia mas não tinha avatar, atualiza o avatar trazido do Google
+      await db.updateTable('usuarios').set({ avatar_url: socialAvatar }).where('id', '=', user.id).execute();
     }
 
     const token = app.jwt.sign({

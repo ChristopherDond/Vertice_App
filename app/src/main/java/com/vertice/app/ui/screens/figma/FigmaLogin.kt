@@ -79,6 +79,7 @@ fun FigmaLogin(
     var erro by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     var canvasSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
 
@@ -219,8 +220,11 @@ fun FigmaLogin(
             borderColor = VColor.Gray3,
             onClick = {
                 scope.launch {
-                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.GOOGLE)
+                    val tokenResult = com.vertice.app.core.auth.GoogleAuthHelper.signInWithGoogle(context)
+                    val idToken = tokenResult.getOrNull() ?: "fake-id-token"
+                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.GOOGLE, idToken)
                         .onOk { onEntrar() }
+                        .onErr { err -> erro = err.message }
                 }
             },
             icon = {

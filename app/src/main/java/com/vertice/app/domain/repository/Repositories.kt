@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.Flow
 interface AuthRepository {
     val session: Flow<Session?>
     suspend fun login(credential: String, password: String): VerticeResult<Session>
-    suspend fun loginWithProvider(provider: AuthProvider): VerticeResult<Session>
+    suspend fun loginWithProvider(provider: AuthProvider, idToken: String = "fake-id-token"): VerticeResult<Session>
     suspend fun register(form: RegistrationForm): VerticeResult<Session>
     suspend fun requestRecoveryCode(channel: RecoveryChannel, contact: String): VerticeResult<Unit>
     suspend fun resetPassword(contact: String, code: String, newPassword: String): VerticeResult<Unit>

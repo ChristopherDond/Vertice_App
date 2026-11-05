@@ -19,17 +19,20 @@ android {
 
         buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
         buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
     }
 
     buildTypes {
         debug {
             buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
             buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
         }
         release {
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", "\"http://137.131.242.237/v1/\"")
             buildConfigField("boolean", "USE_FAKE_BACKEND", "false")
+            buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"\"")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -82,6 +85,11 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Google Sign-In (Credential Manager)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 

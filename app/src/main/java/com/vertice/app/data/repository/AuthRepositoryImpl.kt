@@ -35,10 +35,10 @@ class AuthRepositoryImpl(
             dto.toSession().also { sessionManager.save(it) }
         }
 
-    override suspend fun loginWithProvider(provider: AuthProvider): VerticeResult<Session> =
+    override suspend fun loginWithProvider(provider: AuthProvider, idToken: String): VerticeResult<Session> =
         runResult {
             val dto = api.loginWithProvider(
-                ProviderLoginRequestDto(provider = provider.apiValue, idToken = "fake-id-token"),
+                ProviderLoginRequestDto(provider = provider.apiValue, idToken = idToken),
             )
             dto.toSession().also { sessionManager.save(it) }
         }

@@ -71,13 +71,13 @@ private fun AmountHeader(label: String, amount: String, gradient: Boolean = true
 @Composable
 fun PixScreen(onBack: () -> Unit, onDone: () -> Unit) {
     val colors = LocalVerticeColors.current
-    var key by remember { mutableStateOf("ana.silva@vertice.app") }
+    var key by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         TopBar(title = "Receber via PIX", onBack = onBack)
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 30.dp)) {
-            FadeSlideIn(0) { AmountHeader("Sua chave PIX", "ana.silva@vertice.app") }
+            FadeSlideIn(0) { AmountHeader("Sua chave PIX", key.ifBlank { "Nenhuma chave cadastrada" }) }
             Column(Modifier.padding(horizontal = 22.dp)) {
                 Spacer(Modifier.height(20.dp))
                 FadeSlideIn(70) {
@@ -94,7 +94,7 @@ fun PixScreen(onBack: () -> Unit, onDone: () -> Unit) {
                             Spacer(Modifier.height(18.dp))
                             Surface(shape = RoundedCornerShape(13.dp), color = colors.textSecondary.copy(alpha = 0.09f), modifier = Modifier.fillMaxWidth()) {
                                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Text(key, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                                    Text(key.ifBlank { "Nenhuma chave cadastrada" }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
                                     Icon(Icons.Filled.ContentCopy, "Copiar", tint = colors.gradientStart, modifier = Modifier.size(18.dp))
                                 }
                             }
@@ -265,7 +265,7 @@ fun CardScreen(onBack: () -> Unit) {
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                     Column {
                                         Text("TITULAR", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.72f))
-                                        Text("ANA SILVA", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = Color.White)
+                                        Text("NOME DO TITULAR", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold, color = Color.White)
                                     }
                                     Column {
                                         Text("VALIDADE", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.72f))

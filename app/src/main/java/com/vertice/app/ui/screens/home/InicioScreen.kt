@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.TrendingUp
@@ -92,17 +93,17 @@ fun InicioScreen(
                         .padding(top = 54.dp, bottom = 46.dp),
                 ) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painterResource(R.drawable.ana_profile),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(46.dp).clip(CircleShape),
-                        )
+                        Box(
+                            Modifier.size(46.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(Icons.Filled.Person, null, tint = Color.White, modifier = Modifier.size(24.dp))
+                        }
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
-                            Text("Bem-vinda de volta", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.78f))
+                            Text("Bem-vindo(a)", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.78f))
                             Text(
-                                session?.displayName ?: "Ana Silva",
+                                session?.displayName?.ifBlank { "Usuário" } ?: "Usuário",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,

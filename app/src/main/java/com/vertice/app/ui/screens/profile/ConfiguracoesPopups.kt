@@ -148,6 +148,10 @@ fun ConfiguracoesPopups(
     onPopup: (ConfigPopup) -> Unit,
     onDismiss: () -> Unit,
     senhaVoltar: ConfigPopup = ConfigPopup.SENHA_RECUPERAR,
+    onUpdateName: (String) -> Unit = {},
+    onUpdateEmail: (String) -> Unit = {},
+    onUpdatePhone: (String) -> Unit = {},
+    onUpdatePassword: (String) -> Unit = {},
 ) {
     if (popup == ConfigPopup.NENHUM) return
 
@@ -216,6 +220,7 @@ fun ConfiguracoesPopups(
                                     if (nome.isBlank()) {
                                         erro = "Informe seu nome completo"
                                     } else {
+                                        onUpdateName(nome.trim())
                                         Toast.makeText(ctx, "Nome atualizado", Toast.LENGTH_SHORT).show()
                                         onDismiss()
                                     }
@@ -288,7 +293,10 @@ fun ConfiguracoesPopups(
                                         novaSenha != confSenha -> "As senhas não coincidem"
                                         else -> null
                                     }
-                                    if (erro == null) onPopup(ConfigPopup.SENHA_OK)
+                                    if (erro == null) {
+                                        onUpdatePassword(novaSenha)
+                                        onPopup(ConfigPopup.SENHA_OK)
+                                    }
                                 }
                                 VError(erro)
                             }
@@ -385,7 +393,10 @@ fun ConfiguracoesPopups(
                                         novoEmail != confEmail -> "Os e-mails não coincidem"
                                         else -> null
                                     }
-                                    if (erro == null) onPopup(ConfigPopup.EMAIL_OK)
+                                    if (erro == null) {
+                                        onUpdateEmail(novoEmail.trim())
+                                        onPopup(ConfigPopup.EMAIL_OK)
+                                    }
                                 }
                                 VError(erro)
                             }
@@ -469,6 +480,7 @@ fun ConfiguracoesPopups(
                                     if (novoTelefone.count(Char::isDigit) < 10) {
                                         erro = "Informe um telefone com DDD"
                                     } else {
+                                        onUpdatePhone(novoTelefone.trim())
                                         onPopup(ConfigPopup.TELEFONE_OK)
                                     }
                                 }

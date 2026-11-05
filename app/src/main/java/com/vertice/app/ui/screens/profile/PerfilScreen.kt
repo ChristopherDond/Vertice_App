@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -110,26 +111,19 @@ fun PerfilScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Box {
-                        Image(
-                            painterResource(R.drawable.ana_profile),
-                            contentDescription = "Foto de perfil",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(104.dp).clip(CircleShape),
-                        )
                         Box(
                             Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(32.dp)
+                                .size(104.dp)
                                 .clip(CircleShape)
-                                .background(Color.White),
+                                .background(Color.White.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(Icons.Filled.VerifiedUser, null, tint = colors.gradientStart, modifier = Modifier.size(19.dp))
+                            Icon(Icons.Filled.Person, "Foto de perfil", tint = Color.White, modifier = Modifier.size(52.dp))
                         }
                     }
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        session?.displayName ?: "Ana Silva",
+                        session?.displayName?.ifBlank { "Usuário" } ?: "Usuário",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -142,7 +136,7 @@ fun PerfilScreen(
                         ) {
                             Icon(Icons.Filled.CheckCircle, null, tint = Color.White, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text("Identidade verificada", style = MaterialTheme.typography.labelSmall, color = Color.White)
+                            Text("Perfil básico", style = MaterialTheme.typography.labelSmall, color = Color.White)
                         }
                     }
                 }
@@ -160,15 +154,15 @@ fun PerfilScreen(
                     Column(Modifier.padding(18.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("18", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
+                                Text("0", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
                                 Text("Serviços", style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("4,9", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
+                                Text("0,0", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
                                 Text("Avaliação", style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("25%", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
+                                Text("0%", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = colors.gradientStart)
                                 Text("Trilha", style = MaterialTheme.typography.labelSmall, color = colors.textSecondary)
                             }
                         }
@@ -213,13 +207,13 @@ fun PerfilScreen(
                             MenuItem(Icons.Filled.Settings, "Configurações", "Perfil, endereço, notificações", colors.gradientStart, onConfiguracoes)
                             MenuItem(Icons.Filled.CreditCard, "Formas de pagamento", "Cartão de débito e PIX", colors.info) {}
                             MenuItem(Icons.Filled.Shield, "Protocolo Violeta", "Sua rota segura 24h", colors.gradientEnd, onVioleta)
-                            MenuItem(Icons.Filled.CheckCircle, "Trilha de Blindagem", "25% concluída", colors.success, onTrilha)
+                            MenuItem(Icons.Filled.CheckCircle, "Trilha de Blindagem", "0% concluída", colors.success, onTrilha)
                         }
                     }
                     Spacer(Modifier.height(16.dp))
                     Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 2.dp) {
                         Column {
-                            MenuItem(Icons.Filled.LocationOn, "Endereço", "Vila Madalena, São Paulo", colors.gradientStart) {}
+                            MenuItem(Icons.Filled.LocationOn, "Endereço", "Não cadastrado", colors.gradientStart) {}
                             MenuItem(Icons.Filled.Notifications, "Notificações", "Ativadas", colors.warning) {}
                             MenuItem(Icons.Filled.HelpOutline, "Ajuda e suporte", "Atendimento 24h", colors.textSecondary) {}
                         }

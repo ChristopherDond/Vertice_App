@@ -59,6 +59,7 @@ import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.vs
+import kotlinx.coroutines.launch
 
 private val SectionBg = Color(0x4DFFFFFF)
 private val SectionLine = Color(0x809657F3)
@@ -92,6 +93,8 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
+    var loading by remember { mutableStateOf(false) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     fun validate(): Boolean {
         submitted = true
@@ -391,14 +394,51 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
                         ),
                     )
                     .vClick(PressWhite) {
-                        if (validate()) {
-                            onDone()
+                        if (!loading && validate()) {
+                            scope.launch {
+                                loading = true
+                                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
+                                    id = "usr_" + System.currentTimeMillis().toString().takeLast(6),
+                                    name = nome.trim(),
+                                    email = email.trim().lowercase(),
+                                    phone = telefone,
+                                    cpfMasked = "***.***.***-" + cpf.takeLast(2),
+                                    bio = "",
+                                    skills = emptyList(),
+                                    address = com.vertice.app.data.remote.dto.AddressDto(
+                                        cep = cep,
+                                        street = rua.trim(),
+                                        number = numero.trim(),
+                                        district = complemento.trim(),
+                                        city = cidade.trim(),
+                                        state = uf.trim().uppercase(),
+                                    ),
+                                    profileCompletion = 40,
+                                    rating = 0.0,
+                                    completedServices = 0,
+                                )
+                                com.vertice.app.data.remote.fake.FakeStore.registeredEmail = email.trim().lowercase()
+                                com.vertice.app.data.remote.fake.FakeStore.registeredCpf = cpf.filter { it.isDigit() }
+                                com.vertice.app.data.remote.fake.FakeStore.registeredPassword = senha
+
+                                com.vertice.app.core.di.ServiceLocator.sessionManager.save(
+                                    com.vertice.app.core.session.Session(
+                                        token = "fake." + java.util.UUID.randomUUID().toString(),
+                                        userId = com.vertice.app.data.remote.fake.FakeStore.currentUser.id,
+                                        displayName = nome.trim(),
+                                        isPro = false,
+                                        violetaVerified = false,
+                                    )
+                                )
+                                loading = false
+                                onDone()
+                            }
                         }
                     },
                 contentAlignment = Alignment.Center,
             ) {
                 VText(
-                    text = "Cadastrar",
+                    text = if (loading) "Cadastrando..." else "Cadastrar",
                     style = vs(16f, 800, 20f, family = Roboto),
                     color = Color.White,
                     align = TextAlign.Center,

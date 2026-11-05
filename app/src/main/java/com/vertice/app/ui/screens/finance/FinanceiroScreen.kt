@@ -199,14 +199,27 @@ fun FinanceiroScreen(onPix: () -> Unit, onTransfer: () -> Unit, onPay: () -> Uni
                     color = MaterialTheme.colorScheme.surface,
                     tonalElevation = 2.dp,
                 ) {
-                    Column {
-                        transactions.forEachIndexed { i, t ->
-                            TransactionRow(t)
-                            if (i != transactions.lastIndex) {
-                                androidx.compose.material3.HorizontalDivider(
-                                    modifier = Modifier.padding(start = 68.dp),
-                                    color = colors.textSecondary.copy(alpha = 0.13f),
-                                )
+                    if (transactions.isEmpty()) {
+                        Box(
+                            Modifier.fillMaxWidth().padding(24.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                "Nenhuma transação registrada.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colors.textSecondary,
+                            )
+                        }
+                    } else {
+                        Column {
+                            transactions.forEachIndexed { i, t ->
+                                TransactionRow(t)
+                                if (i != transactions.lastIndex) {
+                                    androidx.compose.material3.HorizontalDivider(
+                                        modifier = Modifier.padding(start = 68.dp),
+                                        color = colors.textSecondary.copy(alpha = 0.13f),
+                                    )
+                                }
                             }
                         }
                     }

@@ -96,15 +96,22 @@ private fun Flow() {
             Step.INICIAL -> FigmaInicial(
                 onNav = { tab ->
                     when (tab) {
-                        VTab.MATCH -> step = Step.MATCH
+                        VTab.MATCH -> {
+                            com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
+                            step = Step.MATCH
+                        }
                         VTab.VIOLETA -> step = Step.VIOLETA
                         VTab.PERFIL -> step = Step.PERFIL
                         else -> {}
                     }
                 },
                 onPro = { proVoltar = Step.INICIAL; step = Step.PRO },
-                onEncontrarParceiro = { step = Step.MATCH },
+                onEncontrarParceiro = {
+                    com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
+                    step = Step.MATCH
+                },
                 onOferecerServico = { step = Step.OFERECER_SERVICO },
+                onEditarPerfil = { step = Step.EDITAR_PERFIL },
             )
             Step.PRO -> FigmaPro(
                 onBack = { step = proVoltar },
@@ -122,19 +129,22 @@ private fun Flow() {
                 onBack = { step = Step.INICIAL },
                 onPublished = { step = Step.INICIAL },
             )
-            Step.MATCH -> FigmaMatch(
-                onNav = { tab ->
-                    when (tab) {
-                        VTab.INICIO -> step = Step.INICIAL
-                        VTab.VIOLETA -> step = Step.VIOLETA
-                        VTab.PERFIL -> step = Step.PERFIL
-                        else -> {}
-                    }
-                },
-                onContratar = { contratar = it },
-                onFiltros = { filtros = true },
-                onVerPerfil = { verPerfil = it },
-            )
+            Step.MATCH -> {
+                com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
+                FigmaMatch(
+                    onNav = { tab ->
+                        when (tab) {
+                            VTab.INICIO -> step = Step.INICIAL
+                            VTab.VIOLETA -> step = Step.VIOLETA
+                            VTab.PERFIL -> step = Step.PERFIL
+                            else -> {}
+                        }
+                    },
+                    onContratar = { contratar = it },
+                    onFiltros = { filtros = true },
+                    onVerPerfil = { verPerfil = it },
+                )
+            }
             Step.VIOLETA -> FigmaVioleta(persist = true, onNav = { tab ->
                 when (tab) {
                     VTab.INICIO -> step = Step.INICIAL
@@ -160,7 +170,10 @@ private fun Flow() {
             Step.FINANCEIRO -> FigmaFinanceiro(onBack = { step = Step.PERFIL })
             Step.EDITAR_PERFIL -> FigmaEditarPerfil(
                 onBack = { step = Step.PERFIL },
-                onLogout = { step = Step.LOGIN },
+                onLogout = {
+                    scope.launch { ServiceLocator.authRepository.logout() }
+                    step = Step.LOGIN
+                },
             )
             Step.TRILHA -> FigmaTrilhaRoute(
                 onBack = { step = Step.PERFIL },

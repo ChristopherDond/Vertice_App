@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,18 +88,18 @@ data class TrailItem(
 )
 
 object PerfilMock {
-    const val name = "Ana Silva"
+    const val name = "Meu Perfil"
     const val planTitle = "Vertice Pro"
     const val planSubtitle = "Desbloqueie novos recursos, matchs e muito mais!"
-    val skills = listOf("Costura", "Confecção", "Manejo")
+    val skills = emptyList<String>()
     const val trailTitle = "Trilha de blindagem"
-    const val trailProgress = 52
+    const val trailProgress = 0
     const val trailFooter = "Toque para ver a trilha completa"
     const val settings = "Configurações"
     val trail = listOf(
-        TrailItem("Segurança pessoal", IcoBoxiconsShieldFilled, true, false),
-        TrailItem("Direitos do MEI", IcoFileTextFill, true, false),
-        TrailItem("Gestão de clientes", IcoCrosshairFill, false, true),
+        TrailItem("Segurança pessoal", IcoBoxiconsShieldFilled, false, false),
+        TrailItem("Direitos do MEI", IcoFileTextFill, false, false),
+        TrailItem("Gestão de clientes", IcoCrosshairFill, false, false),
     )
 }
 
@@ -107,6 +108,10 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
     val scroll = rememberScrollState()
     var isPro by remember { mutableStateOf(false) }
     var violetaAtiva by remember { mutableStateOf(false) }
+    val session by ServiceLocator.sessionManager.session.collectAsState(initial = null)
+    val profileName = session?.displayName?.ifBlank { com.vertice.app.data.remote.fake.FakeStore.currentUser.name.ifBlank { PerfilMock.name } }
+        ?: com.vertice.app.data.remote.fake.FakeStore.currentUser.name.ifBlank { PerfilMock.name }
+
     LaunchedEffect(Unit) {
         ServiceLocator.financeRepository.subscription().onOk { isPro = it.active }
         ServiceLocator.profileRepository.violeta().onOk { violetaAtiva = it.enabled }
@@ -126,7 +131,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                     .padding(top = 12.dp),
             )
             Text(
-                PerfilMock.name,
+                profileName,
                 modifier = Modifier.fillMaxWidth().padding(top = 13.dp),
                 style = vs(32f, 800, 37.64f, 0f, Roboto),
                 color = Color.Black,
@@ -201,7 +206,7 @@ private fun Avatar(modifier: Modifier = Modifier) {
             .clip(CircleShape)
             .background(Color.White)
             .border(0.75.dp, VColor.InkSoft, CircleShape)
-            .semantics { contentDescription = "Foto de perfil de Ana Silva" },
+            .semantics { contentDescription = "Foto de perfil do usuário" },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
@@ -283,24 +288,33 @@ private fun Insignia(label: String, icon: ImageVector, cores: List<Color>) {
 
 @Composable
 private fun SkillsRow(modifier: Modifier = Modifier) {
-    Row(modifier.padding(end = 16.dp)) {
-        PerfilMock.skills.forEachIndexed { index, label ->
-            if (index > 0) Spacer(Modifier.width(6.dp))
-            Box(
-                Modifier
-                    .height(32.dp)
-                    .clip(RoundedCornerShape(100.dp))
-                    .background(VPerfil.chipBg)
-                    .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(100.dp))
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    label,
-                    style = vs(16f, 500, 18.82f, 0f, Roboto),
-                    color = VPerfil.chipText,
-                    maxLines = 1,
-                )
+    if (PerfilMock.skills.isEmpty()) {
+        Text(
+            "Nenhuma habilidade cadastrada ainda.",
+            modifier = modifier.padding(end = 16.dp),
+            style = vs(14f, 400, 18f, 0f, Roboto),
+            color = VColor.Gray,
+        )
+    } else {
+        Row(modifier.padding(end = 16.dp)) {
+            PerfilMock.skills.forEachIndexed { index, label ->
+                if (index > 0) Spacer(Modifier.width(6.dp))
+                Box(
+                    Modifier
+                        .height(32.dp)
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(VPerfil.chipBg)
+                        .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(100.dp))
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        label,
+                        style = vs(16f, 500, 18.82f, 0f, Roboto),
+                        color = VPerfil.chipText,
+                        maxLines = 1,
+                    )
+                }
             }
         }
     }

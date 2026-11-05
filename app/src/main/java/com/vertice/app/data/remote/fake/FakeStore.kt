@@ -16,31 +16,28 @@ import com.vertice.app.data.remote.dto.VioletaStatusDto
 object FakeStore {
 
     var currentUser: UserDto = UserDto(
-        id = "usr_ana",
-        name = "Ana Silva",
-        email = "ana.silva@vertice.app",
-        phone = "(11) 98159-5963",
-        cpfMasked = "***.***.***-28",
-        bio = "Costureira e confeccionista. Peças sob medida, ajustes e reformas. Atendo em domicílio na zona sul de São Paulo.",
-        skills = listOf("Costura", "Confecção", "Manejo"),
-        address = AddressDto(
-            cep = "06760-000",
-            street = "Rua José",
-            number = "182",
-            district = "Jardim Maria Rosa",
-            city = "Taboão da Serra",
-            state = "SP",
-        ),
+        id = "",
+        name = "",
+        email = "",
+        phone = "",
+        cpfMasked = "",
+        bio = "",
+        skills = emptyList(),
+        address = null,
         isPro = false,
-        violetaVerified = true,
-        profileCompletion = 70,
-        rating = 4.8,
-        completedServices = 56,
+        violetaVerified = false,
+        profileCompletion = 0,
+        rating = 0.0,
+        completedServices = 0,
     )
 
     const val DEMO_PASSWORD = "senha123"
     const val DEMO_EMAIL = "ana.silva@vertice.app"
     const val DEMO_CPF = "52998224725"
+
+    var registeredEmail: String? = null
+    var registeredCpf: String? = null
+    var registeredPassword: String? = null
 
     val freelancers: List<FreelancerDto> = listOf(
         FreelancerDto(
@@ -141,19 +138,11 @@ object FakeStore {
         ),
     )
 
-    var balance: BalanceDto = BalanceDto(available = 570.00, pending = 180.00)
+    var balance: BalanceDto = BalanceDto(available = 0.0, pending = 0.0)
 
-    val transactions: List<TransactionDto> = listOf(
-        TransactionDto("txn_1", "Flavio Bol.", "Conserto de pia", "Rua José, 182 - SP/SP", 220.00, "08/12/2025", "WITHDRAWABLE", "hoje"),
-        TransactionDto("txn_2", "Daniel Vor.", "Conserto de chuveiro", "Rua José, 182 - SP/SP", 150.00, "07/12/2025", "COMPLETED", null),
-        TransactionDto("txn_3", "Donald T.", "Conserto de piscina", "Rua José, 182 - SP/SP", 200.00, "06/12/2025", "COMPLETED", null),
-        TransactionDto("txn_4", "Carlos Mendes", "Ajuste de costura", "Taboão da Serra - SP", 90.00, "05/12/2025", "WITHDRAWN", null),
-    )
+    val transactions: List<TransactionDto> = emptyList()
 
-    var cards: MutableList<CardDto> = mutableListOf(
-        CardDto("crd_1", "MASTERCARD", "6769", "ANA SILVA", "08/29", "Cartão principal", true),
-        CardDto("crd_2", "VISA", "8371", "ANA SILVA", "11/28", "Reserva", false),
-    )
+    var cards: MutableList<CardDto> = mutableListOf()
 
     var subscription: SubscriptionDto = SubscriptionDto(
         active = false,
@@ -182,13 +171,25 @@ object FakeStore {
 
     var violeta: VioletaStatusDto = VioletaStatusDto(
         enabled = false,
-        identityVerified = true,
-        phoneVerified = true,
-        identityVerifiedAt = "jan 2026",
-        phoneVerifiedAt = "jan 2025",
-        safeRouteEnabled = true,
-        emergencyButtonEnabled = true,
+        identityVerified = false,
+        phoneVerified = false,
+        identityVerifiedAt = null,
+        phoneVerifiedAt = null,
+        safeRouteEnabled = false,
+        emergencyButtonEnabled = false,
     )
+
+    var exploredMatch: Boolean = false
+
+    fun calculateProfileCompletion(): Int {
+        var score = 0
+        if (currentUser.id.isNotBlank()) score += 20
+        if (currentUser.bio.isNotBlank()) score += 20
+        if (currentUser.skills.isNotEmpty()) score += 20
+        if (violeta.identityVerified) score += 20
+        if (exploredMatch) score += 20
+        return score
+    }
 
     var trilhaDone: MutableSet<String> = mutableSetOf()
 

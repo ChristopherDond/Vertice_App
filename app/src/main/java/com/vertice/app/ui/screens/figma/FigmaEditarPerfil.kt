@@ -8,6 +8,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -39,6 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -72,6 +74,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.vertice.app.R
 import com.vertice.app.ui.components.PressAccent
 import com.vertice.app.ui.components.PressSoft
 import com.vertice.app.ui.components.vClick
@@ -95,17 +98,17 @@ private val EpShadow = Color(0x40883FF4)
 private val EpToggleRowLine = Color(0x33883FF4)
 
 object EditarPerfilMock {
-    const val name = "Carlos Mendes"
+    const val name = ""
     const val subtitle = "Atualize seus dados e informações de perfil"
     const val birthDigits = ""
-    const val bio = "Costureira Pirulitos felizes"
-    val skills = listOf("Costura", "Concreto", "Manejo")
-    const val email = "Vorcaro@gmail.com"
-    const val phoneDigits = "11999999999"
-    const val cepDigits = "04552040"
-    const val street = "Rua Elvira Ferraz"
-    const val number = "2.197"
-    const val city = "São Paulo"
+    const val bio = ""
+    val skills = emptyList<String>()
+    const val email = ""
+    const val phoneDigits = ""
+    const val cepDigits = ""
+    const val street = ""
+    const val number = ""
+    const val city = ""
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -115,20 +118,42 @@ fun FigmaEditarPerfil(
     onLogout: () -> Unit = {},
     @DrawableRes avatarRes: Int? = null,
 ) {
-    BackHandler(enabled = true) { onBack() }
-
+    val current = com.vertice.app.data.remote.fake.FakeStore.currentUser
     var birth by remember { mutableStateOf(EditarPerfilMock.birthDigits) }
-    var bio by remember { mutableStateOf(EditarPerfilMock.bio) }
-    var email by remember { mutableStateOf(EditarPerfilMock.email) }
-    var phone by remember { mutableStateOf(EditarPerfilMock.phoneDigits) }
-    var cep by remember { mutableStateOf(EditarPerfilMock.cepDigits) }
-    var street by remember { mutableStateOf(EditarPerfilMock.street) }
-    var number by remember { mutableStateOf(EditarPerfilMock.number) }
-    var city by remember { mutableStateOf(EditarPerfilMock.city) }
+    var bio by remember { mutableStateOf(current.bio.ifBlank { EditarPerfilMock.bio }) }
+    var email by remember { mutableStateOf(current.email.ifBlank { EditarPerfilMock.email }) }
+    var phone by remember { mutableStateOf(current.phone.filter { it.isDigit() }) }
+    var cep by remember { mutableStateOf(current.address?.cep?.filter { it.isDigit() } ?: "") }
+    var street by remember { mutableStateOf(current.address?.street ?: "") }
+    var number by remember { mutableStateOf(current.address?.number ?: "") }
+    var city by remember { mutableStateOf(current.address?.city ?: "") }
     var notifyProposals by remember { mutableStateOf(true) }
     var popup by remember { mutableStateOf(ConfigPopup.NENHUM) }
-    var fullName by remember { mutableStateOf(EditarPerfilMock.name) }
-    val skills = remember { mutableStateListOf(*EditarPerfilMock.skills.toTypedArray()) }
+    var fullName by remember { mutableStateOf(current.name.ifBlank { EditarPerfilMock.name }) }
+    val skills = remember { mutableStateListOf(*(if (current.skills.isNotEmpty()) current.skills.toTypedArray() else EditarPerfilMock.skills.toTypedArray())) }
+
+    val defaultAvatars = listOf(
+        R.drawable.freelancer_b,
+        R.drawable.freelancer_c,
+        R.drawable.freelancer_m,
+        R.drawable.ana_profile,
+    )
+    var currentAvatarRes by remember { mutableStateOf(avatarRes) }
+
+    fun saveAndBack() {
+        com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
+            name = fullName.trim(),
+            bio = bio.trim(),
+            skills = skills.toList(),
+            email = email.trim(),
+            phone = phone.trim(),
+            avatarUrl = if (currentAvatarRes != null) "avatar_selected" else null,
+            profileCompletion = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion(),
+        )
+        onBack()
+    }
+
+    BackHandler(enabled = true) { saveAndBack() }
 
     Box(Modifier.fillMaxSize().background(VColor.Bg)) {
         Column(
@@ -139,11 +164,17 @@ fun FigmaEditarPerfil(
                 .navigationBarsPadding()
                 .imePadding(),
         ) {
-            EpTopBar(onBack)
+            EpTopBar(onBack = { saveAndBack() })
 
-            EpAvatar(avatarRes, Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp))
+            EpAvatar(
+                avatarRes = currentAvatarRes,
+                onPickAvatar = {
+                    currentAvatarRes = if (currentAvatarRes == null) defaultAvatars[0] else defaultAvatars[(defaultAvatars.indexOf(currentAvatarRes) + 1) % defaultAvatars.size]
+                },
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 8.dp),
+            )
             VText(
-                fullName.ifBlank { EditarPerfilMock.name },
+                fullName.ifBlank { "Nome do Usuário" },
                 vs(24f, 800, 28.23f, family = Roboto),
                 VColor.Ink,
                 Modifier.fillMaxWidth().padding(top = 12.dp),
@@ -162,7 +193,7 @@ fun FigmaEditarPerfil(
                 EpSectionHeader(1, "Informações pessoais", "Atualize seus dados básicos")
                 Spacer(Modifier.height(16.dp))
                 EpField("Nome completo") {
-                    EpAlterRow(fullName, "Alterar nome") { popup = ConfigPopup.NOME }
+                    EpAlterRow(fullName, "Nome completo", actionLabel = if (fullName.isBlank()) "Adicionar" else "Alterar", placeholder = "Informe seu nome completo") { popup = ConfigPopup.NOME }
                 }
                 Spacer(Modifier.height(14.dp))
                 EpField("Senha") { EpPasswordRow { popup = ConfigPopup.SENHA_NOVA } }
@@ -205,11 +236,11 @@ fun FigmaEditarPerfil(
                 EpSectionHeader(2, "Contato", "Para confirmações e novidades")
                 Spacer(Modifier.height(16.dp))
                 EpField("E-mail") {
-                    EpAlterRow(email, "Alterar e-mail") { popup = ConfigPopup.EMAIL_CODIGO }
+                    EpAlterRow(email, "E-mail", actionLabel = if (email.isBlank()) "Adicionar" else "Alterar", placeholder = "seuemail@exemplo.com") { popup = ConfigPopup.EMAIL_CODIGO }
                 }
                 Spacer(Modifier.height(14.dp))
                 EpField("Telefone") {
-                    EpAlterRow(phone.formatPhone(), "Alterar telefone") { popup = ConfigPopup.TELEFONE_CODIGO }
+                    EpAlterRow(phone.formatPhone(), "Telefone", actionLabel = if (phone.isBlank()) "Adicionar" else "Alterar", placeholder = "(11) 99999-9999") { popup = ConfigPopup.TELEFONE_CODIGO }
                 }
             }
 
@@ -273,6 +304,22 @@ fun FigmaEditarPerfil(
             onPopup = { popup = it },
             onDismiss = { popup = ConfigPopup.NENHUM },
             senhaVoltar = ConfigPopup.NENHUM,
+            onUpdateName = {
+                fullName = it
+                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(name = it)
+            },
+            onUpdateEmail = {
+                email = it
+                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(email = it)
+                com.vertice.app.data.remote.fake.FakeStore.registeredEmail = it
+            },
+            onUpdatePhone = {
+                phone = it
+                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(phone = it)
+            },
+            onUpdatePassword = {
+                com.vertice.app.data.remote.fake.FakeStore.registeredPassword = it
+            },
         )
     }
 }
@@ -299,25 +346,62 @@ private fun EpTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-private fun EpAvatar(@DrawableRes avatarRes: Int?, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(110.dp)
-            .clip(CircleShape)
-            .background(Color.White)
-            .semantics { contentDescription = "Foto de perfil" },
-        contentAlignment = Alignment.Center,
+private fun EpAvatar(
+    @DrawableRes avatarRes: Int?,
+    onPickAvatar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (avatarRes != null) {
-            Image(
-                painterResource(avatarRes),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
-        } else {
-            Icon(IcoImageFill, null, Modifier.size(36.dp), tint = VColor.InkSoft)
+        Box(
+            Modifier
+                .size(110.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .vClick(PressSoft) { onPickAvatar() }
+                .semantics { contentDescription = "Foto de perfil" },
+            contentAlignment = Alignment.Center,
+        ) {
+            if (avatarRes != null) {
+                Image(
+                    painterResource(avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            } else {
+                Icon(IcoImageFill, null, Modifier.size(36.dp), tint = VColor.InkSoft)
+            }
+
+            Box(
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(VColor.PurpleMid)
+                    .border(2.dp, Color.White, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.CameraAlt,
+                    contentDescription = "Alterar foto",
+                    tint = Color.White,
+                    modifier = Modifier.size(15.dp),
+                )
+            }
         }
+        Spacer(Modifier.height(8.dp))
+        VText(
+            if (avatarRes != null) "Alterar foto" else "Adicionar foto",
+            vs(12.5f, 600, 15f, family = Inter),
+            VColor.PurpleMid,
+            Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .clickable { onPickAvatar() }
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+        )
     }
 }
 
@@ -409,12 +493,18 @@ private fun EpInput(
 /** Senha nunca é pré-preenchida: o campo só mostra máscara e leva para "Alterar senha". */
 @Composable
 private fun EpPasswordRow(onClick: () -> Unit) {
-    EpAlterRow("••••••••••••", "Senha, toque para alterar", onClick)
+    EpAlterRow("••••••••••••", "Senha, toque para alterar", onClick = onClick)
 }
 
-/** Campo somente leitura com link "Alterar": usado para dados que mudam por popup (e-mail, telefone, senha). */
+/** Campo somente leitura com link "Adicionar" / "Alterar": usado para dados que mudam por popup (nome, e-mail, telefone, senha). */
 @Composable
-private fun EpAlterRow(value: String, contentDescription: String, onClick: () -> Unit) {
+private fun EpAlterRow(
+    value: String,
+    contentDescription: String,
+    actionLabel: String = if (value.isBlank()) "Adicionar" else "Alterar",
+    placeholder: String = "Toque para adicionar",
+    onClick: () -> Unit,
+) {
     val shape = RoundedCornerShape(10.dp)
     Row(
         Modifier
@@ -429,13 +519,13 @@ private fun EpAlterRow(value: String, contentDescription: String, onClick: () ->
         verticalAlignment = Alignment.CenterVertically,
     ) {
         VText(
-            value.ifBlank { "Não informado" },
+            value.ifBlank { placeholder },
             vs(14f, 400, 16.94f, family = Inter),
             if (value.isBlank()) EpPlaceholder else VColor.Ink,
             Modifier.weight(1f),
             maxLines = 1,
         )
-        VText("Alterar", vs(12f, 600, 14.52f, family = Inter), VColor.Purple)
+        VText(actionLabel, vs(12f, 600, 14.52f, family = Inter), VColor.Purple)
     }
 }
 

@@ -10,19 +10,30 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -101,24 +112,19 @@ fun FigmaInicial(
     onPro: () -> Unit = {},
     onEncontrarParceiro: () -> Unit = { onNav(VTab.MATCH) },
     onOferecerServico: () -> Unit = {},
+    onEditarPerfil: () -> Unit = { onNav(VTab.PERFIL) },
 ) {
     var proVisible by remember { mutableStateOf(true) }
+    var showMissionsSheet by remember { mutableStateOf(false) }
+    val profileScore = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion()
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) { appear.animateTo(1f, tween(420, easing = LinearEasing)) }
 
-    val pulse = rememberInfiniteTransition(label = "live")
-    val dot by pulse.animateFloat(
-        0.45f,
-        1f,
-        infiniteRepeatable(tween(1100), RepeatMode.Reverse),
-        label = "dot",
-    )
-
-    val ring = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
-        delay(160)
-        ring.animateTo(0.70f, tween(850, easing = LinearEasing))
-    }
+    val session by com.vertice.app.core.di.ServiceLocator.sessionManager.session.collectAsState(initial = null)
+    val userName = session?.displayName?.ifBlank { com.vertice.app.data.remote.fake.FakeStore.currentUser.name }
+        ?: com.vertice.app.data.remote.fake.FakeStore.currentUser.name
+    val firstName = userName.trim().split(Regex("\\s+")).firstOrNull()?.replaceFirstChar { it.uppercase() } ?: ""
+    val saudacao = if (firstName.isNotBlank()) "Olá, $firstName!" else "Olá!"
 
     Box(Modifier.fillMaxSize().background(Color(0xFFF6F1FF))) {
 
@@ -172,25 +178,23 @@ fun FigmaInicial(
                 .offset(0.dp, if (proVisible) 0.dp else (-46).dp)
                 .alpha(appear.value),
         ) {
-            T("Olá, Ana!", 30, 158, 157, 24f, 800, Color.Black, 1, 28.13f)
+            T(saudacao, 30, 158, 260, 24f, 800, Color.Black, 1, 28.13f)
             T("Veja suas conexões e oportunidades de hoje", 30, 190, 226, 13f, 400, Color(0x70000000), 2, 18f)
 
             Box(
-                Modifier.offset(298.dp, 155.dp).size(65.dp).clip(CircleShape).background(Color.White),
+                Modifier
+                    .offset(298.dp, 155.dp)
+                    .size(65.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(0.75.dp, Color(0x33000000), CircleShape),
+                contentAlignment = Alignment.Center,
             ) {
-                Image(
-                    painterResource(R.drawable.img_avatar_ana),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                )
-                Box(
-                    Modifier
-                        .offset(58.dp, 0.dp)
-                        .size(7.dp)
-                        .alpha(dot)
-                        .clip(CircleShape)
-                        .background(Green),
+                Icon(
+                    com.vertice.app.ui.icons.IcoUsersFill,
+                    contentDescription = "Foto de perfil",
+                    modifier = Modifier.size(30.dp),
+                    tint = Purple,
                 )
             }
 
@@ -200,7 +204,8 @@ fun FigmaInicial(
                     .width(333.dp)
                     .height(106.dp)
                     .clip(RoundedCornerShape(15.dp))
-                    .background(Purple),
+                    .background(Purple)
+                    .clickable { showMissionsSheet = true },
             ) {
                 Box(Modifier.offset(21.dp, 17.dp).size(72.dp), contentAlignment = Alignment.Center) {
                     Canvas(Modifier.fillMaxSize()) {
@@ -219,17 +224,27 @@ fun FigmaInicial(
                         drawArc(
                             color = Color.White,
                             startAngle = -90f,
-                            sweepAngle = 360f * ring.value,
+                            sweepAngle = 360f * (profileScore / 100f),
                             useCenter = false,
                             topLeft = tl,
                             size = Size(d, d),
                             style = Stroke(stroke, cap = StrokeCap.Round),
                         )
                     }
-                    Text("70%", style = vs(15.6f, 800, 19f, 0f, Roboto), color = Color.White)
+                    Text("$profileScore%", style = vs(15.6f, 800, 19f, 0f, Roboto), color = Color.White)
                 }
                 T("PERFIL", 140, 28, 60, 10f, 800, Color.White, 1, 11.76f)
-                T("Complete seu perfil\npara mais matches", 140, 39, 135, 10f, 500, Color.White, 2, 15.3f)
+                T(
+                    if (profileScore == 100) "Perfil completo!\nMáxima visibilidade" else "Complete seu perfil\npara mais matches",
+                    140,
+                    39,
+                    135,
+                    10f,
+                    500,
+                    Color.White,
+                    2,
+                    15.3f,
+                )
                 Ico(IcoDashiconsArrowRightAlt2, 293, 43, 20, 20, Color(0xB3FFFFFF))
             }
 
@@ -238,31 +253,46 @@ fun FigmaInicial(
 
             T("ATIVIDADE RECENTE", 30, 459, 118, 10f, 500, Label, 1, 11.73f)
 
-            Act(
-                y = 488,
-                icon = IcoDashiconsAdminTools,
-                iconBg = ToolBg,
-                iconTint = ProIconFg,
-                body = "Carlos Mendes concluiu o serviço\nConserto de chuveiro elétrico • R$120",
-                bodyX = 63,
-                bodyW = 219,
-                time = "há 20min",
-                timeX = 278,
-            )
-            Act(
-                y = 561,
-                icon = Trophy,
-                iconBg = TrophyBg,
-                iconTint = TrophyFg,
-                body = "Módulo concluído na Trilha de Blindagem\nContinue e desbloqueie mais matches",
-                bodyX = 63,
-                bodyW = 229,
-                time = "há 2h",
-                timeX = 297,
-            )
+            Box(
+                Modifier
+                    .offset(30.dp, 488.dp)
+                    .width(333.dp)
+                    .height(68.dp)
+                    .shadow(5.dp, RoundedCornerShape(15.dp), ambientColor = Shadow, spotColor = Shadow)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(Color.White)
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text(
+                    "Nenhuma atividade recente.\nSuas conexões e serviços aparecerão aqui.",
+                    style = vs(12f, 400, 17f, 0f, Roboto),
+                    color = Color.Gray,
+                )
+            }
         }
 
         VBottomNav(VTab.INICIO, onNav, Modifier.align(Alignment.BottomCenter))
+
+        if (showMissionsSheet) {
+            MissoesPerfilBottomSheet(
+                score = profileScore,
+                onDismiss = { showMissionsSheet = false },
+                onNavMatch = {
+                    showMissionsSheet = false
+                    com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
+                    onNav(VTab.MATCH)
+                },
+                onNavVioleta = {
+                    showMissionsSheet = false
+                    onNav(VTab.VIOLETA)
+                },
+                onNavEditarPerfil = {
+                    showMissionsSheet = false
+                    onEditarPerfil()
+                },
+            )
+        }
     }
 }
 
@@ -324,5 +354,227 @@ private fun Act(
             color = Color(0x8F000000),
             maxLines = 1,
         )
+    }
+}
+
+@Composable
+private fun MissoesPerfilBottomSheet(
+    score: Int,
+    onDismiss: () -> Unit,
+    onNavMatch: () -> Unit,
+    onNavVioleta: () -> Unit,
+    onNavEditarPerfil: () -> Unit,
+) {
+    val store = com.vertice.app.data.remote.fake.FakeStore
+    val isContaOk = store.currentUser.id.isNotBlank()
+    val isMatchOk = store.exploredMatch
+    val isVioletaOk = store.violeta.identityVerified
+    val isBioOk = store.currentUser.bio.isNotBlank()
+    val isSkillsOk = store.currentUser.skills.isNotEmpty()
+
+    data class Missao(
+        val num: Int,
+        val titulo: String,
+        val desc: String,
+        val feita: Boolean,
+        val acaoLabel: String,
+        val onAcao: () -> Unit,
+    )
+
+    val missoes = listOf(
+        Missao(1, "Criar sua conta", "Cadastro inicial e credenciais salvas", isContaOk, "Concluído", {}),
+        Missao(2, "Explorar o Match", "Descubra parceiros e serviços na rede", isMatchOk, "Explorar", onNavMatch),
+        Missao(3, "Protocolo Violeta", "Envie documentos e foto para verificação", isVioletaOk, "Verificar", onNavVioleta),
+        Missao(4, "Bio e Foto de Perfil", "Apresente quem você é e sua atuação", isBioOk, "Editar", onNavEditarPerfil),
+        Missao(5, "Habilidades e Tags", "Adicione ao menos 1 competência", isSkillsOk, "Adicionar", onNavEditarPerfil),
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.55f))
+            .clickable(onClick = onDismiss),
+    ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .background(Color.White)
+                .clickable(enabled = false) {}
+                .padding(horizontal = 22.dp, vertical = 20.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                // Drag handle
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(42.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color(0xFFDDDDDD)),
+                )
+                Spacer(Modifier.height(16.dp))
+
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column {
+                        Text(
+                            text = "Complete seu perfil",
+                            style = vs(19f, 700, 23f, 0f, Roboto),
+                            color = Color.Black,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = "$score% concluído para mais visibilidade",
+                            style = vs(12f, 500, 16f, 0f, Roboto),
+                            color = Purple,
+                        )
+                    }
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = "Fechar",
+                            modifier = Modifier.size(16.dp),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                // Barra de progresso
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0xFFEFE8FC)),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(fraction = (score / 100f).coerceIn(0.02f, 1f))
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Brush.horizontalGradient(listOf(Color(0xFF883FF4), Color(0xFFEA58A3)))),
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // Lista de missões
+                missoes.forEachIndexed { idx, m ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            if (m.feita) {
+                                Image(
+                                    painter = painterResource(R.drawable.ic_v_check_mark),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .clip(CircleShape)
+                                        .border(1.5.dp, Color(0xFFB8B1AA), CircleShape),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        text = "${m.num}",
+                                        style = vs(10f, 700, 12f, 0f, Roboto),
+                                        color = Color(0xFF888888),
+                                    )
+                                }
+                            }
+
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Text(
+                                        text = m.titulo,
+                                        style = vs(13f, 700, 16f, 0f, Roboto),
+                                        color = if (m.feita) Color.Black else Color.Black.copy(alpha = 0.85f),
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(if (m.feita) Color(0xFFEAF8ED) else Color(0xFFF2EBFF))
+                                            .padding(horizontal = 5.dp, vertical = 2.dp),
+                                    ) {
+                                        Text(
+                                            text = "+20%",
+                                            style = vs(9f, 700, 11f, 0f, Roboto),
+                                            color = if (m.feita) Color(0xFF1E7629) else Purple,
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = m.desc,
+                                    style = vs(11f, 400, 14f, 0f, Roboto),
+                                    color = Color.Gray,
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.width(8.dp))
+
+                        if (m.feita) {
+                            Text(
+                                text = "Feito ✓",
+                                style = vs(12f, 600, 14f, 0f, Roboto),
+                                color = Color(0xFF1E7629),
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Purple)
+                                    .clickable(onClick = m.onAcao)
+                                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = m.acaoLabel,
+                                    style = vs(11.5f, 700, 14f, 0f, Roboto),
+                                    color = Color.White,
+                                )
+                            }
+                        }
+                    }
+
+                    if (idx < missoes.size - 1) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(0.5.dp)
+                                .background(Color(0xFFEEEEEE)),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(24.dp))
+            }
+        }
     }
 }

@@ -29,12 +29,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +46,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.vertice.app.R
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onErr
+import com.vertice.app.core.result.onOk
+import kotlinx.coroutines.launch
 import com.vertice.app.ui.design.T
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VGrad
@@ -70,8 +76,34 @@ fun FigmaLogin(
     var cpf by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var verSenha by remember { mutableStateOf(false) }
+    var erro by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     var canvasSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+
+    fun tentarEntrar() {
+        val cred = cpf.trim()
+        if (cred.isBlank()) {
+            erro = "Informe seu CPF ou e-mail."
+            return
+        }
+        if (senha.isBlank()) {
+            erro = "Informe sua senha."
+            return
+        }
+        loading = true
+        erro = null
+        scope.launch {
+            val result = ServiceLocator.authRepository.login(cred, senha)
+            loading = false
+            result.onOk {
+                onEntrar()
+            }.onErr { err ->
+                erro = err.message
+            }
+        }
+    }
 
     Box(
         Modifier
@@ -133,16 +165,33 @@ fun FigmaLogin(
             Modifier.offset(x = 258.dp, y = 565.dp).vClick(PressSoft) { onEsqueci() },
         )
 
+        if (erro != null) {
+            VText(
+                erro!!,
+                vs(11f, 600, 13f),
+                Color(0xFFD32F2F),
+                Modifier
+                    .offset(x = 52.dp, y = 574.dp)
+                    .width(288.dp),
+                align = TextAlign.Center,
+            )
+        }
+
         Box(
             Modifier
                 .offset(x = 126.dp, y = 596.dp)
                 .width(142.dp)
                 .height(36.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(VColor.Purple)
-                .vClick(PressWhite) { onEntrar() },
+                .background(if (loading) VColor.PurpleMuted else VColor.Purple)
+                .vClick(PressWhite) { if (!loading) tentarEntrar() },
         ) {
-            VText("Entrar", vs(14f, 800, 16.47f), VColor.White, Modifier.align(Alignment.Center))
+            VText(
+                if (loading) "Entrando..." else "Entrar",
+                vs(14f, 800, 16.47f),
+                VColor.White,
+                Modifier.align(Alignment.Center),
+            )
         }
 
         Row(
@@ -168,6 +217,12 @@ fun FigmaLogin(
             bg = VColor.White,
             textColor = VColor.Ink,
             borderColor = VColor.Gray3,
+            onClick = {
+                scope.launch {
+                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.GOOGLE)
+                        .onOk { onEntrar() }
+                }
+            },
             icon = {
                 Image(
                     painterResource(R.drawable.svg_google),
@@ -184,6 +239,12 @@ fun FigmaLogin(
             bg = VColor.AppleDark,
             textColor = VColor.White,
             borderColor = null,
+            onClick = {
+                scope.launch {
+                    ServiceLocator.authRepository.loginWithProvider(com.vertice.app.domain.model.AuthProvider.APPLE)
+                        .onOk { onEntrar() }
+                }
+            },
             icon = {
                 Image(
                     painterResource(R.drawable.svg_apple),
@@ -255,6 +316,7 @@ private fun SocialButton(
     bg: androidx.compose.ui.graphics.Color,
     textColor: androidx.compose.ui.graphics.Color,
     borderColor: androidx.compose.ui.graphics.Color?,
+    onClick: () -> Unit = {},
     icon: @Composable () -> Unit,
 ) {
     Box(
@@ -264,7 +326,8 @@ private fun SocialButton(
             .height(43.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(bg)
-            .then(if (borderColor != null) Modifier.border(1.dp, borderColor, RoundedCornerShape(10.dp)) else Modifier),
+            .then(if (borderColor != null) Modifier.border(1.dp, borderColor, RoundedCornerShape(10.dp)) else Modifier)
+            .clickable { onClick() },
     ) {
         Box(Modifier.align(Alignment.CenterStart).padding(start = 20.dp)) { icon() }
         VText(

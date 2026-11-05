@@ -128,14 +128,28 @@ fun FigmaVioleta(
     Crossfade(state, animationSpec = tween(340), label = "viol") { s ->
         when (s) {
             VioletaState.VERIFICACAO -> Verificacao(onGo = { state = VioletaState.DESATIVADO }, onNav = onNav)
-            VioletaState.DESATIVADO -> Desativado(onGo = { alternar(true) }, onNav = onNav)
+            VioletaState.DESATIVADO -> Desativado(
+                isVerified = com.vertice.app.data.remote.fake.FakeStore.violeta.identityVerified,
+                onGo = {
+                    if (com.vertice.app.data.remote.fake.FakeStore.violeta.identityVerified) {
+                        alternar(true)
+                    } else {
+                        state = VioletaState.VERIFICACAO
+                    }
+                },
+                onNav = onNav,
+            )
             VioletaState.ATIVO -> Ativo(onGo = { alternar(false) }, onBack = { onNav(VTab.INICIO) })
         }
     }
 }
 
 @Composable
-private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
+private fun Desativado(
+    isVerified: Boolean,
+    onGo: () -> Unit,
+    onNav: (VTab) -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -229,12 +243,20 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                         .border(0.5.dp, Color(0xFFE5E5E5), RoundedCornerShape(15.dp))
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
-                    val items = listOf(
-                        "Identidade verificada" to "Verificado em jan 2026",
-                        "Telefone confirmado" to "Verificado em jan 2025",
-                        "Protocolo violeta" to "Verificado em jan 2025",
-                    )
-                    items.forEachIndexed { index, (title, date) ->
+                    val items = if (isVerified) {
+                        listOf(
+                            Triple("Identidade verificada", "Verificado recentemente", true),
+                            Triple("Telefone confirmado", "Confirmado no cadastro", true),
+                            Triple("Protocolo violeta", "Liberado para ativação", true),
+                        )
+                    } else {
+                        listOf(
+                            Triple("Identidade verificada", "Pendente de envio", false),
+                            Triple("Telefone confirmado", "Confirmado no cadastro", true),
+                            Triple("Protocolo violeta", "Aguardando verificação", false),
+                        )
+                    }
+                    items.forEachIndexed { index, (title, statusText, isOk) ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -246,11 +268,27 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_v_check_mark),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(17.dp),
-                                )
+                                if (isOk) {
+                                    Image(
+                                        painter = painterResource(R.drawable.ic_v_check_mark),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(17.dp),
+                                    )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(17.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFFFFEEF3)),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            "!",
+                                            style = vs(11f, 700, 13f, 0f, Roboto),
+                                            color = Color(0xFFD61476),
+                                        )
+                                    }
+                                }
                                 Text(
                                     text = title,
                                     style = vs(11.5f, 700, 14f, 0f, Roboto),
@@ -258,9 +296,9 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                                 )
                             }
                             Text(
-                                text = date,
-                                style = vs(9.5f, 400, 12f, 0f, Roboto),
-                                color = Muted,
+                                text = statusText,
+                                style = vs(9.5f, if (isOk) 400 else 600, 12f, 0f, Roboto),
+                                color = if (isOk) Muted else Color(0xFFD61476),
                             )
                         }
                         if (index < items.size - 1) {
@@ -274,7 +312,7 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                     }
                 }
 
-                // Botão "Ativar proteção agora"
+                // Botão "Ativar proteção agora" ou "Iniciar verificação"
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -290,7 +328,7 @@ private fun Desativado(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Ativar proteção agora",
+                        text = if (isVerified) "Ativar proteção agora" else "Iniciar verificação",
                         style = vs(14f, 800, 18f, 0f, Roboto),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -434,19 +472,30 @@ private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
 
         DashUploadBox(18, 291, 358, 133, onClick = { docsOk = true }) {
             Text(
-                "Envie seus documentos ou tire uma foto deles",
+                "Envie seus documentos ou tire uma foto deles, frente e verso",
                 modifier = Modifier.offset(18.dp, 32.dp).width(322.dp),
                 style = vs(20f, 400, 27f, 0f, Roboto),
                 color = Color.Black,
                 maxLines = 3,
             )
             if (docsOk) {
-                Icon(
-                    IcoAkarIconsCheck,
-                    contentDescription = null,
-                    modifier = Modifier.offset(320.dp, 100.dp).size(18.dp),
-                    tint = Color(0xFF12AA24),
-                )
+                Row(
+                    modifier = Modifier.offset(18.dp, 96.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Icon(
+                        IcoAkarIconsCheck,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = Color(0xFF12AA24),
+                    )
+                    Text(
+                        "Frente e verso anexados",
+                        style = vs(12f, 600, 14f, 0f, Roboto),
+                        color = Color(0xFF12AA24),
+                    )
+                }
             }
         }
 
@@ -465,12 +514,23 @@ private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 modifier = Modifier.offset(25.dp, 38.dp).size(135.dp),
             )
             if (selfieOk) {
-                Icon(
-                    IcoAkarIconsCheck,
-                    contentDescription = null,
-                    modifier = Modifier.offset(150.dp, 186.dp).size(18.dp),
-                    tint = Color(0xFF12AA24),
-                )
+                Row(
+                    modifier = Modifier.offset(14.dp, 178.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        IcoAkarIconsCheck,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = Color(0xFF12AA24),
+                    )
+                    Text(
+                        "Rosto verificado",
+                        style = vs(12f, 600, 14f, 0f, Roboto),
+                        color = Color(0xFF12AA24),
+                    )
+                }
             }
         }
 
@@ -479,10 +539,22 @@ private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 .offset(22.dp, 711.dp)
                 .width(353.dp)
                 .height(48.dp)
-                .shadow(0.dp)
+                .shadow(4.dp, RoundedCornerShape(10.dp), spotColor = Color(0x33EA58A3))
                 .clip(RoundedCornerShape(10.dp))
                 .background(Brush.horizontalGradient(PinkBtn))
-                .clickable(onClick = onGo),
+                .clickable {
+                    com.vertice.app.data.remote.fake.FakeStore.violeta = com.vertice.app.data.remote.fake.FakeStore.violeta.copy(
+                        identityVerified = true,
+                        phoneVerified = true,
+                        identityVerifiedAt = "Jan 2026",
+                        phoneVerifiedAt = "Jan 2026",
+                    )
+                    com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
+                        violetaVerified = true,
+                        profileCompletion = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion(),
+                    )
+                    onGo()
+                },
             contentAlignment = Alignment.Center,
         ) {
             Text("Verificar", style = vs(20f, 700, 26f, 0f, Roboto), color = Color.White)

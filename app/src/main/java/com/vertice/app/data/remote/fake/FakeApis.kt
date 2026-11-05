@@ -45,32 +45,59 @@ class FakeAuthApi : AuthApi {
     override suspend fun login(body: LoginRequestDto): SessionDto {
         tick()
         val credential = body.credential.trim().lowercase()
-        val matchesEmail = credential == FakeStore.DEMO_EMAIL.lowercase() ||
-            credential == FakeStore.currentUser.email.lowercase()
+        val registeredEmail = FakeStore.registeredEmail ?: FakeStore.currentUser.email.lowercase()
+        val registeredCpf = FakeStore.registeredCpf ?: FakeStore.currentUser.cpfMasked.filter { it.isDigit() }
+        val matchesEmail = (credential.isNotBlank() && (credential == FakeStore.DEMO_EMAIL.lowercase() || credential == "demo@vertice.app")) ||
+            (registeredEmail.isNotBlank() && credential == registeredEmail)
         val cpfDigits = credential.filter { it.isDigit() }
-        val matchesCpf = cpfDigits.length == 11 && cpfDigits == FakeStore.DEMO_CPF
+        val matchesCpf = (cpfDigits.length == 11 && cpfDigits == FakeStore.DEMO_CPF) ||
+            (registeredCpf.isNotBlank() && cpfDigits == registeredCpf)
+
         if (!matchesEmail && !matchesCpf) throw FakeApiException("NOT_FOUND", "Conta não encontrada. Verifique o CPF ou e-mail.")
-        if (body.password != password) throw FakeApiException("UNAUTHORIZED", "Senha incorreta. Tente novamente.")
+        val expectedPassword = FakeStore.registeredPassword ?: password
+        if (body.password != expectedPassword && body.password != FakeStore.DEMO_PASSWORD) {
+            throw FakeApiException("UNAUTHORIZED", "Senha incorreta. Tente novamente.")
+        }
+
+        if (FakeStore.currentUser.name.isBlank()) {
+            FakeStore.currentUser = FakeStore.currentUser.copy(
+                id = "usr_demo",
+                name = "Usuário Demo",
+                email = if (matchesEmail) credential else FakeStore.DEMO_EMAIL,
+                profileCompletion = 50,
+            )
+        }
         return session()
     }
 
     override suspend fun loginWithProvider(body: ProviderLoginRequestDto): SessionDto {
         tick(600)
-        if (body.idToken.isBlank()) throw FakeApiException("VALIDATION", "Não foi possível concluir com ${body.provider}.")
+        if (FakeStore.currentUser.name.isBlank()) {
+            FakeStore.currentUser = FakeStore.currentUser.copy(
+                id = "usr_social",
+                name = "Usuário Social",
+                email = "social@vertice.app",
+                profileCompletion = 40,
+            )
+        }
         return session()
     }
 
     override suspend fun register(body: RegisterRequestDto): SessionDto {
         tick(800)
         FakeStore.currentUser = FakeStore.currentUser.copy(
+            id = "usr_" + System.currentTimeMillis().toString().takeLast(6),
             name = body.fullName,
             email = body.email,
             phone = body.phone,
             cpfMasked = "***.***.***-" + body.cpf.filter { it.isDigit() }.takeLast(2),
             bio = "",
             skills = emptyList(),
-            profileCompletion = 35,
+            profileCompletion = 40,
         )
+        FakeStore.registeredEmail = body.email.lowercase()
+        FakeStore.registeredCpf = body.cpf.filter { it.isDigit() }
+        FakeStore.registeredPassword = body.password
         password = body.password
         return session()
     }

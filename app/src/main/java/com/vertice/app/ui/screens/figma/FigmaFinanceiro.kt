@@ -89,11 +89,7 @@ object FinanceiroMock {
         val entrada: Boolean get() = valor > 0
     }
 
-    val movimentos = listOf(
-        Movimento("Pintura residencial", "Profissional: João Lima", "23 out", "PIX", -350.0),
-        Movimento("Reparo hidráulico", "Cliente: Carlos Lima", "20 out", "PIX", 150.0),
-        Movimento("Pintura residencial", "Cliente: Cañas Lima", "18 out", "PIX", 400.0),
-    )
+    val movimentos = emptyList<Movimento>()
 }
 
 private enum class MetodoCobranca(val titulo: String, val subtitulo: String, val icone: ImageVector) {
@@ -217,21 +213,25 @@ fun FigmaFinanceiro(
         VCard(Modifier.fillMaxWidth(), padding = PaddingValues(16.dp)) {
             VText("Últimas movimentações", vs(14f, 700, 16.5f, family = Roboto), VColor.Ink)
             Spacer(Modifier.height(10.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                FinanceiroMock.movimentos.forEach { LinhaMovimento(it) }
-            }
-            Spacer(Modifier.height(12.dp))
-            Row(
-                Modifier
-                    .align(Alignment.End)
-                    .clip(RoundedCornerShape(8.dp))
-                    .vClick(PressAccent) { onVerExtratoCompleto() }
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                VText("Ver extrato completo", vs(11f, 600, 13f, family = Roboto), Roxo)
-                Spacer(Modifier.width(4.dp))
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(14.dp), tint = Roxo)
+            if (FinanceiroMock.movimentos.isEmpty()) {
+                VText("Nenhuma movimentação realizada ainda.", vs(12f, 400, 16f, family = Roboto), VColor.Gray, Modifier.padding(vertical = 8.dp))
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FinanceiroMock.movimentos.forEach { LinhaMovimento(it) }
+                }
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    Modifier
+                        .align(Alignment.End)
+                        .clip(RoundedCornerShape(8.dp))
+                        .vClick(PressAccent) { onVerExtratoCompleto() }
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    VText("Ver extrato completo", vs(11f, 600, 13f, family = Roboto), Roxo)
+                    Spacer(Modifier.width(4.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, null, Modifier.size(14.dp), tint = Roxo)
+                }
             }
         }
 

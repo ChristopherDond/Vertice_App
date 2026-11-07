@@ -50,7 +50,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.Address
+import com.vertice.app.domain.model.ProfileForm
+import com.vertice.app.domain.model.User
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,19 +125,38 @@ fun FigmaEditarPerfil(
     onLogout: () -> Unit = {},
     @DrawableRes avatarRes: Int? = null,
 ) {
-    val current = com.vertice.app.data.remote.fake.FakeStore.currentUser
+    val scope = rememberCoroutineScope()
+    var current by remember { mutableStateOf<User?>(null) }
     var birth by remember { mutableStateOf(EditarPerfilMock.birthDigits) }
-    var bio by remember { mutableStateOf(current.bio.ifBlank { EditarPerfilMock.bio }) }
-    var email by remember { mutableStateOf(current.email.ifBlank { EditarPerfilMock.email }) }
-    var phone by remember { mutableStateOf(current.phone.filter { it.isDigit() }) }
-    var cep by remember { mutableStateOf(current.address?.cep?.filter { it.isDigit() } ?: "") }
-    var street by remember { mutableStateOf(current.address?.street ?: "") }
-    var number by remember { mutableStateOf(current.address?.number ?: "") }
-    var city by remember { mutableStateOf(current.address?.city ?: "") }
+    var bio by remember { mutableStateOf(EditarPerfilMock.bio) }
+    var email by remember { mutableStateOf(EditarPerfilMock.email) }
+    var phone by remember { mutableStateOf("") }
+    var cep by remember { mutableStateOf("") }
+    var street by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
     var notifyProposals by remember { mutableStateOf(true) }
     var popup by remember { mutableStateOf(ConfigPopup.NENHUM) }
-    var fullName by remember { mutableStateOf(current.name.ifBlank { EditarPerfilMock.name }) }
-    val skills = remember { mutableStateListOf(*(if (current.skills.isNotEmpty()) current.skills.toTypedArray() else EditarPerfilMock.skills.toTypedArray())) }
+    var fullName by remember { mutableStateOf(EditarPerfilMock.name) }
+    val skills = remember { mutableStateListOf(*EditarPerfilMock.skills.toTypedArray()) }
+
+    LaunchedEffect(Unit) {
+        ServiceLocator.profileRepository.me().onOk { u ->
+            current = u
+            fullName = u.name.ifBlank { EditarPerfilMock.name }
+            bio = u.bio.ifBlank { EditarPerfilMock.bio }
+            email = u.email.ifBlank { EditarPerfilMock.email }
+            phone = u.phone.filter { it.isDigit() }
+            cep = u.address?.cep?.filter { it.isDigit() } ?: ""
+            street = u.address?.street ?: ""
+            number = u.address?.number ?: ""
+            city = u.address?.city ?: ""
+            if (u.skills.isNotEmpty()) {
+                skills.clear()
+                skills.addAll(u.skills)
+            }
+        }
+    }
 
     val defaultAvatars = listOf(
         R.drawable.freelancer_b,
@@ -141,16 +167,30 @@ fun FigmaEditarPerfil(
     var currentAvatarRes by remember { mutableStateOf(avatarRes) }
 
     fun saveAndBack() {
-        com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
-            name = fullName.trim(),
-            bio = bio.trim(),
-            skills = skills.toList(),
-            email = email.trim(),
-            phone = phone.trim(),
-            avatarUrl = if (currentAvatarRes != null) "avatar_selected" else null,
-            profileCompletion = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion(),
-        )
-        onBack()
+        scope.launch {
+            val addr = if (street.isNotBlank() || cep.isNotBlank() || city.isNotBlank()) {
+                Address(
+                    cep = cep,
+                    street = street.trim(),
+                    number = number.trim(),
+                    district = current?.address?.district ?: "Centro",
+                    city = city.trim(),
+                    state = current?.address?.state ?: "SP",
+                )
+            } else current?.address
+
+            val form = ProfileForm(
+                fullName = fullName.trim(),
+                bio = bio.trim(),
+                skills = skills.toList(),
+                email = email.trim(),
+                phone = phone.trim(),
+                address = addr,
+                notificationsEnabled = notifyProposals,
+            )
+            ServiceLocator.profileRepository.update(form)
+            onBack()
+        }
     }
 
     BackHandler(enabled = true) { saveAndBack() }
@@ -306,19 +346,17 @@ fun FigmaEditarPerfil(
             senhaVoltar = ConfigPopup.NENHUM,
             onUpdateName = {
                 fullName = it
-                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(name = it)
             },
             onUpdateEmail = {
                 email = it
-                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(email = it)
-                com.vertice.app.data.remote.fake.FakeStore.registeredEmail = it
+                scope.launch { ServiceLocator.authRepository.changeEmail(it) }
             },
             onUpdatePhone = {
                 phone = it
-                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(phone = it)
+                scope.launch { ServiceLocator.authRepository.changePhone(it) }
             },
             onUpdatePassword = {
-                com.vertice.app.data.remote.fake.FakeStore.registeredPassword = it
+                scope.launch { ServiceLocator.authRepository.changePassword("", it) }
             },
         )
     }

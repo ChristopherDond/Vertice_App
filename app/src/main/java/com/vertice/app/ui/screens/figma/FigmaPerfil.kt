@@ -1,7 +1,9 @@
 package com.vertice.app.ui.screens.figma
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,13 +41,17 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.vertice.app.R
 import com.vertice.app.core.di.ServiceLocator
 import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.User
 import com.vertice.app.ui.components.PressSoft
 import com.vertice.app.ui.components.vClick
 import com.vertice.app.ui.design.Roboto
@@ -106,16 +112,25 @@ object PerfilMock {
 @Composable
 fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail: () -> Unit = {}, onFinanceiro: () -> Unit = {}, onPro: () -> Unit = {}) {
     val scroll = rememberScrollState()
+    var user by remember { mutableStateOf<User?>(null) }
     var isPro by remember { mutableStateOf(false) }
     var violetaAtiva by remember { mutableStateOf(false) }
     val session by ServiceLocator.sessionManager.session.collectAsState(initial = null)
-    val profileName = session?.displayName?.ifBlank { com.vertice.app.data.remote.fake.FakeStore.currentUser.name.ifBlank { PerfilMock.name } }
-        ?: com.vertice.app.data.remote.fake.FakeStore.currentUser.name.ifBlank { PerfilMock.name }
+    val trilhaDone by ServiceLocator.profileRepository.trilhaProgress().collectAsState(initial = emptySet())
+    val trilhaPercent = if (trilhaDone.isNotEmpty()) ((trilhaDone.size.toFloat() / 15f) * 100).toInt().coerceIn(0, 100) else 0
+
+    val profileName = user?.name?.ifBlank { session?.displayName.orEmpty().ifBlank { PerfilMock.name } }
+        ?: session?.displayName.orEmpty().ifBlank { PerfilMock.name }
 
     LaunchedEffect(Unit) {
+        ServiceLocator.profileRepository.me().onOk { user = it }
         ServiceLocator.financeRepository.subscription().onOk { isPro = it.active }
         ServiceLocator.profileRepository.violeta().onOk { violetaAtiva = it.enabled }
     }
+
+    val showPro = isPro || user?.isPro == true
+    val showVioleta = violetaAtiva || user?.violetaVerified == true
+
     Box(Modifier.fillMaxSize().background(VPerfil.bg)) {
         Column(
             Modifier
@@ -126,7 +141,8 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 .padding(bottom = 76.dp),
         ) {
             Avatar(
-                Modifier
+                user = user,
+                modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 12.dp),
             )
@@ -138,20 +154,20 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 maxLines = 1,
                 textAlign = TextAlign.Center,
             )
-            if (isPro || violetaAtiva) {
+            if (showPro || showVioleta) {
                 Row(
                     Modifier.fillMaxWidth().padding(top = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 ) {
-                    if (isPro) {
+                    if (showPro) {
                         Insignia("Vertice Pro", Icons.Filled.WorkspacePremium, VPerfil.gradPro)
                     }
-                    if (violetaAtiva) {
+                    if (showVioleta) {
                         Insignia("Protocolo Violeta", IcoBoxiconsShieldFilled, VPerfil.gradVioleta)
                     }
                 }
             }
-            if (!isPro) {
+            if (!showPro) {
                 PlanCard(onPro, Modifier.padding(top = 18.dp).padding(horizontal = 16.dp))
             }
             Box(
@@ -169,8 +185,9 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 color = Color.Black,
                 maxLines = 1,
             )
-            SkillsRow(Modifier.padding(start = 17.dp, top = 7.dp))
+            SkillsRow(skills = user?.skills ?: emptyList(), modifier = Modifier.padding(start = 17.dp, top = 7.dp))
             TrailCard(
+                progress = trilhaPercent,
                 onOpen = onTrail,
                 modifier = Modifier
                     .padding(start = 19.dp, top = 15.dp, end = 14.dp)
@@ -199,7 +216,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
 }
 
 @Composable
-private fun Avatar(modifier: Modifier = Modifier) {
+private fun Avatar(user: User?, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(135.dp)
@@ -209,12 +226,21 @@ private fun Avatar(modifier: Modifier = Modifier) {
             .semantics { contentDescription = "Foto de perfil do usuário" },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            IcoImageFill,
-            contentDescription = null,
-            modifier = Modifier.size(42.dp),
-            tint = VColor.InkSoft,
-        )
+        if (!user?.avatarUrl.isNullOrBlank() || user?.name?.contains("Ana", ignoreCase = true) == true) {
+            Image(
+                painter = painterResource(R.drawable.ana_profile),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Icon(
+                IcoImageFill,
+                contentDescription = null,
+                modifier = Modifier.size(42.dp),
+                tint = VColor.InkSoft,
+            )
+        }
     }
 }
 
@@ -287,8 +313,8 @@ private fun Insignia(label: String, icon: ImageVector, cores: List<Color>) {
 }
 
 @Composable
-private fun SkillsRow(modifier: Modifier = Modifier) {
-    if (PerfilMock.skills.isEmpty()) {
+private fun SkillsRow(skills: List<String>, modifier: Modifier = Modifier) {
+    if (skills.isEmpty()) {
         Text(
             "Nenhuma habilidade cadastrada ainda.",
             modifier = modifier.padding(end = 16.dp),
@@ -296,16 +322,20 @@ private fun SkillsRow(modifier: Modifier = Modifier) {
             color = VColor.Gray,
         )
     } else {
-        Row(modifier.padding(end = 16.dp)) {
-            PerfilMock.skills.forEachIndexed { index, label ->
-                if (index > 0) Spacer(Modifier.width(6.dp))
+        Row(
+            modifier = modifier
+                .padding(end = 16.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            skills.forEach { label ->
                 Box(
                     Modifier
                         .height(32.dp)
                         .clip(RoundedCornerShape(100.dp))
                         .background(VPerfil.chipBg)
                         .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(100.dp))
-                        .padding(horizontal = 12.dp),
+                        .padding(horizontal = 14.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -321,7 +351,7 @@ private fun SkillsRow(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun TrailCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
+private fun TrailCard(progress: Int, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier
             .clip(RoundedCornerShape(15.dp))
@@ -339,14 +369,14 @@ private fun TrailCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
             Box(
                 Modifier
                     .height(32.dp)
-                    .width(38.dp)
+                    .width(46.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(VPerfil.chipBg)
                     .border(0.75.dp, VPerfil.chipLine, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "${PerfilMock.trailProgress}%",
+                    "$progress%",
                     style = vs(16f, 500, 18.82f, 0f, Roboto),
                     color = VPerfil.chipText,
                     maxLines = 1,
@@ -360,7 +390,7 @@ private fun TrailCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
                 tint = Color.Black,
             )
         }
-        ProgressBar(Modifier.fillMaxWidth().padding(top = 8.dp))
+        ProgressBar(progress, Modifier.fillMaxWidth().padding(top = 8.dp))
         Column(Modifier.padding(top = 13.dp)) {
             PerfilMock.trail.forEachIndexed { index, item ->
                 if (index > 0) Spacer(Modifier.height(9.dp))
@@ -393,7 +423,7 @@ private fun TrailCard(onOpen: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ProgressBar(modifier: Modifier = Modifier) {
+private fun ProgressBar(progress: Int, modifier: Modifier = Modifier) {
     Box(
         modifier
             .height(9.dp)
@@ -402,7 +432,7 @@ private fun ProgressBar(modifier: Modifier = Modifier) {
     ) {
         Box(
             Modifier
-                .fillMaxWidth(PerfilMock.trailProgress / 100f)
+                .fillMaxWidth((progress / 100f).coerceIn(0.02f, 1f))
                 .height(9.dp)
                 .clip(RoundedCornerShape(100.dp))
                 .background(Brush.horizontalGradient(VPerfil.gradBar)),

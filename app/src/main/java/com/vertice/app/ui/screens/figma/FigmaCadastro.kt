@@ -59,6 +59,8 @@ import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.VText
 import com.vertice.app.ui.design.vs
+import com.vertice.app.core.result.onErr
+import com.vertice.app.core.result.onOk
 import kotlinx.coroutines.launch
 
 private val SectionBg = Color(0x4DFFFFFF)
@@ -397,41 +399,39 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
                         if (!loading && validate()) {
                             scope.launch {
                                 loading = true
-                                com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
-                                    id = "usr_" + System.currentTimeMillis().toString().takeLast(6),
-                                    name = nome.trim(),
+                                val birthFormatted = if (nascimento.length == 8) {
+                                    "${nascimento.substring(0, 2)}/${nascimento.substring(2, 4)}/${nascimento.substring(4, 8)}"
+                                } else nascimento
+
+                                val form = com.vertice.app.domain.model.RegistrationForm(
+                                    fullName = nome.trim(),
+                                    cpf = cpf.filter { it.isDigit() },
+                                    birthDate = birthFormatted,
+                                    password = senha,
+                                    confirmPassword = senha,
                                     email = email.trim().lowercase(),
-                                    phone = telefone,
-                                    cpfMasked = "***.***.***-" + cpf.takeLast(2),
-                                    bio = "",
-                                    skills = emptyList(),
-                                    address = com.vertice.app.data.remote.dto.AddressDto(
+                                    phone = telefone.filter { it.isDigit() },
+                                    acceptedTerms = true,
+                                    address = com.vertice.app.domain.model.Address(
                                         cep = cep,
                                         street = rua.trim(),
                                         number = numero.trim(),
-                                        district = complemento.trim(),
+                                        complement = complemento.trim(),
+                                        district = complemento.ifBlank { "Centro" }.trim(),
                                         city = cidade.trim(),
                                         state = uf.trim().uppercase(),
                                     ),
-                                    profileCompletion = 40,
-                                    rating = 0.0,
-                                    completedServices = 0,
                                 )
-                                com.vertice.app.data.remote.fake.FakeStore.registeredEmail = email.trim().lowercase()
-                                com.vertice.app.data.remote.fake.FakeStore.registeredCpf = cpf.filter { it.isDigit() }
-                                com.vertice.app.data.remote.fake.FakeStore.registeredPassword = senha
 
-                                com.vertice.app.core.di.ServiceLocator.sessionManager.save(
-                                    com.vertice.app.core.session.Session(
-                                        token = "fake." + java.util.UUID.randomUUID().toString(),
-                                        userId = com.vertice.app.data.remote.fake.FakeStore.currentUser.id,
-                                        displayName = nome.trim(),
-                                        isPro = false,
-                                        violetaVerified = false,
-                                    )
-                                )
-                                loading = false
-                                onDone()
+                                com.vertice.app.core.di.ServiceLocator.authRepository.register(form)
+                                    .onOk {
+                                        loading = false
+                                        onDone()
+                                    }
+                                    .onErr { err ->
+                                        loading = false
+                                        errorMessage = err.message
+                                    }
                             }
                         }
                     },

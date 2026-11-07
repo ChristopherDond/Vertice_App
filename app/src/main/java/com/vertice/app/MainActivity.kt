@@ -103,10 +103,7 @@ private fun Flow() {
             Step.INICIAL -> FigmaInicial(
                 onNav = { tab ->
                     when (tab) {
-                        VTab.MATCH -> {
-                            com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
-                            step = Step.MATCH
-                        }
+                        VTab.MATCH -> step = Step.MATCH
                         VTab.VIOLETA -> step = Step.VIOLETA
                         VTab.PERFIL -> step = Step.PERFIL
                         else -> {}
@@ -114,7 +111,6 @@ private fun Flow() {
                 },
                 onPro = { proVoltar = Step.INICIAL; step = Step.PRO },
                 onEncontrarParceiro = {
-                    com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
                     step = Step.MATCH
                 },
                 onOferecerServico = { step = Step.OFERECER_SERVICO },
@@ -137,7 +133,6 @@ private fun Flow() {
                 onPublished = { step = Step.INICIAL },
             )
             Step.MATCH -> {
-                com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
                 FigmaMatch(
                     onNav = { tab ->
                         when (tab) {

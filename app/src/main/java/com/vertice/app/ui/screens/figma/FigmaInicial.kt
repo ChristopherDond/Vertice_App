@@ -54,6 +54,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.vertice.app.R
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.Balance
+import com.vertice.app.domain.model.User
+import com.vertice.app.domain.model.VioletaStatus
 import com.vertice.app.ui.design.Roboto
 import com.vertice.app.ui.design.VColor
 import com.vertice.app.ui.design.vs
@@ -116,13 +121,38 @@ fun FigmaInicial(
 ) {
     var proVisible by remember { mutableStateOf(true) }
     var showMissionsSheet by remember { mutableStateOf(false) }
-    val profileScore = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion()
-    val appear = remember { Animatable(0f) }
-    LaunchedEffect(Unit) { appear.animateTo(1f, tween(420, easing = LinearEasing)) }
+    var user by remember { mutableStateOf<User?>(null) }
+    var balance by remember { mutableStateOf<Balance?>(null) }
+    var violetaStatus by remember { mutableStateOf<VioletaStatus?>(null) }
+    var exploredMatch by remember { mutableStateOf(false) }
 
-    val session by com.vertice.app.core.di.ServiceLocator.sessionManager.session.collectAsState(initial = null)
-    val userName = session?.displayName?.ifBlank { com.vertice.app.data.remote.fake.FakeStore.currentUser.name }
-        ?: com.vertice.app.data.remote.fake.FakeStore.currentUser.name
+    val appear = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        appear.animateTo(1f, tween(420, easing = LinearEasing))
+        ServiceLocator.profileRepository.me().onOk { user = it }
+        ServiceLocator.financeRepository.balance().onOk { balance = it }
+        ServiceLocator.profileRepository.violeta().onOk { violetaStatus = it }
+    }
+
+    val isContaOk = user != null && user?.id?.isNotBlank() == true
+    val isVioletaOk = user?.violetaVerified == true || violetaStatus?.identityVerified == true
+    val isBioOk = !user?.bio.isNullOrBlank()
+    val isSkillsOk = !user?.skills.isNullOrEmpty()
+    val isMatchOk = exploredMatch
+
+    val profileScore = remember(user, violetaStatus, exploredMatch) {
+        var score = 0
+        if (isContaOk) score += 20
+        if (isMatchOk) score += 20
+        if (isVioletaOk) score += 20
+        if (isBioOk) score += 20
+        if (isSkillsOk) score += 20
+        score.coerceIn(0, 100)
+    }
+
+    val session by ServiceLocator.sessionManager.session.collectAsState(initial = null)
+    val userName = user?.name?.ifBlank { session?.displayName.orEmpty() }
+        ?: session?.displayName.orEmpty()
     val firstName = userName.trim().split(Regex("\\s+")).firstOrNull()?.replaceFirstChar { it.uppercase() } ?: ""
     val saudacao = if (firstName.isNotBlank()) "Olá, $firstName!" else "Olá!"
 
@@ -190,12 +220,21 @@ fun FigmaInicial(
                     .border(0.75.dp, Color(0x33000000), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(
-                    com.vertice.app.ui.icons.IcoUsersFill,
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier.size(30.dp),
-                    tint = Purple,
-                )
+                if (!user?.avatarUrl.isNullOrBlank() || user?.name?.contains("Ana", ignoreCase = true) == true) {
+                    Image(
+                        painter = painterResource(R.drawable.ana_profile),
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        com.vertice.app.ui.icons.IcoUsersFill,
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier.size(30.dp),
+                        tint = Purple,
+                    )
+                }
             }
 
             Box(
@@ -264,11 +303,37 @@ fun FigmaInicial(
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
-                Text(
-                    "Nenhuma atividade recente.\nSuas conexões e serviços aparecerão aqui.",
-                    style = vs(12f, 400, 17f, 0f, Roboto),
-                    color = Color.Gray,
-                )
+                if (balance != null) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column {
+                            Text("Saldo em conta", style = vs(11f, 400, 14f, 0f, Roboto), color = Color.Gray)
+                            Text(
+                                "R$ " + String.format("%.2f", balance?.available ?: 0.0).replace('.', ','),
+                                style = vs(16f, 700, 20f, 0f, Roboto),
+                                color = Color.Black,
+                            )
+                        }
+                        Box(
+                            Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color(0xFFEFE8FC))
+                                .clickable { onNav(VTab.PERFIL) }
+                                .padding(horizontal = 10.dp, vertical = 6.dp),
+                        ) {
+                            Text("Ver carteira", style = vs(11f, 600, 14f, 0f, Roboto), color = Purple)
+                        }
+                    }
+                } else {
+                    Text(
+                        "Nenhuma atividade recente.\nSuas conexões e serviços aparecerão aqui.",
+                        style = vs(12f, 400, 17f, 0f, Roboto),
+                        color = Color.Gray,
+                    )
+                }
             }
         }
 
@@ -277,10 +342,15 @@ fun FigmaInicial(
         if (showMissionsSheet) {
             MissoesPerfilBottomSheet(
                 score = profileScore,
+                isContaOk = isContaOk,
+                isMatchOk = isMatchOk,
+                isVioletaOk = isVioletaOk,
+                isBioOk = isBioOk,
+                isSkillsOk = isSkillsOk,
                 onDismiss = { showMissionsSheet = false },
                 onNavMatch = {
                     showMissionsSheet = false
-                    com.vertice.app.data.remote.fake.FakeStore.exploredMatch = true
+                    exploredMatch = true
                     onNav(VTab.MATCH)
                 },
                 onNavVioleta = {
@@ -360,18 +430,16 @@ private fun Act(
 @Composable
 private fun MissoesPerfilBottomSheet(
     score: Int,
+    isContaOk: Boolean,
+    isMatchOk: Boolean,
+    isVioletaOk: Boolean,
+    isBioOk: Boolean,
+    isSkillsOk: Boolean,
     onDismiss: () -> Unit,
     onNavMatch: () -> Unit,
     onNavVioleta: () -> Unit,
     onNavEditarPerfil: () -> Unit,
 ) {
-    val store = com.vertice.app.data.remote.fake.FakeStore
-    val isContaOk = store.currentUser.id.isNotBlank()
-    val isMatchOk = store.exploredMatch
-    val isVioletaOk = store.violeta.identityVerified
-    val isBioOk = store.currentUser.bio.isNotBlank()
-    val isSkillsOk = store.currentUser.skills.isNotEmpty()
-
     data class Missao(
         val num: Int,
         val titulo: String,

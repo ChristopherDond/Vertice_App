@@ -58,6 +58,7 @@ import com.vertice.app.R
 import com.vertice.app.core.di.ServiceLocator
 import com.vertice.app.core.result.onErr
 import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.VioletaStatus
 import kotlinx.coroutines.launch
 import com.vertice.app.ui.components.PressWhite
 import com.vertice.app.ui.components.vClick
@@ -107,11 +108,15 @@ fun FigmaVioleta(
     persist: Boolean = false,
 ) {
     var state by remember { mutableStateOf(initialState) }
+    var violetaStatus by remember { mutableStateOf<VioletaStatus?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(persist) {
         if (persist) {
-            ServiceLocator.profileRepository.violeta().onOk { if (it.enabled) state = VioletaState.ATIVO }
+            ServiceLocator.profileRepository.violeta().onOk {
+                violetaStatus = it
+                if (it.enabled) state = VioletaState.ATIVO
+            }
         }
     }
 
@@ -120,18 +125,32 @@ fun FigmaVioleta(
         state = if (ativar) VioletaState.ATIVO else VioletaState.DESATIVADO
         if (persist) {
             scope.launch {
-                ServiceLocator.profileRepository.setVioleta(ativar).onErr { state = anterior }
+                ServiceLocator.profileRepository.setVioleta(ativar)
+                    .onOk { violetaStatus = it }
+                    .onErr { state = anterior }
             }
         }
     }
 
+    val isVerified = violetaStatus?.identityVerified == true
+
     Crossfade(state, animationSpec = tween(340), label = "viol") { s ->
         when (s) {
-            VioletaState.VERIFICACAO -> Verificacao(onGo = { state = VioletaState.DESATIVADO }, onNav = onNav)
-            VioletaState.DESATIVADO -> Desativado(
-                isVerified = com.vertice.app.data.remote.fake.FakeStore.violeta.identityVerified,
+            VioletaState.VERIFICACAO -> Verificacao(
                 onGo = {
-                    if (com.vertice.app.data.remote.fake.FakeStore.violeta.identityVerified) {
+                    scope.launch {
+                        ServiceLocator.profileRepository.violeta().onOk {
+                            violetaStatus = it
+                        }
+                        alternar(true)
+                    }
+                },
+                onNav = onNav,
+            )
+            VioletaState.DESATIVADO -> Desativado(
+                isVerified = isVerified,
+                onGo = {
+                    if (isVerified) {
                         alternar(true)
                     } else {
                         state = VioletaState.VERIFICACAO
@@ -410,6 +429,8 @@ private fun VioletaFeatureCard(
 private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
     var docsOk by remember { mutableStateOf(false) }
     var selfieOk by remember { mutableStateOf(false) }
+    var verifying by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Box(Modifier.fillMaxSize().background(OffBg)) {
         Column(
@@ -543,21 +564,18 @@ private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 .clip(RoundedCornerShape(10.dp))
                 .background(Brush.horizontalGradient(PinkBtn))
                 .clickable {
-                    com.vertice.app.data.remote.fake.FakeStore.violeta = com.vertice.app.data.remote.fake.FakeStore.violeta.copy(
-                        identityVerified = true,
-                        phoneVerified = true,
-                        identityVerifiedAt = "Jan 2026",
-                        phoneVerifiedAt = "Jan 2026",
-                    )
-                    com.vertice.app.data.remote.fake.FakeStore.currentUser = com.vertice.app.data.remote.fake.FakeStore.currentUser.copy(
-                        violetaVerified = true,
-                        profileCompletion = com.vertice.app.data.remote.fake.FakeStore.calculateProfileCompletion(),
-                    )
-                    onGo()
+                    if (!verifying) {
+                        verifying = true
+                        scope.launch {
+                            ServiceLocator.profileRepository.verifyVioleta("DOCUMENTS", "doc_ref")
+                            verifying = false
+                            onGo()
+                        }
+                    }
                 },
             contentAlignment = Alignment.Center,
         ) {
-            Text("Verificar", style = vs(20f, 700, 26f, 0f, Roboto), color = Color.White)
+            Text(if (verifying) "Verificando..." else "Verificar", style = vs(20f, 700, 26f, 0f, Roboto), color = Color.White)
         }
 
         VBottomNav(

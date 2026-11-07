@@ -47,6 +47,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.graphics.SolidColor
+import com.vertice.app.core.di.ServiceLocator
+import com.vertice.app.core.result.onErr
+import com.vertice.app.core.result.onOk
+import com.vertice.app.domain.model.Freelancer
+import com.vertice.app.domain.model.Gender
+import com.vertice.app.domain.model.MatchFilters
+import com.vertice.app.domain.model.ServiceCategory
 
 import androidx.compose.ui.zIndex
 
@@ -121,28 +133,44 @@ import com.vertice.app.ui.components.PressWhite
 
 
 data class ProMatch(
-
     val photo: Int,
-
     val name: String,
-
     val role: String,
-
     val match: Int,
-
     val tag: String,
-
     val desc: String,
-
     val rating: String,
-
     val services: Int,
-
     val status: String,
-
     val online: Boolean,
-
+    val id: String = "",
 )
+
+fun Freelancer.toProMatch(): ProMatch {
+    val photoRes = when (id) {
+        "flw_camila" -> R.drawable.img_camila
+        "flw_carlos" -> R.drawable.img_carlos
+        "flw_andre" -> R.drawable.img_andre
+        "flw_luisa" -> R.drawable.img_luisa
+        else -> when (gender) {
+            Gender.FEMALE -> R.drawable.freelancer_b
+            else -> R.drawable.freelancer_m
+        }
+    }
+    return ProMatch(
+        photo = photoRes,
+        name = name,
+        role = role,
+        match = matchPercent,
+        tag = area.ifBlank { category.label },
+        desc = bio,
+        rating = String.format(java.util.Locale.US, "%.1f", rating),
+        services = servicesCount,
+        status = availability,
+        online = availability.contains("agora", ignoreCase = true),
+        id = id,
+    )
+}
 
 
 
@@ -283,170 +311,154 @@ private val tabW = listOf(76, 93, 86, 76, 112)
 @Composable
 
 fun FigmaMatch(
-
     onNav: (VTab) -> Unit,
-
     onContratar: (ProMatch) -> Unit,
-
     onFiltros: () -> Unit,
-
     onVerPerfil: (ProMatch) -> Unit,
-
 ) {
-
     var tab by remember { mutableIntStateOf(0) }
-
     var entrance by remember { mutableIntStateOf(0) }
-
+    var searchQuery by remember { mutableStateOf("") }
+    var loading by remember { mutableStateOf(false) }
+    var freelancers by remember { mutableStateOf<List<Freelancer>>(emptyList()) }
     val scroll = rememberScrollState()
 
+    fun tabToCategory(index: Int): ServiceCategory = when (index) {
+        1 -> ServiceCategory.COMMERCE
+        2 -> ServiceCategory.SERVICES
+        3 -> ServiceCategory.BEAUTY
+        4 -> ServiceCategory.FOOD
+        else -> ServiceCategory.ALL
+    }
 
+    LaunchedEffect(tab, searchQuery) {
+        loading = true
+        entrance++
+        val cat = tabToCategory(tab)
+        val filters = MatchFilters(
+            query = searchQuery.trim(),
+            category = cat,
+        )
+        ServiceLocator.matchRepository.search(filters)
+            .onOk { list ->
+                freelancers = list
+                loading = false
+            }
+            .onErr {
+                loading = false
+            }
+    }
 
-    LaunchedEffect(tab) { entrance++ }
-
-
+    val displayPros = remember(freelancers) {
+        if (freelancers.isNotEmpty()) freelancers.map { it.toProMatch() } else pros
+    }
 
     Box(Modifier.fillMaxSize().background(Color(0xFFF6F1FF))) {
-
         Box(
-
             Modifier
-
                 .fillMaxWidth()
-
                 .verticalScroll(scroll),
-
             contentAlignment = Alignment.TopStart,
-
         ) {
-
-          Box(Modifier.fillMaxWidth().height(1627.dp)) {
-
+          val contentHeight = remember(displayPros.size) {
+              (360 + displayPros.size * 306 + 120).dp
+          }
+          Box(Modifier.fillMaxWidth().height(contentHeight)) {
             Box(
                 Modifier
-
                     .offset(31.dp, 161.dp)
-
                     .width(332.dp)
-
                     .height(41.dp)
-
                     .clip(RoundedCornerShape(10.dp))
-
-                    .background(Color.White),
-
+                    .background(Color.White)
+                    .padding(horizontal = 14.dp),
+                contentAlignment = Alignment.CenterStart,
             ) {
-
-                Icon(
-
-                    IcoAntDesignSearchOutlined,
-
-                    null,
-
-                    Modifier.offset(15.dp, 12.dp).size(16.dp),
-
-                    tint = Color(0xFF4C3274),
-
-                )
-
-                Text(
-
-                    "Buscar habilidade ou área...",
-
-                    modifier = Modifier.offset(44.dp, 11.dp).width(168.dp),
-
-                    style = vs(13f, 400, 17f, 0f, Roboto),
-
-                    color = Color(0x7A4D3274),
-
-                    maxLines = 1,
-
-                )
-
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        IcoAntDesignSearchOutlined,
+                        null,
+                        Modifier.size(16.dp),
+                        tint = Color(0xFF4C3274),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Box(Modifier.weight(1f)) {
+                        if (searchQuery.isBlank()) {
+                            Text(
+                                "Buscar habilidade ou área...",
+                                style = vs(13f, 400, 17f, 0f, Roboto),
+                                color = Color(0x7A4D3274),
+                                maxLines = 1,
+                            )
+                        }
+                        BasicTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            singleLine = true,
+                            textStyle = vs(13f, 400, 17f, 0f, Roboto).copy(color = Ink),
+                            cursorBrush = SolidColor(Purple),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
             }
-
-
 
             Box(Modifier.offset(0.dp, 222.dp).fillMaxWidth().height(33.dp).horizontalScroll(rememberScrollState())) {
-
                 tabs.forEachIndexed { i, label ->
-
                     val on = tab == i
-
                     Box(
-
                         Modifier
-
                             .offset(tabX[i].dp, 0.dp)
-
                             .width(tabW[i].dp)
-
                             .height(33.dp)
-
                             .clip(RoundedCornerShape(15.dp))
-
                             .background(if (on) Purple else Color.White)
-
                             .vClick(scaleDown = 0.95f) { tab = i },
-
                         contentAlignment = Alignment.Center,
-
                     ) {
-
                         Text(label, style = vs(13f, 700, 17f, 0f, Roboto), color = if (on) Color.White else Ink, maxLines = 1)
-
                     }
-
                 }
-
             }
 
-
-
-            pros.forEachIndexed { i, p ->
-
-                var shown by remember(entrance, i) { mutableStateOf(false) }
-
-                LaunchedEffect(entrance, i) {
-
-                    kotlinx.coroutines.delay(70L * i)
-
-                    shown = true
-
-                }
-
-                val appear by animateFloatAsState(
-
-                    targetValue = if (shown) 1f else 0f,
-
-                    animationSpec = tween(420, easing = FastOutSlowInEasing),
-
-                    label = "proAppear",
-
-                )
-
+            if (loading) {
                 Box(
-
                     Modifier
-
-                        .offset(0.dp, (322 + i * 306).dp)
-
-                        .alpha(appear)
-
-                        .graphicsLayer { translationY = (1f - appear) * 32f },
-
+                        .offset(0.dp, 275.dp)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
                 ) {
-
-                    ProCard(p, 0, onContact = { onContratar(p) }, onVerPerfil = { onVerPerfil(p) })
-
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        color = Purple,
+                        strokeWidth = 2.5.dp,
+                    )
                 }
-
             }
 
-            Box(Modifier.offset(0.dp, (322 + (pros.size - 1) * 306 + 286).dp).fillMaxWidth().height(101.dp))
+            displayPros.forEachIndexed { i, p ->
+                var shown by remember(entrance, i) { mutableStateOf(false) }
+                LaunchedEffect(entrance, i) {
+                    kotlinx.coroutines.delay(50L * i)
+                    shown = true
+                }
+                val appear by animateFloatAsState(
+                    targetValue = if (shown) 1f else 0f,
+                    animationSpec = tween(420, easing = FastOutSlowInEasing),
+                    label = "proAppear",
+                )
+                Box(
+                    Modifier
+                        .offset(0.dp, (322 + i * 306).dp)
+                        .alpha(appear)
+                        .graphicsLayer { translationY = (1f - appear) * 32f },
+                ) {
+                    ProCard(p, 0, onContact = { onContratar(p) }, onVerPerfil = { onVerPerfil(p) })
+                }
+            }
 
+            Box(Modifier.offset(0.dp, (322 + (displayPros.size - 1) * 306 + 286).dp).fillMaxWidth().height(101.dp))
           }
-
         }
 
 

@@ -138,7 +138,7 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                 .fillMaxHeight()
                 .verticalScroll(scroll)
                 .statusBarsPadding()
-                .padding(bottom = 76.dp),
+                .padding(bottom = 110.dp),
         ) {
             Avatar(
                 user = user,
@@ -205,12 +205,12 @@ fun FigmaPerfilUser(onNav: (VTab) -> Unit, onSettings: () -> Unit = {}, onTrail:
                     .padding(start = 19.dp, top = 13.dp, end = 14.dp)
                     .fillMaxWidth(),
             )
+            Spacer(Modifier.height(24.dp))
         }
         VBottomNav(
             VTab.PERFIL,
             onNav,
             Modifier.align(Alignment.BottomCenter).zIndex(10f),
-            navPadding = true,
         )
     }
 }

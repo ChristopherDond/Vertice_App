@@ -44,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import com.vertice.app.ui.screens.figma.FigmaSplash
 import com.vertice.app.ui.screens.figma.FigmaVioleta
+import com.vertice.app.ui.screens.figma.VioletaState
 import com.vertice.app.ui.screens.figma.FiltrosDialog
 import com.vertice.app.ui.screens.figma.PerfilPrestadorDialog
 import com.vertice.app.ui.screens.figma.ProMatch
@@ -75,6 +76,7 @@ private fun Flow() {
     var licao by remember { mutableStateOf<Lesson?>(null) }
     var proCobranca by remember { mutableStateOf("" to "") }
     var proVoltar by remember { mutableStateOf(Step.INICIAL) }
+    var violetaInitialState by remember { mutableStateOf(VioletaState.DESATIVADO) }
     val scope = rememberCoroutineScope()
 
     BackHandler(enabled = contratar != null || filtros || verPerfil != null) {
@@ -103,18 +105,29 @@ private fun Flow() {
             Step.INICIAL -> FigmaInicial(
                 onNav = { tab ->
                     when (tab) {
-                        VTab.MATCH -> step = Step.MATCH
-                        VTab.VIOLETA -> step = Step.VIOLETA
+                        VTab.MATCH -> {
+                            scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
+                            step = Step.MATCH
+                        }
+                        VTab.VIOLETA -> {
+                            violetaInitialState = VioletaState.DESATIVADO
+                            step = Step.VIOLETA
+                        }
                         VTab.PERFIL -> step = Step.PERFIL
                         else -> {}
                     }
                 },
                 onPro = { proVoltar = Step.INICIAL; step = Step.PRO },
                 onEncontrarParceiro = {
+                    scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
                     step = Step.MATCH
                 },
                 onOferecerServico = { step = Step.OFERECER_SERVICO },
                 onEditarPerfil = { step = Step.EDITAR_PERFIL },
+                onVerificarVioleta = {
+                    violetaInitialState = VioletaState.VERIFICACAO
+                    step = Step.VIOLETA
+                },
             )
             Step.PRO -> FigmaPro(
                 onBack = { step = proVoltar },
@@ -137,7 +150,10 @@ private fun Flow() {
                     onNav = { tab ->
                         when (tab) {
                             VTab.INICIO -> step = Step.INICIAL
-                            VTab.VIOLETA -> step = Step.VIOLETA
+                            VTab.VIOLETA -> {
+                                violetaInitialState = VioletaState.DESATIVADO
+                                step = Step.VIOLETA
+                            }
                             VTab.PERFIL -> step = Step.PERFIL
                             else -> {}
                         }
@@ -147,20 +163,33 @@ private fun Flow() {
                     onVerPerfil = { verPerfil = it },
                 )
             }
-            Step.VIOLETA -> FigmaVioleta(persist = true, onNav = { tab ->
-                when (tab) {
-                    VTab.INICIO -> step = Step.INICIAL
-                    VTab.MATCH -> step = Step.MATCH
-                    VTab.PERFIL -> step = Step.PERFIL
-                    else -> {}
-                }
-            })
+            Step.VIOLETA -> FigmaVioleta(
+                initialState = violetaInitialState,
+                persist = true,
+                onNav = { tab ->
+                    when (tab) {
+                        VTab.INICIO -> step = Step.INICIAL
+                        VTab.MATCH -> {
+                            scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
+                            step = Step.MATCH
+                        }
+                        VTab.PERFIL -> step = Step.PERFIL
+                        else -> {}
+                    }
+                },
+            )
             Step.PERFIL -> FigmaPerfilUser(
                 onNav = { tab ->
                     when (tab) {
                         VTab.INICIO -> step = Step.INICIAL
-                        VTab.MATCH -> step = Step.MATCH
-                        VTab.VIOLETA -> step = Step.VIOLETA
+                        VTab.MATCH -> {
+                            scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
+                            step = Step.MATCH
+                        }
+                        VTab.VIOLETA -> {
+                            violetaInitialState = VioletaState.DESATIVADO
+                            step = Step.VIOLETA
+                        }
                         else -> {}
                     }
                 },

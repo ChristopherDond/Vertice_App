@@ -40,6 +40,16 @@ class SessionManager(private val context: Context) {
         }
     }
 
+    val hasExploredMatch: Flow<Boolean> = context.sessionDataStore.data.map { prefs ->
+        prefs[EXPLORED_MATCH] ?: false
+    }
+
+    suspend fun setExploredMatch(explored: Boolean = true) {
+        context.sessionDataStore.edit { prefs ->
+            prefs[EXPLORED_MATCH] = explored
+        }
+    }
+
     suspend fun clear() {
         context.sessionDataStore.edit { it.clear() }
     }
@@ -50,5 +60,6 @@ class SessionManager(private val context: Context) {
         val DISPLAY_NAME = stringPreferencesKey("display_name")
         val IS_PRO = booleanPreferencesKey("is_pro")
         val VIOLETA_VERIFIED = booleanPreferencesKey("violeta_verified")
+        val EXPLORED_MATCH = booleanPreferencesKey("explored_match")
     }
 }

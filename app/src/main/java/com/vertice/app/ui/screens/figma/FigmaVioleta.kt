@@ -111,12 +111,18 @@ fun FigmaVioleta(
     var violetaStatus by remember { mutableStateOf<VioletaStatus?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(persist) {
+    LaunchedEffect(persist, initialState) {
         if (persist) {
             ServiceLocator.profileRepository.violeta().onOk {
                 violetaStatus = it
-                if (it.enabled) state = VioletaState.ATIVO
+                if (initialState == VioletaState.VERIFICACAO) {
+                    state = VioletaState.VERIFICACAO
+                } else if (it.enabled) {
+                    state = VioletaState.ATIVO
+                }
             }
+        } else {
+            state = initialState
         }
     }
 
@@ -137,6 +143,9 @@ fun FigmaVioleta(
     Crossfade(state, animationSpec = tween(340), label = "viol") { s ->
         when (s) {
             VioletaState.VERIFICACAO -> Verificacao(
+                onBack = {
+                    state = if (isVerified && violetaStatus?.enabled == true) VioletaState.ATIVO else VioletaState.DESATIVADO
+                },
                 onGo = {
                     scope.launch {
                         ServiceLocator.profileRepository.violeta().onOk {
@@ -156,9 +165,14 @@ fun FigmaVioleta(
                         state = VioletaState.VERIFICACAO
                     }
                 },
+                onVerificacao = { state = VioletaState.VERIFICACAO },
                 onNav = onNav,
             )
-            VioletaState.ATIVO -> Ativo(onGo = { alternar(false) }, onBack = { onNav(VTab.INICIO) })
+            VioletaState.ATIVO -> Ativo(
+                onGo = { alternar(false) },
+                onVerificacao = { state = VioletaState.VERIFICACAO },
+                onBack = { onNav(VTab.INICIO) },
+            )
         }
     }
 }
@@ -167,6 +181,7 @@ fun FigmaVioleta(
 private fun Desativado(
     isVerified: Boolean,
     onGo: () -> Unit,
+    onVerificacao: () -> Unit,
     onNav: (VTab) -> Unit,
 ) {
     Box(
@@ -260,6 +275,7 @@ private fun Desativado(
                         .clip(RoundedCornerShape(15.dp))
                         .background(CardWhite)
                         .border(0.5.dp, Color(0xFFE5E5E5), RoundedCornerShape(15.dp))
+                        .clickable { onVerificacao() }
                         .padding(horizontal = 16.dp, vertical = 6.dp),
                 ) {
                     val items = if (isVerified) {
@@ -343,7 +359,7 @@ private fun Desativado(
                         )
                         .clip(RoundedCornerShape(15.dp))
                         .background(ButtonPinkGradient)
-                        .clickable(onClick = onGo),
+                        .clickable(onClick = if (isVerified) onGo else onVerificacao),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -352,6 +368,22 @@ private fun Desativado(
                         color = Color.White,
                         textAlign = TextAlign.Center,
                     )
+                }
+
+                if (isVerified) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onVerificacao() }
+                            .padding(vertical = 2.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "Ver detalhes da verificação",
+                            style = vs(12f, 600, 15f, 0f, Roboto),
+                            color = DeepViolet,
+                        )
+                    }
                 }
 
                 // Rodapé "Verificado pelo Vertice"
@@ -426,7 +458,8 @@ private fun VioletaFeatureCard(
 }
 
 @Composable
-private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
+private fun Verificacao(onBack: () -> Unit, onGo: () -> Unit, onNav: (VTab) -> Unit) {
+    BackHandler { onBack() }
     var docsOk by remember { mutableStateOf(false) }
     var selfieOk by remember { mutableStateOf(false) }
     var verifying by remember { mutableStateOf(false) }
@@ -474,6 +507,21 @@ private fun Verificacao(onGo: () -> Unit, onNav: (VTab) -> Unit) {
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 28.dp),
             )
+        }
+
+        Box(
+            Modifier
+                .statusBarsPadding()
+                .padding(start = 12.dp, top = 8.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(Color(0x33FFFFFF))
+                .border(0.6.dp, Color(0x66FFFFFF), CircleShape)
+                .vClick(PressWhite) { onBack() }
+                .semantics { contentDescription = "Voltar" },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(22.dp), tint = Color.White)
         }
 
         Text(
@@ -631,7 +679,7 @@ private fun DashUploadBox(
 }
 
 @Composable
-private fun Ativo(onGo: () -> Unit, onBack: () -> Unit) {
+private fun Ativo(onGo: () -> Unit, onVerificacao: () -> Unit, onBack: () -> Unit) {
     BackHandler(enabled = true) { onBack() }
     Box(Modifier.fillMaxSize().background(Color(0xFFF7F2FF))) {
         Box(
@@ -757,7 +805,35 @@ private fun Ativo(onGo: () -> Unit, onBack: () -> Unit) {
                 }
             }
 
-            Spacer(Modifier.height(26.dp))
+            Spacer(Modifier.height(18.dp))
+
+            Box(
+                Modifier
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(Color(0x33FFFFFF))
+                    .border(0.6.dp, Color(0x66FFFFFF), RoundedCornerShape(15.dp))
+                    .vClick(PressWhite) { onVerificacao() }
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_v_check_shield11),
+                        contentDescription = null,
+                        modifier = Modifier.size(15.dp),
+                    )
+                    Text(
+                        "Ver detalhes da verificação",
+                        style = vs(12.5f, 700, 15f, 0f, Roboto),
+                        color = Color.White,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
 
             Box(
                 Modifier

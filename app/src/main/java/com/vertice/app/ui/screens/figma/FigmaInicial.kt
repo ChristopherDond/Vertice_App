@@ -68,6 +68,9 @@ import com.vertice.app.ui.icons.Lightning
 import com.vertice.app.ui.icons.Trophy
 import kotlinx.coroutines.delay
 
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
 private val ProBg = Color(0xFFE0CEFC)
 private val ProIconBg = Color(0xFFD1B2FF)
 private val ProIconFg = Color(0xFF9657F3)
@@ -118,13 +121,15 @@ fun FigmaInicial(
     onEncontrarParceiro: () -> Unit = { onNav(VTab.MATCH) },
     onOferecerServico: () -> Unit = {},
     onEditarPerfil: () -> Unit = { onNav(VTab.PERFIL) },
+    onVerificarVioleta: () -> Unit = { onNav(VTab.VIOLETA) },
 ) {
+    val scope = rememberCoroutineScope()
     var proVisible by remember { mutableStateOf(true) }
     var showMissionsSheet by remember { mutableStateOf(false) }
     var user by remember { mutableStateOf<User?>(null) }
     var balance by remember { mutableStateOf<Balance?>(null) }
     var violetaStatus by remember { mutableStateOf<VioletaStatus?>(null) }
-    var exploredMatch by remember { mutableStateOf(false) }
+    val exploredMatch by ServiceLocator.sessionManager.hasExploredMatch.collectAsState(initial = false)
 
     val appear = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
@@ -237,64 +242,71 @@ fun FigmaInicial(
                 }
             }
 
-            Box(
-                Modifier
-                    .offset(29.dp, 245.dp)
-                    .width(333.dp)
-                    .height(106.dp)
-                    .clip(RoundedCornerShape(15.dp))
-                    .background(Purple)
-                    .clickable { showMissionsSheet = true },
-            ) {
-                Box(Modifier.offset(21.dp, 17.dp).size(72.dp), contentAlignment = Alignment.Center) {
-                    Canvas(Modifier.fillMaxSize()) {
-                        val stroke = 5.dp.toPx()
-                        val d = size.minDimension - stroke
-                        val tl = Offset((size.width - d) / 2f, (size.height - d) / 2f)
-                        drawArc(
-                            color = Color(0x6BD9D9D9),
-                            startAngle = -90f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            topLeft = tl,
-                            size = Size(d, d),
-                            style = Stroke(stroke, cap = StrokeCap.Round),
-                        )
-                        drawArc(
-                            color = Color.White,
-                            startAngle = -90f,
-                            sweepAngle = 360f * (profileScore / 100f),
-                            useCenter = false,
-                            topLeft = tl,
-                            size = Size(d, d),
-                            style = Stroke(stroke, cap = StrokeCap.Round),
-                        )
+            val cardShift = if (profileScore >= 100) (-126).dp else 0.dp
+
+            if (profileScore < 100) {
+                Box(
+                    Modifier
+                        .offset(29.dp, 245.dp)
+                        .width(333.dp)
+                        .height(106.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(Purple)
+                        .clickable { showMissionsSheet = true },
+                ) {
+                    Box(Modifier.offset(21.dp, 17.dp).size(72.dp), contentAlignment = Alignment.Center) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            val stroke = 5.dp.toPx()
+                            val d = size.minDimension - stroke
+                            val tl = Offset((size.width - d) / 2f, (size.height - d) / 2f)
+                            drawArc(
+                                color = Color(0x6BD9D9D9),
+                                startAngle = -90f,
+                                sweepAngle = 360f,
+                                useCenter = false,
+                                topLeft = tl,
+                                size = Size(d, d),
+                                style = Stroke(stroke, cap = StrokeCap.Round),
+                            )
+                            drawArc(
+                                color = Color.White,
+                                startAngle = -90f,
+                                sweepAngle = 360f * (profileScore / 100f),
+                                useCenter = false,
+                                topLeft = tl,
+                                size = Size(d, d),
+                                style = Stroke(stroke, cap = StrokeCap.Round),
+                            )
+                        }
+                        Text("$profileScore%", style = vs(15.6f, 800, 19f, 0f, Roboto), color = Color.White)
                     }
-                    Text("$profileScore%", style = vs(15.6f, 800, 19f, 0f, Roboto), color = Color.White)
+                    T("PERFIL", 140, 28, 60, 10f, 800, Color.White, 1, 11.76f)
+                    T(
+                        "Complete seu perfil\npara mais matches",
+                        140,
+                        39,
+                        135,
+                        10f,
+                        500,
+                        Color.White,
+                        2,
+                        15.3f,
+                    )
+                    Ico(IcoDashiconsArrowRightAlt2, 293, 43, 20, 20, Color(0xB3FFFFFF))
                 }
-                T("PERFIL", 140, 28, 60, 10f, 800, Color.White, 1, 11.76f)
-                T(
-                    if (profileScore == 100) "Perfil completo!\nMáxima visibilidade" else "Complete seu perfil\npara mais matches",
-                    140,
-                    39,
-                    135,
-                    10f,
-                    500,
-                    Color.White,
-                    2,
-                    15.3f,
-                )
-                Ico(IcoDashiconsArrowRightAlt2, 293, 43, 20, 20, Color(0xB3FFFFFF))
             }
 
-            Btn("Encontrar Parceiro", 30, 371, 157, Purple, Color.White) { onEncontrarParceiro() }
-            Btn("Oferecer Serviço", 207, 371, 156, BtnLight, Color.Black) { onOferecerServico() }
+            Btn("Encontrar Parceiro", 30, 371 + cardShift.value.toInt(), 157, Purple, Color.White) {
+                scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
+                onEncontrarParceiro()
+            }
+            Btn("Oferecer Serviço", 207, 371 + cardShift.value.toInt(), 156, BtnLight, Color.Black) { onOferecerServico() }
 
-            T("ATIVIDADE RECENTE", 30, 459, 118, 10f, 500, Label, 1, 11.73f)
+            T("ATIVIDADE RECENTE", 30, 459 + cardShift.value.toInt(), 118, 10f, 500, Label, 1, 11.73f)
 
             Box(
                 Modifier
-                    .offset(30.dp, 488.dp)
+                    .offset(30.dp, (488 + cardShift.value.toInt()).dp)
                     .width(333.dp)
                     .height(68.dp)
                     .shadow(5.dp, RoundedCornerShape(15.dp), ambientColor = Shadow, spotColor = Shadow)
@@ -350,12 +362,12 @@ fun FigmaInicial(
                 onDismiss = { showMissionsSheet = false },
                 onNavMatch = {
                     showMissionsSheet = false
-                    exploredMatch = true
+                    scope.launch { ServiceLocator.sessionManager.setExploredMatch(true) }
                     onNav(VTab.MATCH)
                 },
                 onNavVioleta = {
                     showMissionsSheet = false
-                    onNav(VTab.VIOLETA)
+                    onVerificarVioleta()
                 },
                 onNavEditarPerfil = {
                     showMissionsSheet = false

@@ -28,6 +28,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import com.vertice.app.data.remote.viacep.ViaCepClient
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -88,6 +91,7 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
     var telefone by remember { mutableStateOf("") }
     var cep by remember { mutableStateOf("") }
     var rua by remember { mutableStateOf("") }
+    var bairro by remember { mutableStateOf("") }
     var numero by remember { mutableStateOf("") }
     var complemento by remember { mutableStateOf("") }
     var cidade by remember { mutableStateOf("") }
@@ -96,6 +100,7 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var submitted by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(false) }
+    var cepLoading by remember { mutableStateOf(false) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     fun validate(): Boolean {
@@ -288,9 +293,34 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
                     placeholder = "00000-000",
                     modifier = Modifier.padding(horizontal = 16.dp),
                     value = cep,
-                    onValueChange = { cep = it.filter(Char::isDigit).take(8) },
+                    onValueChange = { novoCep ->
+                        val digits = novoCep.filter(Char::isDigit).take(8)
+                        cep = digits
+                        if (digits.length == 8) {
+                            scope.launch {
+                                cepLoading = true
+                                try {
+                                    ViaCepClient.getAddressByCep(digits)?.let { address ->
+                                        bairro = address.district
+                                        val streetWithDistrict = listOf(address.street, address.district).filter { it.isNotBlank() }.joinToString(", ")
+                                        if (streetWithDistrict.isNotBlank()) rua = streetWithDistrict
+                                        if (address.city.isNotBlank()) cidade = address.city
+                                        if (address.state.isNotBlank()) uf = address.state
+                                        if (complemento.isBlank() && address.complement.isNotBlank()) {
+                                            complemento = address.complement
+                                        }
+                                    }
+                                } finally {
+                                    cepLoading = false
+                                }
+                            }
+                        }
+                    },
                     keyboardType = KeyboardType.Number,
                     visualTransformation = CepMask,
+                    trailing = if (cepLoading) {
+                        { CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = VColor.PurpleMid) }
+                    } else null,
                     isError = submitted && cep.length != 8,
                 )
                 Spacer(Modifier.height(14.dp))
@@ -417,7 +447,7 @@ fun FigmaCadastro(onBack: () -> Unit = {}, onDone: () -> Unit = {}) {
                                         street = rua.trim(),
                                         number = numero.trim(),
                                         complement = complemento.trim(),
-                                        district = complemento.ifBlank { "Centro" }.trim(),
+                                        district = bairro.ifBlank { complemento.ifBlank { "Centro" } }.trim(),
                                         city = cidade.trim(),
                                         state = uf.trim().uppercase(),
                                     ),

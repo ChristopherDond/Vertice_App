@@ -31,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.rememberCoroutineScope
+import com.vertice.app.data.remote.viacep.ViaCepClient
 import com.vertice.app.core.di.ServiceLocator
 import com.vertice.app.domain.model.RegistrationForm
 import com.vertice.app.ui.components.FadeSlideIn
@@ -79,12 +81,14 @@ fun RegisterScreen(onBack: () -> Unit, onRegistered: () -> Unit) {
     var phone by remember { mutableStateOf("") }
     var cep by remember { mutableStateOf("") }
     var street by remember { mutableStateOf("") }
+    var district by remember { mutableStateOf("") }
     var number by remember { mutableStateOf("") }
     var complement by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
     var uf by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Column(
         Modifier
@@ -149,7 +153,30 @@ fun RegisterScreen(onBack: () -> Unit, onRegistered: () -> Unit) {
                     Column(Modifier.padding(18.dp)) {
                         SectionHeading("3", "Endereço", "Seu endereço principal")
                         Spacer(Modifier.height(16.dp))
-                        VerticeTextField(cep, { cep = it }, "CEP", "00000-000", keyboardType = KeyboardType.Number)
+                        VerticeTextField(
+                            value = cep,
+                            onValueChange = { novoCep ->
+                                val digits = novoCep.filter { it.isDigit() }.take(8)
+                                cep = digits
+                                if (digits.length == 8) {
+                                    scope.launch {
+                                        ViaCepClient.getAddressByCep(digits)?.let { address ->
+                                            district = address.district
+                                            val streetWithDistrict = listOf(address.street, address.district).filter { it.isNotBlank() }.joinToString(", ")
+                                            if (streetWithDistrict.isNotBlank()) street = streetWithDistrict
+                                            if (address.city.isNotBlank()) city = address.city
+                                            if (address.state.isNotBlank()) uf = address.state
+                                            if (complement.isBlank() && address.complement.isNotBlank()) {
+                                                complement = address.complement
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            label = "CEP",
+                            placeholder = "00000-000",
+                            keyboardType = KeyboardType.Number,
+                        )
                         Spacer(Modifier.height(14.dp))
                         VerticeTextField(street, { street = it }, "Rua e bairro", "Ex.: Rua das Araucárias, Centro")
                         Spacer(Modifier.height(14.dp))
@@ -198,7 +225,7 @@ fun RegisterScreen(onBack: () -> Unit, onRegistered: () -> Unit) {
                                 email = email, phone = phone, acceptedTerms = true,
                                 address = com.vertice.app.domain.model.Address(
                                     cep = cep, street = street, number = number,
-                                    complement = complement, district = "", city = city, state = uf,
+                                    complement = complement, district = district.ifBlank { complement.ifBlank { "Centro" } }, city = city, state = uf,
                                 ),
                             ),
                         )

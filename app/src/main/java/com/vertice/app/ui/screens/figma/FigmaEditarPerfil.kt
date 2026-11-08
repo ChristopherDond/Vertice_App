@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import com.vertice.app.data.remote.viacep.ViaCepClient
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -135,6 +137,9 @@ fun FigmaEditarPerfil(
     var street by remember { mutableStateOf("") }
     var number by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
+    var district by remember { mutableStateOf("") }
+    var state by remember { mutableStateOf("") }
+    var cepLoading by remember { mutableStateOf(false) }
     var notifyProposals by remember { mutableStateOf(true) }
     var popup by remember { mutableStateOf(ConfigPopup.NENHUM) }
     var fullName by remember { mutableStateOf(EditarPerfilMock.name) }
@@ -151,6 +156,8 @@ fun FigmaEditarPerfil(
             street = u.address?.street ?: ""
             number = u.address?.number ?: ""
             city = u.address?.city ?: ""
+            district = u.address?.district ?: ""
+            state = u.address?.state ?: ""
             if (u.skills.isNotEmpty()) {
                 skills.clear()
                 skills.addAll(u.skills)
@@ -173,9 +180,9 @@ fun FigmaEditarPerfil(
                     cep = cep,
                     street = street.trim(),
                     number = number.trim(),
-                    district = current?.address?.district ?: "Centro",
+                    district = district.ifBlank { current?.address?.district ?: "Centro" },
                     city = city.trim(),
-                    state = current?.address?.state ?: "SP",
+                    state = state.ifBlank { current?.address?.state ?: "SP" },
                 )
             } else current?.address
 
@@ -290,10 +297,31 @@ fun FigmaEditarPerfil(
                 EpField("CEP") {
                     EpInput(
                         value = cep,
-                        onValueChange = { cep = it.digitsOnly(8) },
+                        onValueChange = { novoCep ->
+                            val digits = novoCep.digitsOnly(8)
+                            cep = digits
+                            if (digits.length == 8) {
+                                scope.launch {
+                                    cepLoading = true
+                                    try {
+                                        ViaCepClient.getAddressByCep(digits)?.let { address ->
+                                            if (address.street.isNotBlank()) street = address.street
+                                            if (address.city.isNotBlank()) city = address.city
+                                            if (address.district.isNotBlank()) district = address.district
+                                            if (address.state.isNotBlank()) state = address.state
+                                        }
+                                    } finally {
+                                        cepLoading = false
+                                    }
+                                }
+                            }
+                        },
                         placeholder = "00000-000",
                         keyboardType = KeyboardType.Number,
                         transformation = EpMask("#####-###"),
+                        trailing = if (cepLoading) {
+                            { CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp, color = VColor.PurpleMid) }
+                        } else null,
                     )
                 }
                 Spacer(Modifier.height(14.dp))
@@ -494,6 +522,7 @@ private fun EpInput(
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Next,
     transformation: VisualTransformation = VisualTransformation.None,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
@@ -501,7 +530,7 @@ private fun EpInput(
     val shape = RoundedCornerShape(10.dp)
     val textStyle = vs(14f, 400, 16.94f, family = Inter)
 
-    Box(
+    Row(
         modifier
             .fillMaxWidth()
             .height(fieldHeight)
@@ -509,22 +538,30 @@ private fun EpInput(
             .background(VColor.White)
             .border(stroke.dp, EpInputLine, shape)
             .padding(horizontal = 14.dp, vertical = if (singleLine) 0.dp else 14.dp),
-        contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart,
+        verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top,
     ) {
-        if (value.isEmpty() && placeholder.isNotEmpty()) {
-            VText(placeholder, textStyle, EpPlaceholder)
+        Box(
+            Modifier.weight(1f),
+            contentAlignment = if (singleLine) Alignment.CenterStart else Alignment.TopStart,
+        ) {
+            if (value.isEmpty() && placeholder.isNotEmpty()) {
+                VText(placeholder, textStyle, EpPlaceholder)
+            }
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = textStyle.copy(color = VColor.Ink),
+                singleLine = singleLine,
+                cursorBrush = SolidColor(VColor.PurpleMid),
+                visualTransformation = transformation,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+                interactionSource = interaction,
+            )
         }
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = textStyle.copy(color = VColor.Ink),
-            singleLine = singleLine,
-            cursorBrush = SolidColor(VColor.PurpleMid),
-            visualTransformation = transformation,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
-            interactionSource = interaction,
-        )
+        if (trailing != null) {
+            trailing()
+        }
     }
 }
 
